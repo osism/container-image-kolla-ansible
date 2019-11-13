@@ -1,0 +1,6 @@
+# This is a workaround to be able to run local actions with sudo without requiring a password.
+#
+# This behaviour should be fixed in kolla-ansible itself, local actions should not be use sudo
+# when it is not required.
+
+dragon ALL=(root) NOPASSWD: ALL

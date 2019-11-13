@@ -1,0 +1,31 @@
+---
+dist: bionic
+language: generic
+
+before_install:
+  - scripts/travis.sh
+
+env:
+  global:
+    - REPOSITORY=osism/kolla-ansible
+  matrix:
+    - OPENSTACK_VERSION=queens
+    - OPENSTACK_VERSION=rocky
+    - OPENSTACK_VERSION=stein
+
+before_script:
+  - bash scripts/lint.sh
+
+script:
+  - bash scripts/build.sh
+
+after_success:
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master" ]; then bash scripts/push.sh; fi'
+
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#osism"
+    template:
+      - "%{result} %{repository_slug}: %{commit_subject} %{build_url}"
+    skip_join: true

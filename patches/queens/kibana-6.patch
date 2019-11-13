@@ -1,0 +1,37 @@
+diff --git a/ansible/roles/kibana/templates/kibana.json.j2 b/ansible/roles/kibana/templates/kibana.json.j2
+index 599c107af..f2dfaa957 100644
+--- a/ansible/roles/kibana/templates/kibana.json.j2
++++ b/ansible/roles/kibana/templates/kibana.json.j2
+@@ -1,9 +1,9 @@
+ {
+-    "command": "/opt/kibana/bin/kibana",
++    "command": "/usr/share/kibana/bin/kibana",
+     "config_files": [
+         {
+             "source": "{{ container_config_directory }}/kibana.yml",
+-            "dest": "/opt/kibana/config/kibana.yml",
++            "dest": "/etc/kibana/kibana.yml",
+             "owner": "kibana",
+             "perm": "0640"
+         }
+diff --git a/ansible/roles/kibana/templates/kibana.yml.j2 b/ansible/roles/kibana/templates/kibana.yml.j2
+index 12920d133..6530a08c5 100644
+--- a/ansible/roles/kibana/templates/kibana.yml.j2
++++ b/ansible/roles/kibana/templates/kibana.yml.j2
+@@ -5,15 +5,4 @@ server.host: "{{ api_interface_address }}"
+ elasticsearch.url: "{{ internal_protocol }}://{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}:{{ elasticsearch_port }}"
+ elasticsearch.requestTimeout: {{ kibana_elasticsearch_request_timeout }}
+ elasticsearch.shardTimeout: {{ kibana_elasticsearch_shard_timeout }}
+-elasticsearch.ssl.verify: {{ kibana_elasticsearch_ssl_verify }}
+-bundled_plugin_ids:
+- - plugins/dashboard/index
+- - plugins/discover/index
+- - plugins/doc/index
+- - plugins/kibana/index
+- - plugins/markdown_vis/index
+- - plugins/metric_vis/index
+- - plugins/settings/index
+- - plugins/table_vis/index
+- - plugins/vis_types/index
+- - plugins/visualize/index
++elasticsearch.ssl.verificationMode: "{{ 'full' if kibana_elasticsearch_ssl_verify | bool else 'none' }}"

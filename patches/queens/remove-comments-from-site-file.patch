@@ -1,0 +1,13 @@
+diff --git a/ansible/site.yml b/ansible/site.yml
+index 6f2133661..4eabf246b 100644
+--- a/ansible/site.yml
++++ b/ansible/site.yml
+@@ -325,8 +325,6 @@
+         tags: nova-hyperv,
+         when: enable_hyperv | bool }
+ 
+-# NOTE(gmmaha): Please do not change the order listed here. The current order is a
+-# workaround to fix the bug https://bugs.launchpad.net/kolla/+bug/1546789
+ - name: Apply role neutron
+   gather_facts: false
+   hosts:

@@ -1,0 +1,558 @@
+diff --git a/ansible/roles/aodh/meta/main.yml b/ansible/roles/aodh/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/aodh/meta/main.yml
++++ b/ansible/roles/aodh/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/barbican/meta/main.yml b/ansible/roles/barbican/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/barbican/meta/main.yml
++++ b/ansible/roles/barbican/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/blazar/meta/main.yml b/ansible/roles/blazar/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/blazar/meta/main.yml
++++ b/ansible/roles/blazar/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/ceilometer/meta/main.yml b/ansible/roles/ceilometer/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/ceilometer/meta/main.yml
++++ b/ansible/roles/ceilometer/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/ceph/meta/main.yml b/ansible/roles/ceph/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/ceph/meta/main.yml
++++ b/ansible/roles/ceph/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/chrony/meta/main.yml b/ansible/roles/chrony/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/chrony/meta/main.yml
++++ b/ansible/roles/chrony/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/cinder/meta/main.yml b/ansible/roles/cinder/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/cinder/meta/main.yml
++++ b/ansible/roles/cinder/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/cloudkitty/meta/main.yml b/ansible/roles/cloudkitty/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/cloudkitty/meta/main.yml
++++ b/ansible/roles/cloudkitty/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/collectd/meta/main.yml b/ansible/roles/collectd/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/collectd/meta/main.yml
++++ b/ansible/roles/collectd/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/congress/meta/main.yml b/ansible/roles/congress/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/congress/meta/main.yml
++++ b/ansible/roles/congress/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/cyborg/meta/main.yml b/ansible/roles/cyborg/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/cyborg/meta/main.yml
++++ b/ansible/roles/cyborg/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/designate/meta/main.yml b/ansible/roles/designate/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/designate/meta/main.yml
++++ b/ansible/roles/designate/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/elasticsearch/meta/main.yml b/ansible/roles/elasticsearch/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/elasticsearch/meta/main.yml
++++ b/ansible/roles/elasticsearch/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/etcd/meta/main.yml b/ansible/roles/etcd/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/etcd/meta/main.yml
++++ b/ansible/roles/etcd/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/freezer/meta/main.yml b/ansible/roles/freezer/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/freezer/meta/main.yml
++++ b/ansible/roles/freezer/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/glance/meta/main.yml b/ansible/roles/glance/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/glance/meta/main.yml
++++ b/ansible/roles/glance/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/gnocchi/meta/main.yml b/ansible/roles/gnocchi/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/gnocchi/meta/main.yml
++++ b/ansible/roles/gnocchi/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/grafana/meta/main.yml b/ansible/roles/grafana/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/grafana/meta/main.yml
++++ b/ansible/roles/grafana/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/haproxy/meta/main.yml b/ansible/roles/haproxy/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/haproxy/meta/main.yml
++++ b/ansible/roles/haproxy/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/heat/meta/main.yml b/ansible/roles/heat/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/heat/meta/main.yml
++++ b/ansible/roles/heat/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/horizon/meta/main.yml b/ansible/roles/horizon/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/horizon/meta/main.yml
++++ b/ansible/roles/horizon/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/influxdb/meta/main.yml b/ansible/roles/influxdb/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/influxdb/meta/main.yml
++++ b/ansible/roles/influxdb/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/ironic/meta/main.yml b/ansible/roles/ironic/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/ironic/meta/main.yml
++++ b/ansible/roles/ironic/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/iscsi/meta/main.yml b/ansible/roles/iscsi/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/iscsi/meta/main.yml
++++ b/ansible/roles/iscsi/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/kafka/meta/main.yml b/ansible/roles/kafka/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/kafka/meta/main.yml
++++ b/ansible/roles/kafka/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/karbor/meta/main.yml b/ansible/roles/karbor/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/karbor/meta/main.yml
++++ b/ansible/roles/karbor/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/keystone/meta/main.yml b/ansible/roles/keystone/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/keystone/meta/main.yml
++++ b/ansible/roles/keystone/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/kibana/meta/main.yml b/ansible/roles/kibana/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/kibana/meta/main.yml
++++ b/ansible/roles/kibana/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/magnum/meta/main.yml b/ansible/roles/magnum/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/magnum/meta/main.yml
++++ b/ansible/roles/magnum/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/manila/meta/main.yml b/ansible/roles/manila/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/manila/meta/main.yml
++++ b/ansible/roles/manila/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/mariadb/meta/main.yml b/ansible/roles/mariadb/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/mariadb/meta/main.yml
++++ b/ansible/roles/mariadb/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/mistral/meta/main.yml b/ansible/roles/mistral/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/mistral/meta/main.yml
++++ b/ansible/roles/mistral/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/monasca/meta/main.yml b/ansible/roles/monasca/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/monasca/meta/main.yml
++++ b/ansible/roles/monasca/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/mongodb/meta/main.yml b/ansible/roles/mongodb/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/mongodb/meta/main.yml
++++ b/ansible/roles/mongodb/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/murano/meta/main.yml b/ansible/roles/murano/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/murano/meta/main.yml
++++ b/ansible/roles/murano/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/neutron/meta/main.yml b/ansible/roles/neutron/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/neutron/meta/main.yml
++++ b/ansible/roles/neutron/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/nova/meta/main.yml b/ansible/roles/nova/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/nova/meta/main.yml
++++ b/ansible/roles/nova/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/opendaylight/meta/main.yml b/ansible/roles/opendaylight/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/opendaylight/meta/main.yml
++++ b/ansible/roles/opendaylight/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/openvswitch/meta/main.yml b/ansible/roles/openvswitch/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/openvswitch/meta/main.yml
++++ b/ansible/roles/openvswitch/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/panko/meta/main.yml b/ansible/roles/panko/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/panko/meta/main.yml
++++ b/ansible/roles/panko/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/placement/meta/main.yml b/ansible/roles/placement/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/placement/meta/main.yml
++++ b/ansible/roles/placement/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/prometheus/meta/main.yml b/ansible/roles/prometheus/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/prometheus/meta/main.yml
++++ b/ansible/roles/prometheus/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/qdrouterd/meta/main.yml b/ansible/roles/qdrouterd/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/qdrouterd/meta/main.yml
++++ b/ansible/roles/qdrouterd/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/rabbitmq/meta/main.yml b/ansible/roles/rabbitmq/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/rabbitmq/meta/main.yml
++++ b/ansible/roles/rabbitmq/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/rally/meta/main.yml b/ansible/roles/rally/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/rally/meta/main.yml
++++ b/ansible/roles/rally/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/redis/meta/main.yml b/ansible/roles/redis/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/redis/meta/main.yml
++++ b/ansible/roles/redis/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/sahara/meta/main.yml b/ansible/roles/sahara/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/sahara/meta/main.yml
++++ b/ansible/roles/sahara/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/searchlight/meta/main.yml b/ansible/roles/searchlight/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/searchlight/meta/main.yml
++++ b/ansible/roles/searchlight/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/senlin/meta/main.yml b/ansible/roles/senlin/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/senlin/meta/main.yml
++++ b/ansible/roles/senlin/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/skydive/meta/main.yml b/ansible/roles/skydive/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/skydive/meta/main.yml
++++ b/ansible/roles/skydive/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/solum/meta/main.yml b/ansible/roles/solum/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/solum/meta/main.yml
++++ b/ansible/roles/solum/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/storm/meta/main.yml b/ansible/roles/storm/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/storm/meta/main.yml
++++ b/ansible/roles/storm/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/swift/meta/main.yml b/ansible/roles/swift/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/swift/meta/main.yml
++++ b/ansible/roles/swift/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/tacker/meta/main.yml b/ansible/roles/tacker/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/tacker/meta/main.yml
++++ b/ansible/roles/tacker/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/telegraf/meta/main.yml b/ansible/roles/telegraf/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/telegraf/meta/main.yml
++++ b/ansible/roles/telegraf/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/tempest/meta/main.yml b/ansible/roles/tempest/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/tempest/meta/main.yml
++++ b/ansible/roles/tempest/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/trove/meta/main.yml b/ansible/roles/trove/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/trove/meta/main.yml
++++ b/ansible/roles/trove/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/vitrage/meta/main.yml b/ansible/roles/vitrage/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/vitrage/meta/main.yml
++++ b/ansible/roles/vitrage/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/vmtp/meta/main.yml b/ansible/roles/vmtp/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/vmtp/meta/main.yml
++++ b/ansible/roles/vmtp/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/watcher/meta/main.yml b/ansible/roles/watcher/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/watcher/meta/main.yml
++++ b/ansible/roles/watcher/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/zookeeper/meta/main.yml b/ansible/roles/zookeeper/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/zookeeper/meta/main.yml
++++ b/ansible/roles/zookeeper/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []
+diff --git a/ansible/roles/zun/meta/main.yml b/ansible/roles/zun/meta/main.yml
+index 6b4fff8fe..23d65c7ef 100644
+--- a/ansible/roles/zun/meta/main.yml
++++ b/ansible/roles/zun/meta/main.yml
+@@ -1,3 +1,2 @@
+ ---
+-dependencies:
+-  - { role: common }
++dependencies: []

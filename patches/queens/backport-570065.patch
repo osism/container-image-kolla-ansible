@@ -1,0 +1,122 @@
+From 317a107988146855614034252ad2b671255f5efe Mon Sep 17 00:00:00 2001
+From: Jorge Niedbalski <jorge.niedbalski@linaro.org>
+Date: Tue, 22 May 2018 17:55:56 -0400
+Subject: [PATCH] [kibana] enforce index creation for ELK > 5 (debian)
+
+The default index isn't created automatically when using
+ELK > 5.x. This commit adds a new task into the post-deploy
+taskset to force the creation of the default index.
+
+This patch also enforces the kibana config to set index
+as defaultIndex without the need for the defaultIndex property
+to already exists , preventing the error exposed on the public bug.
+
+Also added a new option named kibana_default_index_options, with
+a default index.mapper.dynamic set to true, this option
+can be extended by the operator and they will be applied to the index.
+
+Change-Id: Ica63a5fb30947f7ebae6cf8c80500a7dd0907211
+Closes-Bug: #1772687
+Signed-off-by: Jorge Niedbalski <jorge.niedbalski@linaro.org>
+---
+
+diff --git a/ansible/roles/elasticsearch/templates/elasticsearch.yml.j2 b/ansible/roles/elasticsearch/templates/elasticsearch.yml.j2
+index de3fcda..2f335da 100644
+--- a/ansible/roles/elasticsearch/templates/elasticsearch.yml.j2
++++ b/ansible/roles/elasticsearch/templates/elasticsearch.yml.j2
+@@ -18,3 +18,4 @@
+ path.logs: "/var/log/kolla/elasticsearch"
+ path.scripts: "/etc/elasticsearch/scripts"
+ indices.fielddata.cache.size: 40%
++action.auto_create_index: "true"
+diff --git a/ansible/roles/kibana/defaults/main.yml b/ansible/roles/kibana/defaults/main.yml
+index 28bf4cc..71bf00d 100644
+--- a/ansible/roles/kibana/defaults/main.yml
++++ b/ansible/roles/kibana/defaults/main.yml
+@@ -29,7 +29,8 @@
+ kibana_default_index:
+   title: "{{ kibana_default_index_pattern }}"
+   timeFieldName: "@timestamp"
+-
++kibana_default_index_options:
++  index.mapper.dynamic: true
+ 
+ ####################
+ # Docker
+diff --git a/ansible/roles/kibana/tasks/post_config.yml b/ansible/roles/kibana/tasks/post_config.yml
+index 1acdbd4..108c256 100644
+--- a/ansible/roles/kibana/tasks/post_config.yml
++++ b/ansible/roles/kibana/tasks/post_config.yml
+@@ -5,6 +5,15 @@
+     port: "{{ kibana_server_port }}"
+   run_once: true
+ 
++- name: Register the kibana index in elasticsearch
++  uri:
++    url: "{{ internal_protocol }}://{{ kolla_internal_vip_address }}:{{ elasticsearch_port }}/.kibana"
++    method: PUT
++    body: "{{ kibana_default_index_options | to_json }}"
++    body_format: json
++    status_code: 200, 201
++  run_once: true
++
+ - name: Wait for kibana to register in elasticsearch
+   uri:
+     url: "{{ internal_protocol }}://{{ kolla_internal_vip_address }}:{{ elasticsearch_port }}/.kibana"
+@@ -13,6 +22,16 @@
+   until: result.status == 200
+   retries: 20
+   delay: 2
++  run_once: true
++
++- name: Change kibana config to set index as defaultIndex
++  uri:
++    url: "{{ internal_protocol }}://{{ kolla_internal_vip_address }}:{{ elasticsearch_port }}/.kibana/config/*"
++    method: PUT
++    body:
++      defaultIndex: "{{ kibana_default_index_pattern }}"
++    body_format: json
++    status_code: 200, 201
+   run_once: true
+ 
+ - name: Get kibana default indexes
+@@ -39,39 +58,6 @@
+     body: "{{ kibana_default_index | to_json }}"
+     body_format: json
+     status_code: 201
+-  run_once: true
+-  when:
+-    - kibana_default_index is defined
+-    - kibana_default_indexes is defined
+-    - kibana_default_indexes['.kibana']['mappings']['config']['properties']['defaultIndex'] is not defined
+-
+-- name: Find kibana version
+-  command: docker exec -t kibana /opt/kibana/bin/kibana --version
+-  register: kibana_version
+-  run_once: true
+-  changed_when: true
+-  when:
+-    - kibana_default_index is defined
+-    - kibana_default_indexes is defined
+-    - kibana_default_indexes['.kibana']['mappings']['config']['properties']['defaultIndex'] is not defined
+-
+-- set_fact:
+-    kibana_version: "{{ kibana_version.stdout }}"
+-  run_once: true
+-  connection: local
+-  when:
+-    - kibana_default_index is defined
+-    - kibana_default_indexes is defined
+-    - kibana_default_indexes['.kibana']['mappings']['config']['properties']['defaultIndex'] is not defined
+-
+-- name: Change kibana config to set index as defaultIndex
+-  uri:
+-    url: "http://{{ kolla_internal_vip_address }}:{{ elasticsearch_port }}/.kibana/config/{{ kibana_version }}"
+-    method: PUT
+-    body:
+-      defaultIndex: "{{ kibana_default_index_pattern }}"
+-    body_format: json
+-    status_code: 200
+   run_once: true
+   when:
+     - kibana_default_index is defined

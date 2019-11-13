@@ -1,0 +1,12 @@
+diff --git a/ansible/roles/mariadb/tasks/bootstrap_cluster.yml b/ansible/roles/mariadb/tasks/bootstrap_cluster.yml
+index 56dabcc66..ad7928f1b 100644
+--- a/ansible/roles/mariadb/tasks/bootstrap_cluster.yml
++++ b/ansible/roles/mariadb/tasks/bootstrap_cluster.yml
+@@ -17,6 +17,7 @@
+     volumes:
+       - "{{ node_config_directory }}/mariadb/:{{ container_config_directory }}/:ro"
+       - "/etc/localtime:/etc/localtime:ro"
++      - "/etc/hosts:/etc/hosts:ro"
+       - "kolla_logs:/var/log/kolla/"
+       - "mariadb:/var/lib/mysql"
+   notify:
