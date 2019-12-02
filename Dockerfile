@@ -27,6 +27,7 @@ COPY files/playbooks/$OPENSTACK_VERSION/kolla-common.yml /ansible/kolla-common.y
 COPY files/playbooks/$OPENSTACK_VERSION/awx-kolla-common.yml /ansible/awx-kolla-common.yml
 
 COPY files/scripts/generate-images-file.py /generate-images-file.py
+COPY files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
 COPY files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
 COPY files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
 
@@ -132,15 +133,17 @@ RUN git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-an
 
 RUN cp /repository/ansible/group_vars/all.yml /ansible/group_vars/all/defaults-kolla.yml \
     && pip3 install --no-cache-dir -r /repository/requirements.txt \
-    && python3 /split-kolla-ansible-site.py \
     && python3 /generate-images-file.py > /ansible/group_vars/all/images-project.yml \
+    && python3 /remove-common-as-dependency.py \
+    && python3 /split-kolla-ansible-site.py \
     && cp -r /repository/ansible/action_plugins/* /ansible/action_plugins \
     && cp /repository/ansible/library/* /ansible/library \
     && cp -r /repository/ansible/roles/* /ansible/roles \
     && for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml"); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done \
     && rm -f /ansible/kolla-kolla-host.yml /ansible/kolla-post-deploy.yml \
-    && rm /split-kolla-ansible-site.py \
     && rm /generate-images-file.py \
+    && rm /remove-common-as-dependency.py \
+    && rm /split-kolla-ansible-site.py \
     && mkdir /ansible/files \
     && cp /repository/tools/cleanup-* /ansible/files
 
