@@ -27,7 +27,11 @@ if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
 fi
 
-TAG=$REPOSITORY:$OPENSTACK_VERSION-$VERSION
+if [[ $OPENSTACK_VERSION == "master" ]]; then
+    tag=$REPOSITORY:latest
+else
+    tag=$REPOSITORY:$OPENSTACK_VERSION-$VERSION
+fi
 
 docker build \
     --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
@@ -35,5 +39,5 @@ docker build \
     --label "io.osism.kolla-ansible=$HASH_REPOSITORY" \
     --squash \
     --no-cache \
-    --tag "$TAG-$(git rev-parse --short HEAD)" \
+    --tag "$tag-$(git rev-parse --short HEAD)" \
     $BUID_OPTS .

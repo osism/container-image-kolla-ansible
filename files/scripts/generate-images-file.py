@@ -29,7 +29,8 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
     rolename = os.path.basename(rolepath)
 
     # NOTE(berendt): workaround for https://review.opendev.org/693058
-    defaults_filename = "main.yaml" if rolename == "module-load" else "main.yml"
+    defaults_filename = "main.yaml" if (rolename == "module-load" and OPENSTACK_VERSION != "master") else "main.yml"
+
     with open(os.path.join(rolepath, "defaults", defaults_filename)) as fp:
         defaults = yaml.load(fp)
 
