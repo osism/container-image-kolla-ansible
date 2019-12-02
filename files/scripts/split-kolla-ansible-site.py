@@ -1,5 +1,5 @@
 import re
-import os 
+import os
 
 import ruamel.yaml
 
@@ -12,7 +12,7 @@ UNSUPPORTED_ROLES = [
 ]
 
 with open(SITEFILE, "r") as fp:
-    site = ruamel.yaml.load(fp, ruamel.yaml.RoundTripLoader)
+    site = ruamel.yaml.safe_load(fp)
 
 for play in site:
     if "name" not in play:
