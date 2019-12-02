@@ -40,6 +40,10 @@ COPY files/dragon_sudoers /etc/sudoers.d/dragon_sudoers
 
 COPY files/src /src
 
+# fix hadolint DL4006
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # show motd
 
 RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc
@@ -121,8 +125,10 @@ RUN tar xzf /mitogen.tar.gz --strip-components=1 -C /ansible/plugins/mitogen \
 
 # prepare project repository
 
-RUN git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository \
-    && for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do \
+RUN if [ $OPENSTACK_VERSION = "master" ]; then git clone https://github.com/openstack/kolla-ansible /repository; fi \
+    && if [ $OPENSTACK_VERSION != "master" ]; then git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository; fi
+
+RUN for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do \
         echo $patchfile; \
         ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1; \
         ( cd /repository && patch --forward --batch -p1 ) < $patchfile; \
@@ -139,7 +145,8 @@ RUN cp /repository/ansible/group_vars/all.yml /ansible/group_vars/all/defaults-k
     && cp -r /repository/ansible/action_plugins/* /ansible/action_plugins \
     && cp /repository/ansible/library/* /ansible/library \
     && cp -r /repository/ansible/roles/* /ansible/roles \
-    && for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml"); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done \
+    && for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml" | grep -v nova.yml); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done \
+    && if [ $OPENSTACK_VERSION = "master" ]; then cp /repository/ansible/nova.yml /ansible/kolla-nova.yml; fi \
     && rm -f /ansible/kolla-kolla-host.yml /ansible/kolla-post-deploy.yml \
     && rm /generate-images-file.py \
     && rm /remove-common-as-dependency.py \

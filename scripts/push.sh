@@ -33,3 +33,12 @@ fi
 
 docker tag "$REPOSITORY:$OPENSTACK_VERSION-$VERSION-$COMMIT" "$REPOSITORY:$OPENSTACK_VERSION-$VERSION"
 docker push "$REPOSITORY:$OPENSTACK_VERSION-$VERSION"
+
+if [[ $OPENSTACK_VERSION == "master" ]]; then
+    tag=$REPOSITORY:latest
+else
+    tag=$REPOSITORY:$OPENSTACK_VERSION-$VERSION
+fi
+
+docker tag "$tag-$COMMIT" "$tag"
+docker push "$tag"
