@@ -1,10 +1,6 @@
 ---
-- name: Purge kolla environment
+- name: Confirm whether user really meant to purge the kolla environment
   hosts: all
-
-  vars:
-    destroy_include_images: false
-    destroy_include_dev: false
 
   vars_prompt:
     - name: ireallymeanit
@@ -26,9 +22,16 @@
            `-e ireallyreallymeanit=ireallyreallymeanit` on the command line when
            invoking the playbook"
       when:
-        - ireallymeanit != 'yes'
-        - ireallyreallymeanit != 'ireallyreallymeanit'
+        - ireallymeanit != 'yes' or ireallyreallymeanit != 'ireallyreallymeanit'
 
+- name: Purge kolla environment
+  hosts: all
+
+  vars:
+    destroy_include_images: false
+    destroy_include_dev: false
+
+  tasks:
     - name: Destroying all kolla containers and volumes
       script: cleanup-containers
 
