@@ -1,0 +1,10 @@
+--- a/ansible/site.yml
++++ b/ansible/site.yml
+@@ -96,6 +96,7 @@
+   gather_facts: false
+   hosts:
+     - haproxy
++  serial: '{{ kolla_serial|default("0") }}'
+   roles:
+     - { role: haproxy,
+         tags: haproxy,
