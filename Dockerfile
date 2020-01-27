@@ -174,7 +174,6 @@ RUN apt-get clean \
       /overlays \
       /patches \
       /release \
-      /requirements.txt \
       /root/.cache \
       /src \
       /tmp/* \
