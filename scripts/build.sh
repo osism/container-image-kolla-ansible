@@ -12,16 +12,16 @@ set -x
 # Set default values
 
 BUILD_OPTS=${BUILD_OPTS:-}
-OPENSTACK_VERSION=${OPENSTACK_VERSION:-rocky}
+CREATED=$(date --rfc-3339=ns)
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-index.docker.io}
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-rocky}
 REPOSITORY=${REPOSITORY:-osism/kolla-ansible}
+REVISION=$(git rev-parse --short HEAD)
 VERSION=${VERSION:-latest}
 
 if [[ -n $TRAVIS_TAG ]]; then
     VERSION=${TRAVIS_TAG:1}
 fi
-
-HASH_REPOSITORY=$(git rev-parse --short HEAD)
 
 if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
@@ -36,7 +36,9 @@ fi
 docker build \
     --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
     --build-arg "VERSION=$VERSION" \
-    --label "io.osism.kolla-ansible=$HASH_REPOSITORY" \
+    --label "org.opencontainers.image.created=$CREATED" \
+    --label "org.opencontainers.image.revision=$REVISION" \
+    --label "org.opencontainers.image.version=$VERSION" \
     --squash \
     --no-cache \
     --tag "$tag-$(git rev-parse --short HEAD)" \
