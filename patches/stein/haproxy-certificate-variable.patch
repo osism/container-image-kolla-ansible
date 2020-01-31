@@ -1,5 +1,3 @@
-diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
-index 9ebef0fce..857a73483 100644
 --- a/ansible/group_vars/all.yml
 +++ b/ansible/group_vars/all.yml
 @@ -717,7 +717,7 @@ qdrouterd_user: "openstack"
@@ -11,8 +9,6 @@ index 9ebef0fce..857a73483 100644
  kolla_external_fqdn_cacert: "{{ node_config }}/certificates/haproxy-ca.crt"
  
  
-diff --git a/ansible/roles/haproxy/tasks/config.yml b/ansible/roles/haproxy/tasks/config.yml
-index f6f9caa3c..bccfa15dc 100644
 --- a/ansible/roles/haproxy/tasks/config.yml
 +++ b/ansible/roles/haproxy/tasks/config.yml
 @@ -96,7 +96,7 @@

@@ -1,30 +1,25 @@
-diff --git a/ansible/roles/glance/handlers/main.yml b/ansible/roles/glance/handlers/main.yml
-index 1c1770412..2403a0219 100644
 --- a/ansible/roles/glance/handlers/main.yml
 +++ b/ansible/roles/glance/handlers/main.yml
-@@ -27,4 +27,5 @@
+@@ -28,4 +28,5 @@
        or policy_overwriting.changed | bool
        or glance_api_container.changed | bool
        or ( glance_upgrading is defined and glance_upgrading | bool )
 -      or ( glance_api_ceph_files is defined and glance_api_ceph_files.changed | bool )
 +      or ( glance_api_ceph_conf_file is defined and glance_api_ceph_conf_file.changed | bool )
 +      or ( glance_api_ceph_keyring_file is defined and glance_api_ceph_keyring_file.changed | bool )
-diff --git a/ansible/roles/glance/tasks/external_ceph.yml b/ansible/roles/glance/tasks/external_ceph.yml
-index 4bf6f8f87..a82c408f8 100644
 --- a/ansible/roles/glance/tasks/external_ceph.yml
 +++ b/ansible/roles/glance/tasks/external_ceph.yml
-@@ -1,14 +1,25 @@
+@@ -1,14 +1,23 @@
  ---
 -- name: Copy over ceph files
 +- name: Copy over ceph.conf file
 +  template:
 +    src: "{{ node_custom_config }}/glance/ceph.conf"
-+    dest: "{{ node_config_directory }}/{{ item }}/ceph.conf"
++    dest: "{{ node_config_directory }}/glance-api/ceph.conf"
++    mode: 0660
 +  become: true
 +  register: glance_api_ceph_conf_file
 +  when: inventory_hostname in groups[item]
-+  with_items:
-+    - "glance-api"
 +  notify:
 +    - Restart glance-api container
 +
@@ -33,8 +28,9 @@ index 4bf6f8f87..a82c408f8 100644
 -    src: "{{ item }}"
 -    dest: "{{ node_config_directory }}/glance-api/"
 -    mode: "0660"
-+     src: "{{ node_custom_config }}/{{ item }}/ceph.client.glance.keyring"
-+     dest: "{{ node_config_directory }}/{{ item }}/ceph.client.glance.keyring"
++     src: "{{ node_custom_config }}/glance/ceph.client.glance.keyring"
++     dest: "{{ node_config_directory }}/glance-api/ceph.client.glance.keyring"
++    mode: 0660
    become: true
 -  register: glance_api_ceph_files
 -  when: inventory_hostname in groups['glance-api']
@@ -42,8 +38,6 @@ index 4bf6f8f87..a82c408f8 100644
 -    - "{{ node_custom_config }}/glance/ceph*"
 +  register: glance_api_ceph_keyring_file
 +  when: inventory_hostname in groups[item]
-+  with_items:
-+    - "glance-api"
    notify:
      - Restart glance-api container
  

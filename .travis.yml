@@ -13,6 +13,7 @@ env:
     - OPENSTACK_VERSION=queens
     - OPENSTACK_VERSION=rocky
     - OPENSTACK_VERSION=stein
+    - OPENSTACK_VERSION=train
 
 before_script:
   - bash scripts/lint.sh
