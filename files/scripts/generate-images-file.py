@@ -5,7 +5,7 @@ import os
 from ruamel.yaml import YAML
 yaml=YAML()
 
-OPENSTACK_VERSION = os.environ.get("OPENSTACK_VERSION", "rocky")
+OPENSTACK_VERSION = os.environ.get("OPENSTACK_VERSION", "master")
 ROLESPATH = "/repository/ansible/roles"
 UNSUPPORTED_ROLES = [
     "baremetal",

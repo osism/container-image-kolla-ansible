@@ -1,0 +1,33 @@
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -764,8 +764,8 @@ haproxy_user: "openstack"
+ haproxy_enable_external_vip: "{{ 'no' if kolla_same_external_internal_vip | bool else 'yes' }}"
+ kolla_enable_tls_internal: "no"
+ kolla_enable_tls_external: "{{ kolla_enable_tls_internal if kolla_same_external_internal_vip | bool else 'no' }}"
+-kolla_external_fqdn_cert: "{{ node_config }}/certificates/haproxy.pem"
+-kolla_internal_fqdn_cert: "{{ node_config }}/certificates/haproxy-internal.pem"
++kolla_external_fqdn_cert:
++kolla_internal_fqdn_cert:
+ kolla_external_fqdn_cacert: "{{ node_config }}/certificates/haproxy-ca.crt"
+ kolla_internal_fqdn_cacert: "{{ node_config }}/certificates/haproxy-ca-internal.crt"
+ 
+--- a/ansible/roles/haproxy/tasks/config.yml
++++ b/ansible/roles/haproxy/tasks/config.yml
+@@ -112,7 +112,7 @@
+   vars:
+     service: "{{ haproxy_services['haproxy'] }}"
+   copy:
+-    src: "{{ kolla_external_fqdn_cert }}"
++    content: "{{ kolla_external_fqdn_cert }}"
+     dest: "{{ node_config_directory }}/haproxy/{{ item }}"
+     mode: "0660"
+   become: true
+@@ -129,7 +129,7 @@
+   vars:
+     service: "{{ haproxy_services['haproxy'] }}"
+   copy:
+-    src: "{{ kolla_internal_fqdn_cert }}"
++    content: "{{ kolla_internal_fqdn_cert }}"
+     dest: "{{ node_config_directory }}/haproxy/{{ item }}"
+     mode: "0660"
+   become: true

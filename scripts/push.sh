@@ -12,7 +12,7 @@ set -x
 # Set default values
 
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-index.docker.io}
-OPENSTACK_VERSION=${OPENSTACK_VERSION:-rocky}
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-master}
 PUSH_COMMIT=${PUSH_COMMIT:-false}
 REPOSITORY=${REPOSITORY:-osism/kolla-ansible}
 VERSION=${VERSION:-latest}
