@@ -1,0 +1,11 @@
+---
+##########################################################
+# ansible
+
+ansible_host: localhost
+
+##########################################################
+# kolla
+
+network_interface: dummy_internal
+neutron_external_interface: dummy_external

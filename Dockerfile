@@ -66,6 +66,7 @@ RUN apt-get update \
         sshpass \
         sudo \
         vim-tiny \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
     && rm -rf /var/lib/apt/lists/*
 
 # add user
