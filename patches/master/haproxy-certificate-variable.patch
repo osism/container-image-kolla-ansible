@@ -1,6 +1,6 @@
 --- a/ansible/group_vars/all.yml
 +++ b/ansible/group_vars/all.yml
-@@ -764,8 +764,8 @@ haproxy_user: "openstack"
+@@ -755,8 +755,8 @@ haproxy_user: "openstack"
  haproxy_enable_external_vip: "{{ 'no' if kolla_same_external_internal_vip | bool else 'yes' }}"
  kolla_enable_tls_internal: "no"
  kolla_enable_tls_external: "{{ kolla_enable_tls_internal if kolla_same_external_internal_vip | bool else 'no' }}"
@@ -8,9 +8,11 @@
 -kolla_internal_fqdn_cert: "{{ node_config }}/certificates/haproxy-internal.pem"
 +kolla_external_fqdn_cert:
 +kolla_internal_fqdn_cert:
- kolla_external_fqdn_cacert: "{{ node_config }}/certificates/haproxy-ca.crt"
- kolla_internal_fqdn_cacert: "{{ node_config }}/certificates/haproxy-ca-internal.crt"
- 
+ kolla_external_fqdn_cacert: "{{ node_config }}/certificates/ca/haproxy.crt"
+ kolla_internal_fqdn_cacert: "{{ node_config }}/certificates/ca/haproxy-internal.crt"
+ kolla_copy_ca_into_containers: "no"
+diff --git a/ansible/roles/haproxy/tasks/config.yml b/ansible/roles/haproxy/tasks/config.yml
+index 53b0f1e51..30af39863 100644
 --- a/ansible/roles/haproxy/tasks/config.yml
 +++ b/ansible/roles/haproxy/tasks/config.yml
 @@ -112,7 +112,7 @@
