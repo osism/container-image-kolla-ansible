@@ -5,7 +5,6 @@ set -x
 #
 # DOCKER_REGISTRY
 # OPENSTACK_VERSION
-# PUSH_COMMIT
 # REPOSITORY
 # VERSION
 
@@ -13,7 +12,6 @@ set -x
 
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-index.docker.io}
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-master}
-PUSH_COMMIT=${PUSH_COMMIT:-false}
 REPOSITORY=${REPOSITORY:-osism/kolla-ansible}
 VERSION=${VERSION:-latest}
 
@@ -27,18 +25,19 @@ if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
 fi
 
-if [[ $PUSH_COMMIT == "true" ]]; then
-    docker push "$REPOSITORY:$VERSION-$COMMIT"
-fi
-
-docker tag "$REPOSITORY:$OPENSTACK_VERSION-$VERSION-$COMMIT" "$REPOSITORY:$OPENSTACK_VERSION-$VERSION"
-docker push "$REPOSITORY:$OPENSTACK_VERSION-$VERSION"
-
 if [[ $OPENSTACK_VERSION == "master" ]]; then
     tag=$REPOSITORY:latest
-else
-    tag=$REPOSITORY:$OPENSTACK_VERSION-$VERSION
-fi
 
-docker tag "$tag-$COMMIT" "$tag"
-docker push "$tag"
+    docker tag "$tag-$COMMIT" "$tag"
+    docker push "$tag"
+else
+    tag=$REPOSITORY:$OPENSTACK_VERSION
+
+    docker tag "$tag-$COMMIT" "$tag-$VERSION"
+    docker push "$tag"
+
+    if [[ -z $TRAVIS_TAG ]]; then
+        docker tag "$tag-$COMMIT" "$tag"
+        docker push "$tag"
+    fi
+fi

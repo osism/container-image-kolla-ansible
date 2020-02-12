@@ -30,7 +30,7 @@ fi
 if [[ $OPENSTACK_VERSION == "master" ]]; then
     tag=$REPOSITORY:latest
 else
-    tag=$REPOSITORY:$OPENSTACK_VERSION-$VERSION
+    tag=$REPOSITORY:$OPENSTACK_VERSION
 fi
 
 docker build \
