@@ -34,7 +34,7 @@ else
     tag=$REPOSITORY:$OPENSTACK_VERSION
 
     docker tag "$tag-$COMMIT" "$tag-$VERSION"
-    docker push "$tag"
+    docker push "$tag-$VERSION"
 
     if [[ -z $TRAVIS_TAG ]]; then
         docker tag "$tag-$COMMIT" "$tag"
