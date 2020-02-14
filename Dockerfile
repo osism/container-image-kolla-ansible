@@ -139,6 +139,7 @@ RUN for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do \
 
 RUN cp /repository/ansible/group_vars/all.yml /ansible/group_vars/all/defaults-kolla.yml \
     && pip3 install --no-cache-dir -r /repository/requirements.txt \
+    && pip3 install --no-cache-dir /repository \
     && python3 /generate-images-file.py > /ansible/group_vars/all/images-project.yml \
     && python3 /remove-common-as-dependency.py \
     && python3 /split-kolla-ansible-site.py \
