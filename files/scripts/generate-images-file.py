@@ -12,7 +12,6 @@ UNSUPPORTED_ROLES = [
     "ceph",
     "certificates",
     "destroy",
-    "nove-cell",  # NOTE: same images as in nova role
     "nova-hyperv",
     "prechecks",
     "service-stop",
@@ -48,6 +47,9 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
             print("%s_tag: \"{{ repository_version }}\"" % rolename)
         else:
             print("%s_tag: \"{{ docker_openstack_version }}-{{ repository_version }}\"" % rolename)
+
+        tag_is_missing = False
+    elif rolename in ['nova-cell']:
         tag_is_missing = False
 
     for key in [x for x in defaults if x.endswith("_tag") or x.endswith("_image")]:
@@ -58,7 +60,11 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
                 else:
                     print("%s: \"{{ docker_openstack_version }}-{{ repository_version }}\"" % key)
         elif key.endswith("_tag"):
-            print("%s: \"{{ %s_tag }}\"" % (key, rolename))
+            if rolename == "nova-cell":
+                if key != "nova_tag":
+                    print("%s: \"{{ nova_tag }}\"" % key)
+            else:
+                print("%s: \"{{ %s_tag }}\"" % (key, rolename))
         elif key.endswith("_image"):
             image = key[:-6].replace("_", "-")
             if image == "openvswitch-db":
