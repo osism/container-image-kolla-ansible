@@ -101,6 +101,7 @@ RUN ansible_version=$(python3 -c 'import ansible; print(ansible.release.__versio
 RUN mkdir -p \
         /ansible \
         /ansible/action_plugins \
+        /ansible/filter_plugins \
         /ansible/library \
         /ansible/roles \
         /ansible/tasks
@@ -142,6 +143,7 @@ RUN cp /repository/ansible/group_vars/all.yml /ansible/group_vars/all/defaults-k
     && python3 /remove-common-as-dependency.py \
     && python3 /split-kolla-ansible-site.py \
     && cp -r /repository/ansible/action_plugins/* /ansible/action_plugins \
+    && if [ -e /repository/ansible/filter_plugins ]; then cp -r /repository/ansible/filter_plugins/* /ansible/filter_plugins; fi \
     && cp /repository/ansible/library/* /ansible/library \
     && cp -r /repository/ansible/roles/* /ansible/roles \
     && for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml" | grep -v nova.yml); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done \
