@@ -55,6 +55,6 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
             image = key[:-6].replace("_", "-")
             if image == "openvswitch-db":
                 image = "openvswitch-db-server"
-            elif image == "placement-api":
+            elif image == "placement-api" and OPENSTACK_VERSION in ["queens", "rocky"]:
                 image = "nova-placement-api"
             print("%s: \"{{ docker_registry }}/{{ docker_namespace }}/%s\"" % (key, image))
