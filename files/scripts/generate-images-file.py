@@ -20,7 +20,8 @@ UNSUPPORTED_ROLES = [
 
 print("---")
 print("docker_namespace: osism")
-print("docker_openstack_version: %s" % OPENSTACK_VERSION)
+if OPENSTACK_VERSION != "master":
+    print("docker_openstack_version: %s" % OPENSTACK_VERSION)
 
 for rolepath in glob.glob("%s/*" % ROLESPATH):
     if os.path.basename(rolepath) in UNSUPPORTED_ROLES or not os.path.isdir(rolepath):
@@ -42,12 +43,17 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
 
     tag_is_missing = True
     if rolename in ['panko', 'skydive', 'common', 'freezer']:
-        print("%s_tag: \"{{ docker_openstack_version }}-{{ repository_version }}\"" % rolename)
+        if OPENSTACK_VERSION == "master":
+            print("%s_tag: \"{{ repository_version }}\"" % rolename)
+        else:
+            print("%s_tag: \"{{ docker_openstack_version }}-{{ repository_version }}\"" % rolename)
         tag_is_missing = False
 
     for key in [x for x in defaults if x.endswith("_tag") or x.endswith("_image")]:
-        if key == "%s_tag" % rolename:
-            if tag_is_missing:
+        if key == "%s_tag" % rolename and tag_is_missing:
+            if OPENSTACK_VERSION == "master":
+                print("%s: \"{{ repository_version }}\"" % key)
+            else:
                 print("%s: \"{{ docker_openstack_version }}-{{ repository_version }}\"" % key)
         elif key.endswith("_tag"):
             print("%s: \"{{ %s_tag }}\"" % (key, rolename))
