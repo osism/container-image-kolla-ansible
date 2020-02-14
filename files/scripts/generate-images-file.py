@@ -12,10 +12,11 @@ UNSUPPORTED_ROLES = [
     "ceph",
     "certificates",
     "destroy",
+    "nove-cell",  # NOTE: same images as in nova role
     "nova-hyperv",
     "prechecks",
     "service-stop",
-    "stop"  # NOTE(berendt): was renamed in stein in service-stop
+    "stop"  # NOTE: was renamed in stein in service-stop
 ]
 
 print("---")
