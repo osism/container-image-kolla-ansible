@@ -10,7 +10,6 @@ env:
     - REPOSITORY=osism/kolla-ansible
   matrix:
     - OPENSTACK_VERSION=master
-    - OPENSTACK_VERSION=queens
     - OPENSTACK_VERSION=rocky
     - OPENSTACK_VERSION=stein
     - OPENSTACK_VERSION=train
