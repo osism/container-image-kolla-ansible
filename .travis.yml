@@ -19,6 +19,7 @@ before_script:
 
 script:
   - bash scripts/build.sh
+  - bash scripts/test.sh
 
 deploy:
   - provider: script
