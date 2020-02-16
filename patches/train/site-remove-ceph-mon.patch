@@ -1,0 +1,36 @@
+diff --git a/ansible/site.yml b/ansible/site.yml
+index 8c84ae702..7f5dcd1d7 100644
+--- a/ansible/site.yml
++++ b/ansible/site.yml
+@@ -665,7 +665,6 @@
+ - name: Apply role glance
+   gather_facts: false
+   hosts:
+-    - ceph-mon
+     - glance-api
+     - '&enable_glance_True'
+   serial: '{{ kolla_serial|default("0") }}'
+@@ -691,7 +690,6 @@
+ - name: Apply role cinder
+   gather_facts: false
+   hosts:
+-    - ceph-mon
+     - cinder-api
+     - cinder-backup
+     - cinder-scheduler
+@@ -917,7 +915,6 @@
+ - name: Apply role manila
+   gather_facts: false
+   hosts:
+-    - ceph-mon
+     - manila-api
+     - manila-data
+     - manila-share
+@@ -932,7 +929,6 @@
+ - name: Apply role gnocchi
+   gather_facts: false
+   hosts:
+-    - ceph-mon
+     - gnocchi-api
+     - gnocchi-metricd
+     - gnocchi-statsd
