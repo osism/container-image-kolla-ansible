@@ -1,5 +1,3 @@
-diff --git a/ansible/roles/keystone/tasks/config.yml b/ansible/roles/keystone/tasks/config.yml
-index 1e86e0b0d..ea9bceb89 100644
 --- a/ansible/roles/keystone/tasks/config.yml
 +++ b/ansible/roles/keystone/tasks/config.yml
 @@ -183,7 +183,7 @@

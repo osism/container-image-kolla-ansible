@@ -1,5 +1,3 @@
-diff --git a/ansible/site.yml b/ansible/site.yml
-index 6658f33fe..f8201ec37 100644
 --- a/ansible/site.yml
 +++ b/ansible/site.yml
 @@ -647,7 +647,6 @@

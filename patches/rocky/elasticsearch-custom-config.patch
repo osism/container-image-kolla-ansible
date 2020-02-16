@@ -1,5 +1,3 @@
-diff --git a/ansible/roles/elasticsearch/defaults/main.yml b/ansible/roles/elasticsearch/defaults/main.yml
-index 8be79d7cf..0342412cd 100644
 --- a/ansible/roles/elasticsearch/defaults/main.yml
 +++ b/ansible/roles/elasticsearch/defaults/main.yml
 @@ -1,4 +1,6 @@
@@ -9,8 +7,6 @@ index 8be79d7cf..0342412cd 100644
  elasticsearch_services:
    elasticsearch:
      container_name: elasticsearch
-diff --git a/ansible/roles/elasticsearch/handlers/main.yml b/ansible/roles/elasticsearch/handlers/main.yml
-index 31b82c908..d89ad5971 100644
 --- a/ansible/roles/elasticsearch/handlers/main.yml
 +++ b/ansible/roles/elasticsearch/handlers/main.yml
 @@ -4,7 +4,6 @@
@@ -28,8 +24,6 @@ index 31b82c908..d89ad5971 100644
 -      or elasticsearch_conf.changed | bool
 +      or elasticsearch_confs.changed | bool
        or elasticsearch_container.changed | bool
-diff --git a/ansible/roles/elasticsearch/tasks/config.yml b/ansible/roles/elasticsearch/tasks/config.yml
-index 1b450b0f5..190c7264d 100644
 --- a/ansible/roles/elasticsearch/tasks/config.yml
 +++ b/ansible/roles/elasticsearch/tasks/config.yml
 @@ -36,16 +36,21 @@

@@ -11,8 +11,6 @@
  kolla_external_fqdn_cacert: "{{ node_config }}/certificates/ca/haproxy.crt"
  kolla_internal_fqdn_cacert: "{{ node_config }}/certificates/ca/haproxy-internal.crt"
  kolla_copy_ca_into_containers: "no"
-diff --git a/ansible/roles/haproxy/tasks/config.yml b/ansible/roles/haproxy/tasks/config.yml
-index 53b0f1e51..30af39863 100644
 --- a/ansible/roles/haproxy/tasks/config.yml
 +++ b/ansible/roles/haproxy/tasks/config.yml
 @@ -112,7 +112,7 @@
