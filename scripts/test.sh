@@ -4,8 +4,10 @@ set -x
 # methods
 
 function deploy() {
-    echo "DEPLOY $1"
-    docker exec -it test /run.sh deploy $1
+    service=$1
+    shift
+    echo "DEPLOY $service"
+    docker exec -it test /run.sh deploy $service $@
 }
 
 # available environment variables
@@ -178,6 +180,20 @@ echo "TEST cinder"
 sleep 5
 openstack --os-cloud admin volume service list
 
+deploy neutron
+echo "TEST neutron"
+sleep 5
+openstack --os-cloud admin network agent list
+
+# NOTE: RabbitMQ is skipped here. The RabbitMQ user/vhost is
+#       already present and on Travis CI the tasks lead to an
+#       error message.
+
+deploy nova --skip-tags service-rabbitmq || exit 1
+echo "TEST nova"
+sleep 5
+openstack --os-cloud admin compute service list
+
 deploy barbican
 echo "TEST barbican"
 
@@ -185,11 +201,6 @@ deploy heat
 echo "TEST heat"
 sleep 5
 openstack --os-cloud admin orchestration service list
-
-deploy neutron
-echo "TEST neutron"
-sleep 5
-openstack --os-cloud admin network agent list
 
 deploy magnum
 echo "TEST magnum"
