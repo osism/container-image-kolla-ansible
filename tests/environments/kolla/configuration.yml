@@ -52,8 +52,8 @@ docker_restart_policy_retry: 0
 enable_aodh: "no"
 enable_barbican: "no"
 enable_ceilometer: "no"
-enable_cinder: "no"
-enable_cinder_backup: "no"
+enable_cinder: "yes"
+enable_cinder_backup: "yes"
 enable_cloudkitty: "no"
 enable_gnocchi: "no"
 enable_heat: "yes"
@@ -105,3 +105,7 @@ neutron_plugin_agent: "openvswitch"
 enable_neutron_agent_ha: "yes"
 enable_neutron_dvr: "no"
 enable_neutron_qos: "yes"
+
+# cinder
+
+enable_cinder_backend_lvm: "yes"

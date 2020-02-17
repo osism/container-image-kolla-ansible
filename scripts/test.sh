@@ -69,6 +69,12 @@ sudo ip l s up dev dummy_external
 
 echo "192.168.50.200 api.osism.local api" | sudo tee -a /etc/hosts
 
+free_device=$(sudo losetup -f)
+sudo fallocate -l 5G /var/lib/cinder_data.img
+sudo losetup $free_device /var/lib/cinder_data.img
+sudo pvcreate $free_device
+sudo vgcreate cinder-volumes $free_device
+
 # start and prepare the kolla-ansible container
 
 docker run --network=host --name test -d \
@@ -155,6 +161,12 @@ deploy glance
 echo "TEST glance"
 sleep 5
 openstack --os-cloud admin image list
+
+deploy cinder
+deploy iscsi
+echo "TEST cinder"
+sleep 5
+openstack --os-cloud admin volume service list
 
 deploy heat
 echo "TEST heat"
