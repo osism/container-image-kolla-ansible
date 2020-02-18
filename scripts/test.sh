@@ -176,6 +176,9 @@ echo "TEST cinder"
 sleep 5
 openstack --os-cloud admin volume service list
 
+deploy barbican
+echo "TEST barbican"
+
 deploy heat
 echo "TEST heat"
 sleep 5
