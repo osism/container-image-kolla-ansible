@@ -1,5 +1,3 @@
-diff --git a/ansible/roles/mariadb/tasks/register.yml b/ansible/roles/mariadb/tasks/register.yml
-index 76030f2b4..62555eb84 100644
 --- a/ansible/roles/mariadb/tasks/register.yml
 +++ b/ansible/roles/mariadb/tasks/register.yml
 @@ -13,6 +13,21 @@

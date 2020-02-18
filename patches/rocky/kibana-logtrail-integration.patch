@@ -18,8 +18,6 @@
  - name: Check kibana containers
    kolla_docker:
      action: "compare_container"
-diff --git a/ansible/roles/kibana/templates/kibana.json.j2 b/ansible/roles/kibana/templates/kibana.json.j2
-index 3ce5c7f8..7186540e 100644
 --- a/ansible/roles/kibana/templates/kibana.json.j2
 +++ b/ansible/roles/kibana/templates/kibana.json.j2
 @@ -6,6 +6,12 @@
@@ -35,9 +33,6 @@ index 3ce5c7f8..7186540e 100644
          }
      ],
      "permissions": [
-diff --git a/ansible/roles/kibana/templates/logtrail.json.j2 b/ansible/roles/kibana/templates/logtrail.json.j2
-new file mode 100644
-index 00000000..2ac1df9f
 --- /dev/null
 +++ b/ansible/roles/kibana/templates/logtrail.json.j2
 @@ -0,0 +1,31 @@
