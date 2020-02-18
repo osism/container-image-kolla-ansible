@@ -44,11 +44,19 @@ sudo apt-get update
 
 if [[ $OPENSTACK_VERSION == "rocky" || $OPENSTACK_VERSION == "stein" ]]; then
     sudo apt-get install -y python python-docker python-pip
-    sudo pip --no-cache-dir install ansible python-openstackclient python-heatclient
+    sudo pip --no-cache-dir install \
+      ansible \
+      python-openstackclient \
+      python-heatclient \
+      python-magnumclient
 else
     sudo apt-get install -y python3 python3-docker python3-pip python3-setuptools
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-    sudo pip3 --no-cache-dir install ansible python-openstackclient python-heatclient
+    sudo pip3 --no-cache-dir install \
+      ansible \
+      python-openstackclient \
+      python-heatclient \
+      python-magnumclient
 fi
 
 mkdir -p ~/.config/openstack
@@ -177,3 +185,8 @@ deploy neutron
 echo "TEST neutron"
 sleep 5
 openstack --os-cloud admin network agent list
+
+deploy magnum
+echo "TEST magnum"
+sleep 5
+openstack --os-cloud admin coe service list
