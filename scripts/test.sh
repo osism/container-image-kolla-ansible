@@ -46,17 +46,19 @@ if [[ $OPENSTACK_VERSION == "rocky" || $OPENSTACK_VERSION == "stein" ]]; then
     sudo apt-get install -y python python-docker python-pip
     sudo pip --no-cache-dir install \
       ansible \
-      python-openstackclient \
+      python-designateclient \
       python-heatclient \
-      python-magnumclient
+      python-magnumclient \
+      python-openstackclient
 else
     sudo apt-get install -y python3 python3-docker python3-pip python3-setuptools
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
     sudo pip3 --no-cache-dir install \
       ansible \
-      python-openstackclient \
+      python-designateclient \
       python-heatclient \
-      python-magnumclient
+      python-magnumclient \
+      python-openstackclient
 fi
 
 mkdir -p ~/.config/openstack
@@ -176,18 +178,22 @@ echo "TEST cinder"
 sleep 5
 openstack --os-cloud admin volume service list
 
-deploy barbican
-echo "TEST barbican"
-
-deploy heat
-echo "TEST heat"
+deploy designate
+echo "TEST desginate"
 sleep 5
-openstack --os-cloud admin orchestration service list
+openstack --os-cloud admin dns service list
 
 deploy neutron
 echo "TEST neutron"
 sleep 5
 openstack --os-cloud admin network agent list
+
+deploy barbican
+
+deploy heat
+echo "TEST heat"
+sleep 5
+openstack --os-cloud admin orchestration service list
 
 deploy magnum
 echo "TEST magnum"
