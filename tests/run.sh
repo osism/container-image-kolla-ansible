@@ -27,12 +27,16 @@ cd $ENVIRONMENTS_DIRECTORY/$ENVIRONMENT
 
 export IFS=","
 for service in $services; do
-  ansible-playbook \
-    -e CONFIG_DIR=$ENVIRONMENTS_DIRECTORY/$ENVIRONMENT \
-    -e @secrets.yml \
-    -e @images.yml \
-    -e @configuration.yml \
-    -e kolla_action=$action \
-    "$@" \
-    $ANSIBLE_DIRECTORY/$ENVIRONMENT-$service.yml
+  if [[ ! -e $ANSIBLE_DIRECTORY/$ENVIRONMENT-$service.yml ]]; then
+    echo "warning: playbook for service $service does not exist"
+  else
+    ansible-playbook \
+      -e CONFIG_DIR=$ENVIRONMENTS_DIRECTORY/$ENVIRONMENT \
+      -e @secrets.yml \
+      -e @images.yml \
+      -e @configuration.yml \
+      -e kolla_action=$action \
+      "$@" \
+      $ANSIBLE_DIRECTORY/$ENVIRONMENT-$service.yml
+  fi
 done

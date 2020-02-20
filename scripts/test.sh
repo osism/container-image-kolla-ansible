@@ -165,6 +165,8 @@ openstack --os-cloud admin token issue
 
 deploy horizon
 
+deploy placement
+
 deploy glance
 echo "TEST glance"
 sleep 5
