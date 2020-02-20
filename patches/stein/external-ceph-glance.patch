@@ -16,10 +16,10 @@
 +  template:
 +    src: "{{ node_custom_config }}/glance/ceph.conf"
 +    dest: "{{ node_config_directory }}/glance-api/ceph.conf"
-+    mode: 0660
++    mode: "0660"
 +  become: true
 +  register: glance_api_ceph_conf_file
-+  when: inventory_hostname in groups[item]
++  when: inventory_hostname in groups['glance-api']
 +  notify:
 +    - Restart glance-api container
 +
@@ -27,17 +27,15 @@
    copy:
 -    src: "{{ item }}"
 -    dest: "{{ node_config_directory }}/glance-api/"
--    mode: "0660"
-+     src: "{{ node_custom_config }}/glance/ceph.client.glance.keyring"
-+     dest: "{{ node_config_directory }}/glance-api/ceph.client.glance.keyring"
-+    mode: 0660
++    src: "{{ node_custom_config }}/glance/ceph.client.glance.keyring"
++    dest: "{{ node_config_directory }}/glance-api/ceph.client.glance.keyring"
+     mode: "0660"
    become: true
 -  register: glance_api_ceph_files
--  when: inventory_hostname in groups['glance-api']
++  register: glance_api_ceph_keyring_file
+   when: inventory_hostname in groups['glance-api']
 -  with_fileglob:
 -    - "{{ node_custom_config }}/glance/ceph*"
-+  register: glance_api_ceph_keyring_file
-+  when: inventory_hostname in groups[item]
    notify:
      - Restart glance-api container
  

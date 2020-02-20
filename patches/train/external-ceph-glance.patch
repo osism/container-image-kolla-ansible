@@ -8,7 +8,7 @@
 +    src: "{{ node_custom_config }}/glance/ceph.conf"
 +    dest: "{{ node_config_directory }}/glance-api/ceph.conf"
 +    mode: "0660"
-+  when: inventory_hostname in groups[item]
++  when: inventory_hostname in groups['glance-api']
 +  when:
 +    - glance_services['glance-api'].host_in_groups | bool
 +    - glance_services['glance-api'].enabled | bool
@@ -19,8 +19,8 @@
    copy:
 -    src: "{{ item }}"
 -    dest: "{{ node_config_directory }}/glance-api/"
-+     src: "{{ node_custom_config }}/glance/ceph.client.glance.keyring"
-+     dest: "{{ node_config_directory }}/glance-api/ceph.client.glance.keyring"
++    src: "{{ node_custom_config }}/glance/ceph.client.glance.keyring"
++    dest: "{{ node_config_directory }}/glance-api/ceph.client.glance.keyring"
      mode: "0660"
 -  become: true
    when:
