@@ -1,0 +1,28 @@
+From 2a6070b963b99b2b0477b6352502fc3a81564989 Mon Sep 17 00:00:00 2001
+From: Michal Nasiadka <michal.nasiadka@nokia.com>
+Date: Thu, 28 Mar 2019 20:33:00 +0100
+Subject: [PATCH] Add support for ovsdb conversion
+
+After upgrade we should check if OVSDB doesn't need conversion to new
+version - this patch adds that to ovsdb start script.
+
+Change-Id: Ifa8766d050b506708142a1970121ce5944c6bae1
+Closes-Bug: #1792496
+---
+
+diff --git a/ansible/roles/openvswitch/templates/start-ovsdb-server.j2 b/ansible/roles/openvswitch/templates/start-ovsdb-server.j2
+index 803e856..579e0bb 100644
+--- a/ansible/roles/openvswitch/templates/start-ovsdb-server.j2
++++ b/ansible/roles/openvswitch/templates/start-ovsdb-server.j2
+@@ -1,5 +1,11 @@
+ #!/bin/bash
+ 
++# NOTE(mnasiadka): ensure existing ovsdb doesn't need to be upgraded
++
++if ([ -f /var/lib/openvswitch/conf.db ] && [ `ovsdb-tool needs-conversion /var/lib/openvswitch/conf.db` == "yes" ]); then
++  /usr/bin/ovsdb-tool convert /var/lib/openvswitch/conf.db
++fi
++
+ # NOTE: (sbezverk) ovs_bridge and ovs_ext_intf variables get initialized only when
+ # this script is executed for kubernetes deployment. With Ansible deployment, only
+ # ovsdb-server gets launched and then the following workflow step will create
