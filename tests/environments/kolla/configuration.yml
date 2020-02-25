@@ -74,7 +74,7 @@ enable_chrony: "no"
 # generic
 
 # NOTE: This has to be "False", not "false"!
-openstack_logging_debug: "False"
+openstack_logging_debug: "True"
 openstack_service_workers: 1
 
 # profiling
