@@ -111,5 +111,7 @@ enable_neutron_qos: "yes"
 enable_neutron_vpnaas: "yes"
 
 # cinder
-
 enable_cinder_backend_lvm: "yes"
+
+# nova
+nova_console: novnc
