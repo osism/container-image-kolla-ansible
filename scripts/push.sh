@@ -10,7 +10,7 @@ set -x
 
 # Set default values
 
-DOCKER_REGISTRY=${DOCKER_REGISTRY:-index.docker.io}
+DOCKER_REGISTRY=${DOCKER_REGISTRY:-quay.io}
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-master}
 REPOSITORY=${REPOSITORY:-osism/kolla-ansible}
 VERSION=${VERSION:-latest}

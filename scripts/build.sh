@@ -13,7 +13,7 @@ set -x
 
 BUILD_OPTS=${BUILD_OPTS:-}
 CREATED=$(date --rfc-3339=ns)
-DOCKER_REGISTRY=${DOCKER_REGISTRY:-index.docker.io}
+DOCKER_REGISTRY=${DOCKER_REGISTRY:-quay.io}
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-master}
 REPOSITORY=${REPOSITORY:-osism/kolla-ansible}
 REVISION=$(git rev-parse --short HEAD)
