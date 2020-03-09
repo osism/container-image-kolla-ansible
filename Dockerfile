@@ -22,6 +22,7 @@ COPY files/tasks /ansible/tasks
 
 COPY files/playbooks/kolla-facts.yml /ansible/kolla-facts.yml
 COPY files/playbooks/kolla-purge.yml /ansible/kolla-purge.yml
+COPY files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
 COPY files/playbooks/$OPENSTACK_VERSION/kolla-common.yml /ansible/kolla-common.yml
 COPY files/playbooks/$OPENSTACK_VERSION/awx-kolla-common.yml /ansible/awx-kolla-common.yml
 
