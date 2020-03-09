@@ -13,6 +13,7 @@ UNSUPPORTED_ROLES = [
     "certificates",
     "destroy",
     "nova-hyperv",
+    "opendaylight",
     "prechecks",
     "service-stop",
     "stop"  # NOTE: was renamed in stein in service-stop
