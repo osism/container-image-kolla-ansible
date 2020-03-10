@@ -32,6 +32,27 @@
     destroy_include_dev: false
 
   tasks:
+
+   # source: https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
+    - name: Get running qemu processes
+      shell: "ps -ef | grep -v grep | grep -w qemu | awk '{print $2}'"
+      register: running_processes
+
+    - name: Kill running qemu processes
+      shell: "kill {{ item }}"
+      with_items: "{{ running_processes.stdout_lines }}"
+
+    - wait_for:
+        path: "/proc/{{ item }}/status"
+        state: absent
+      with_items: "{{ running_processes.stdout_lines }}"
+      ignore_errors: yes
+      register: killed_processes
+
+    - name: Force kill stuck qemu processes
+      shell: "kill -9 {{ item }}"
+      with_items: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
+
     - name: Destroying all kolla containers and volumes
       script: cleanup-containers
 
