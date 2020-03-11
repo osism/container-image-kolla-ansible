@@ -58,6 +58,7 @@ RUN apt-get update \
         libffi-dev \
         libssl-dev \
         libyaml-dev \
+        openssh-client \
         patch \
         python3-dev \
         python3-pip \
