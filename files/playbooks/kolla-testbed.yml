@@ -87,6 +87,7 @@
 
 - name: Run haproxy playbook
   import_playbook: kolla-haproxy.yml
+  tags: infrastructure
 
 - name: Apply infrastructure roles
   gather_facts: no
@@ -94,16 +95,25 @@
   serial: '{{ kolla_serial|default("0") }}'
   roles:
     - role: common
+      tags: infrastructure
     - role: elasticsearch
+      tags: infrastructure
     - role: openvswitch
+      tags: infrastructure
     - role: memcached
+      tags: infrastructure
     - role: redis
+      tags: infrastructure
     - role: etcd
+      tags: infrastructure
     - role: mariadb
+      tags: infrastructure
     - role: kibana
+      tags: infrastructure
 
 - name: Run rabbitmq playbook
   import_playbook: kolla-rabbitmq.yml
+  tags: infrastructure
 
 - name: Apply base openstack roles
   gather_facts: no
@@ -111,12 +121,19 @@
   serial: '{{ kolla_serial|default("0") }}'
   roles:
     - role: keystone
+      tags: openstack
     - role: horizon
+      tags: openstack
     - role: placement
       when: openstack_release != 'rocky'
+      tags: openstack
     - role: glance
+      tags: openstack
     - role: cinder
+      tags: openstack
     - role: neutron
+      tags: openstack
 
 - name: Run nova playbook
   import_playbook: kolla-nova.yml
+  tags: openstack
