@@ -1,0 +1,54 @@
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -164,9 +164,11 @@ kolla_external_vip_interface: "{{ network_interface }}"
+ api_interface: "{{ network_interface }}"
+ storage_interface: "{{ network_interface }}"
+ cluster_interface: "{{ network_interface }}"
++migration_interface: "{{ network_interface }}"
+ tunnel_interface: "{{ network_interface }}"
+ bifrost_network_interface: "{{ network_interface }}"
+ dns_interface: "{{ network_interface }}"
++migration_interface_address: "{{ hostvars[inventory_hostname]['ansible_' + migration_interface]['ipv4']['address'] }}"
+ tunnel_interface_address: "{{ hostvars[inventory_hostname]['ansible_' + tunnel_interface]['ipv4']['address'] }}"
+ 
+ # Valid options are [ openvswitch, linuxbridge, vmware_nsxv, vmware_nsxv3, vmware_dvs, opendaylight ]
+--- a/ansible/roles/nova/tasks/precheck.yml
++++ b/ansible/roles/nova/tasks/precheck.yml
+@@ -95,7 +95,7 @@
+   vars:
+     nova_ssh: "{{ nova_services['nova-ssh'] }}"
+   wait_for:
+-    host: "{{ api_interface_address }}"
++    host: "{{ migration_interface_address }}"
+     port: "{{ nova_ssh_port }}"
+     connect_timeout: 1
+     timeout: 1
+--- a/ansible/roles/nova/templates/libvirtd.conf.j2
++++ b/ansible/roles/nova/templates/libvirtd.conf.j2
+@@ -4,5 +4,5 @@ auth_tcp = "none"
+ ca_file = ""
+ log_level = 3
+ log_outputs = "3:file:/var/log/kolla/libvirt/libvirtd.log"
+-listen_addr = "{{ api_interface_address }}"
++listen_addr = "{{ migration_interface_address }}"
+ tcp_port = "{{ nova_libvirt_port }}"
+--- a/ansible/roles/nova/templates/nova.conf.j2
++++ b/ansible/roles/nova/templates/nova.conf.j2
+@@ -195,7 +195,7 @@ memcached_servers = {% for host in groups['memcached'] %}{{ hostvars[host]['ansi
+ 
+ {% if nova_compute_virt_type in ['kvm', 'qemu'] %}
+ [libvirt]
+-connection_uri = "qemu+tcp://{{ api_interface_address }}/system"
++connection_uri = "qemu+tcp://{{ migration_interface_address }}/system"
+ {% if enable_ceph | bool and nova_backend == "rbd" %}
+ images_type = rbd
+ images_rbd_pool = {{ ceph_nova_pool_name }}
+--- a/ansible/roles/nova/templates/sshd_config.j2
++++ b/ansible/roles/nova/templates/sshd_config.j2
+@@ -1,5 +1,5 @@
+ Port {{ nova_ssh_port }}
+-ListenAddress {{ api_interface_address }}
++ListenAddress {{ migration_interface_address }}
+ 
+ SyslogFacility AUTHPRIV
+ UsePAM yes
