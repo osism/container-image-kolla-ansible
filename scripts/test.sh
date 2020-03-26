@@ -43,22 +43,21 @@ fi
 # run preparations
 
 sudo apt-get update
+sudo apt-get install -y python3 python3-docker python3-pip python3-setuptools
+
+sudo pip3 --no-cache-dir install \
+  python-openstackclient \
+  python-heatclient \
+  python-magnumclient
 
 if [[ $OPENSTACK_VERSION == "rocky" || $OPENSTACK_VERSION == "stein" ]]; then
     sudo apt-get install -y python python-docker python-pip
     sudo pip --no-cache-dir install \
-      ansible \
-      python-openstackclient \
-      python-heatclient \
-      python-magnumclient
+      ansible
 else
-    sudo apt-get install -y python3 python3-docker python3-pip python3-setuptools
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
     sudo pip3 --no-cache-dir install \
-      ansible \
-      python-openstackclient \
-      python-heatclient \
-      python-magnumclient
+      ansible
 fi
 
 mkdir -p ~/.config/openstack
