@@ -7,7 +7,7 @@ function deploy() {
     service=$1
     shift
     echo "DEPLOY $service"
-    docker exec -it test /run.sh deploy $service $@
+    docker exec -it test /run.sh deploy $service $@ || exit 1
 }
 
 # available environment variables
@@ -173,8 +173,8 @@ echo "TEST glance"
 sleep 5
 openstack --os-cloud admin image list
 
-deploy cinder
 deploy iscsi
+deploy cinder -e kolla_enable_sanity_checks="no"
 echo "TEST cinder"
 sleep 5
 openstack --os-cloud admin volume service list
@@ -188,7 +188,7 @@ openstack --os-cloud admin network agent list
 #       already present and on Travis CI the tasks lead to an
 #       error message.
 
-deploy nova --skip-tags service-rabbitmq || exit 1
+deploy nova --skip-tags service-rabbitmq
 echo "TEST nova"
 sleep 5
 openstack --os-cloud admin compute service list
