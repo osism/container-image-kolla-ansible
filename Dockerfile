@@ -35,6 +35,7 @@ COPY files/ansible.cfg /etc/ansible/ansible.cfg
 COPY files/defaults.yml /ansible/group_vars/all/defaults.yml
 COPY files/images.yml /ansible/group_vars/all/images.yml
 COPY files/requirements.yml /ansible/galaxy/requirements.yml
+COPY files/refresh.yml /tmp/refresh.yml
 
 COPY files/dragon_sudoers /etc/sudoers.d/dragon_sudoers
 
@@ -157,7 +158,9 @@ RUN cp /repository/ansible/group_vars/all.yml /ansible/group_vars/all/defaults-k
     && rm /remove-common-as-dependency.py \
     && rm /split-kolla-ansible-site.py \
     && mkdir /ansible/files \
-    && cp /repository/tools/cleanup-* /ansible/files
+    && cp /repository/tools/cleanup-* /ansible/files \
+    && find /ansible/roles/ -name config.yml -print0 | xargs -0 -I{} dirname {} | xargs -I{} cp /tmp/refresh.yml {}/refresh.yml \
+    && rm /tmp/refresh.yml
 
 RUN python3 -m ara.setup.env > /ansible/ara.env
 
