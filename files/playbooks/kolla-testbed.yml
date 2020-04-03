@@ -13,76 +13,76 @@
       group_by:
           key: '{{ item }}'
       with_items:
-        - enable_aodh_{{ enable_aodh | bool }}
-        - enable_barbican_{{ enable_barbican | bool }}
-        - enable_blazar_{{ enable_blazar | bool }}
-        - enable_ceilometer_{{ enable_ceilometer | bool }}
-        - enable_ceph_{{ enable_ceph | bool }}
-        - enable_chrony_{{ enable_chrony | bool }}
-        - enable_cinder_{{ enable_cinder | bool }}
-        - enable_cloudkitty_{{ enable_cloudkitty | bool }}
-        - enable_collectd_{{ enable_collectd | bool }}
-        - enable_congress_{{ enable_congress | bool }}
-        - enable_cyborg_{{ enable_cyborg | bool }}
-        - enable_designate_{{ enable_designate | bool }}
-        - enable_elasticsearch_{{ enable_elasticsearch | bool }}
-        - enable_etcd_{{ enable_etcd | bool }}
-        - enable_freezer_{{ enable_freezer | bool }}
-        - enable_glance_{{ enable_glance | bool }}
-        - enable_gnocchi_{{ enable_gnocchi | bool }}
-        - enable_grafana_{{ enable_grafana | bool }}
-        - enable_haproxy_{{ enable_haproxy | bool }}
-        - enable_heat_{{ enable_heat | bool }}
-        - enable_horizon_{{ enable_horizon | bool }}
-        - enable_hyperv_{{ enable_hyperv | bool }}
-        - enable_influxdb_{{ enable_influxdb | bool }}
-        - enable_ironic_{{ enable_ironic | bool }}
-        - enable_iscsid_{{ enable_iscsid | bool }}
-        - enable_kafka_{{ enable_kafka | bool }}
-        - enable_karbor_{{ enable_karbor | bool }}
-        - enable_keystone_{{ enable_keystone | bool }}
-        - enable_kibana_{{ enable_kibana | bool }}
-        - enable_kuryr_{{ enable_kuryr | bool }}
-        - enable_magnum_{{ enable_magnum | bool }}
-        - enable_manila_{{ enable_manila | bool }}
-        - enable_mariadb_{{ enable_mariadb | bool }}
-        - enable_masakari_{{ enable_masakari | bool }}
-        - enable_memcached_{{ enable_memcached | bool }}
-        - enable_mistral_{{ enable_mistral | bool }}
-        - enable_monasca_{{ enable_monasca | bool }}
-        - enable_mongodb_{{ enable_mongodb | bool }}
-        - enable_multipathd_{{ enable_multipathd | bool }}
-        - enable_murano_{{ enable_murano | bool }}
-        - enable_neutron_{{ enable_neutron | bool }}
-        - enable_nova_{{ enable_nova | bool }}
-        - enable_octavia_{{ enable_octavia | bool }}
-        - enable_opendaylight_{{ enable_opendaylight | bool }}
-        - enable_openvswitch_{{ enable_openvswitch | bool }}
-        - enable_ovs_dpdk_{{ enable_ovs_dpdk | bool }}
-        - enable_outward_rabbitmq_{{ enable_outward_rabbitmq | bool }}
-        - enable_panko_{{ enable_panko | bool }}
-        - enable_placement_{{ enable_placement | bool }}
-        - enable_prometheus_{{ enable_prometheus | bool }}
-        - enable_qdrouterd_{{ enable_qdrouterd | bool }}
-        - enable_qinling_{{ enable_qinling | bool }}
-        - enable_rabbitmq_{{ enable_rabbitmq | bool }}
-        - enable_rally_{{ enable_rally | bool }}
-        - enable_redis_{{ enable_redis | bool }}
-        - enable_sahara_{{ enable_sahara | bool }}
-        - enable_searchlight_{{ enable_searchlight | bool }}
-        - enable_senlin_{{ enable_senlin | bool }}
-        - enable_skydive_{{ enable_skydive | bool }}
-        - enable_solum_{{ enable_solum | bool }}
-        - enable_swift_{{ enable_swift | bool }}
-        - enable_tacker_{{ enable_tacker | bool }}
-        - enable_telegraf_{{ enable_telegraf | bool }}
-        - enable_tempest_{{ enable_tempest | bool }}
-        - enable_trove_{{ enable_trove | bool }}
-        - enable_vitrage_{{ enable_vitrage | bool }}
-        - enable_vmtp_{{ enable_vmtp | bool }}
-        - enable_watcher_{{ enable_watcher | bool }}
-        - enable_zookeeper_{{ enable_zookeeper | bool }}
-        - enable_zun_{{ enable_zun | bool }}
+        - enable_aodh_{{ enable_aodh | default('false') | bool }}
+        - enable_barbican_{{ enable_barbican | default('false') | bool }}
+        - enable_blazar_{{ enable_blazar | default('false') | bool }}
+        - enable_ceilometer_{{ enable_ceilometer | default('false') | bool }}
+        - enable_ceph_{{ enable_ceph | default('false') | bool }}
+        - enable_chrony_{{ enable_chrony | default('false') | bool }}
+        - enable_cinder_{{ enable_cinder | default('false') | bool }}
+        - enable_cloudkitty_{{ enable_cloudkitty | default('false') | bool }}
+        - enable_collectd_{{ enable_collectd | default('false') | bool }}
+        - enable_congress_{{ enable_congress | default('false') | bool }}
+        - enable_cyborg_{{ enable_cyborg | default('false') | bool }}
+        - enable_designate_{{ enable_designate | default('false') | bool }}
+        - enable_elasticsearch_{{ enable_elasticsearch | default('false') | bool }}
+        - enable_etcd_{{ enable_etcd | default('false') | bool }}
+        - enable_freezer_{{ enable_freezer | default('false') | bool }}
+        - enable_glance_{{ enable_glance | default('false') | bool }}
+        - enable_gnocchi_{{ enable_gnocchi | default('false') | bool }}
+        - enable_grafana_{{ enable_grafana | default('false') | bool }}
+        - enable_haproxy_{{ enable_haproxy | default('false') | bool }}
+        - enable_heat_{{ enable_heat | default('false') | bool }}
+        - enable_horizon_{{ enable_horizon | default('false') | bool }}
+        - enable_hyperv_{{ enable_hyperv | default('false') | bool }}
+        - enable_influxdb_{{ enable_influxdb | default('false') | bool }}
+        - enable_ironic_{{ enable_ironic | default('false') | bool }}
+        - enable_iscsid_{{ enable_iscsid | default('false') | bool }}
+        - enable_kafka_{{ enable_kafka | default('false') | bool }}
+        - enable_karbor_{{ enable_karbor | default('false') | bool }}
+        - enable_keystone_{{ enable_keystone | default('false') | bool }}
+        - enable_kibana_{{ enable_kibana | default('false') | bool }}
+        - enable_kuryr_{{ enable_kuryr | default('false') | bool }}
+        - enable_magnum_{{ enable_magnum | default('false') | bool }}
+        - enable_manila_{{ enable_manila | default('false') | bool }}
+        - enable_mariadb_{{ enable_mariadb | default('false') | bool }}
+        - enable_masakari_{{ enable_masakari | default('false') | bool }}
+        - enable_memcached_{{ enable_memcached | default('false') | bool }}
+        - enable_mistral_{{ enable_mistral | default('false') | bool }}
+        - enable_monasca_{{ enable_monasca | default('false') | bool }}
+        - enable_mongodb_{{ enable_mongodb | default('false') | bool }}
+        - enable_multipathd_{{ enable_multipathd | default('false') | bool }}
+        - enable_murano_{{ enable_murano | default('false') | bool }}
+        - enable_neutron_{{ enable_neutron | default('false') | bool }}
+        - enable_nova_{{ enable_nova | default('false') | bool }}
+        - enable_octavia_{{ enable_octavia | default('false') | bool }}
+        - enable_opendaylight_{{ enable_opendaylight | default('false') | bool }}
+        - enable_openvswitch_{{ enable_openvswitch | default('false') | bool }}
+        - enable_ovs_dpdk_{{ enable_ovs_dpdk | default('false') | bool }}
+        - enable_outward_rabbitmq_{{ enable_outward_rabbitmq | default('false') | bool }}
+        - enable_panko_{{ enable_panko | default('false') | bool }}
+        - enable_placement_{{ enable_placement | default('false') | bool }}
+        - enable_prometheus_{{ enable_prometheus | default('false') | bool }}
+        - enable_qdrouterd_{{ enable_qdrouterd | default('false') | bool }}
+        - enable_qinling_{{ enable_qinling | default('false') | bool }}
+        - enable_rabbitmq_{{ enable_rabbitmq | default('false') | bool }}
+        - enable_rally_{{ enable_rally | default('false') | bool }}
+        - enable_redis_{{ enable_redis | default('false') | bool }}
+        - enable_sahara_{{ enable_sahara | default('false') | bool }}
+        - enable_searchlight_{{ enable_searchlight | default('false') | bool }}
+        - enable_senlin_{{ enable_senlin | default('false') | bool }}
+        - enable_skydive_{{ enable_skydive | default('false') | bool }}
+        - enable_solum_{{ enable_solum | default('false') | bool }}
+        - enable_swift_{{ enable_swift | default('false') | bool }}
+        - enable_tacker_{{ enable_tacker | default('false') | bool }}
+        - enable_telegraf_{{ enable_telegraf | default('false') | bool }}
+        - enable_tempest_{{ enable_tempest | default('false') | bool }}
+        - enable_trove_{{ enable_trove | default('false') | bool }}
+        - enable_vitrage_{{ enable_vitrage | default('false') | bool }}
+        - enable_vmtp_{{ enable_vmtp | default('false') | bool }}
+        - enable_watcher_{{ enable_watcher | default('false') | bool }}
+        - enable_zookeeper_{{ enable_zookeeper | default('false') | bool }}
+        - enable_zun_{{ enable_zun | default('false') | bool }}
   tags: always
 
 - name: Run haproxy playbook
