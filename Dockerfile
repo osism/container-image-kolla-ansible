@@ -153,6 +153,7 @@ RUN cp /repository/ansible/group_vars/all.yml /ansible/group_vars/all/defaults-k
     && cp -r /repository/ansible/roles/* /ansible/roles \
     && for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml" | grep -v nova.yml); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done \
     && if [ $OPENSTACK_VERSION != "rocky" ] && [ $OPENSTACK_VERSION != "stein" ]; then cp /repository/ansible/nova.yml /ansible/kolla-nova.yml; fi \
+    && if [ $OPENSTACK_VERSION == "rocky" ]; then mkdir /ansible/roles/placement; fi \
     && rm -f /ansible/kolla-kolla-host.yml /ansible/kolla-post-deploy.yml \
     && rm /generate-images-file.py \
     && rm /remove-common-as-dependency.py \
