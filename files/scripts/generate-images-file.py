@@ -12,10 +12,16 @@ UNSUPPORTED_ROLES = [
     "ceph",
     "certificates",
     "destroy",
+    "haproxy-config",
     "nova-hyperv",
+    "module-load",
     "opendaylight",
     "prechecks",
+    "prune-images",
+    "service-cert-copy",
+    "service-ks-register",
     "service-stop",
+    "services-precheck",
     "stop"  # NOTE: was renamed in stein in service-stop
 ]
 
