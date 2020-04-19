@@ -190,6 +190,9 @@ network
 [neutron-metadata-agent:children]
 network
 
+[neutron-ovn-metadata-agent:children]
+compute
+
 [neutron-vpnaas-agent:children]
 network
 
@@ -441,3 +444,25 @@ designate
 
 [elasticsearch-curator:children]
 elasticsearch
+
+[ovn-controller:children]
+ovn-controller-compute
+ovn-controller-network
+
+[ovn-controller-compute:children]
+compute
+
+[ovn-controller-network:children]
+network
+
+[ovn-database:children]
+control
+
+[ovn-northd:children]
+ovn-database
+
+[ovn-nb-db:children]
+ovn-database
+
+[ovn-sb-db:children]
+ovn-database
