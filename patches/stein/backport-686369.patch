@@ -1,0 +1,18 @@
+--- a/ansible/roles/rabbitmq/defaults/main.yml
++++ b/ansible/roles/rabbitmq/defaults/main.yml
+@@ -69,3 +69,4 @@ rabbitmq_user: "openstack"
+ rabbitmq_cluster_name: "openstack"
+ rabbitmq_hostname: "{{ ansible_hostname }}"
+ rabbitmq_pid_file: "/var/lib/rabbitmq/mnesia/rabbitmq.pid"
++rabbitmq_server_additional_erl_args: ""
+diff --git a/ansible/roles/rabbitmq/templates/rabbitmq-env.conf.j2 b/ansible/roles/rabbitmq/templates/rabbitmq-env.conf.j2
+--- a/ansible/roles/rabbitmq/templates/rabbitmq-env.conf.j2
++++ b/ansible/roles/rabbitmq/templates/rabbitmq-env.conf.j2
+@@ -2,6 +2,7 @@ RABBITMQ_NODENAME=rabbit@{{ ansible_hostname }}
+ RABBITMQ_LOG_BASE=/var/log/kolla/{{ project_name }}
+ RABBITMQ_DIST_PORT={{ role_rabbitmq_cluster_port }}
+ RABBITMQ_PID_FILE={{ rabbitmq_pid_file }}
++RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS="{{ rabbitmq_server_additional_erl_args }}"
+ 
+ export ERL_EPMD_ADDRESS={{ api_interface_address }}
+ export ERL_EPMD_PORT={{ role_rabbitmq_epmd_port }}
