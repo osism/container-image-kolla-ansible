@@ -1,9 +1,9 @@
 --- a/ansible/roles/mariadb/defaults/main.yml
 +++ b/ansible/roles/mariadb/defaults/main.yml
-@@ -10,6 +10,7 @@ mariadb_services:
-     volumes:
+@@ -11,6 +11,7 @@ mariadb_services:
        - "{{ node_config_directory }}/mariadb/:{{ container_config_directory }}/:ro"
        - "/etc/localtime:/etc/localtime:ro"
+       - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
 +      - "/etc/hosts:/etc/hosts:ro"
        - "mariadb:/var/lib/mysql"
        - "kolla_logs:/var/log/kolla/"
