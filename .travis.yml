@@ -27,6 +27,11 @@ deploy:
     skip_cleanup: true
     on:
       branch: master
+  - provider: script
+    script: bash scripts/push.sh
+    skip_cleanup: true
+    on:
+      branch: tags
 
 notifications:
   irc:
