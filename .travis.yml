@@ -31,7 +31,7 @@ deploy:
     script: bash scripts/push.sh
     skip_cleanup: true
     on:
-      branch: tags
+      tags: true
 
 notifications:
   irc:
