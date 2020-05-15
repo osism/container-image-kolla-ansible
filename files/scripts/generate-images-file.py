@@ -78,4 +78,6 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
                 image = "openvswitch-db-server"
             elif image == "placement-api" and OPENSTACK_VERSION in ["queens", "rocky"]:
                 image = "nova-placement-api"
+            elif image == "kuryr":
+                image = "kuryr-libnetwork"
             print("%s: \"{{ docker_registry }}/{{ docker_namespace }}/%s\"" % (key, image))
