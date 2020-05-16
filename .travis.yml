@@ -9,10 +9,10 @@ env:
   global:
     - REPOSITORY=osism/kolla-ansible
   matrix:
-    - OPENSTACK_VERSION=master
-    - OPENSTACK_VERSION=rocky
-    - OPENSTACK_VERSION=stein
-    - OPENSTACK_VERSION=train
+    - OPENSTACK_VERSION=master UBUNTU_VERSION=20.04
+    - OPENSTACK_VERSION=rocky UBUNTU_VERSION=18.04
+    - OPENSTACK_VERSION=stein UBUNTU_VERSION=18.04
+    - OPENSTACK_VERSION=train UBUNTU_VERSION=18.04
 
 before_script:
   - bash scripts/lint.sh

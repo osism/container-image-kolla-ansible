@@ -35,6 +35,7 @@ fi
 
 docker build \
     --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
+    --build-arg "UBUNTU_VERSION=$UBUNTU_VERSION" \
     --build-arg "VERSION=$VERSION" \
     --label "org.opencontainers.image.created=$CREATED" \
     --label "org.opencontainers.image.documentation=https://docs.osism.de" \

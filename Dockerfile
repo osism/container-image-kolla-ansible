@@ -1,4 +1,5 @@
-FROM ubuntu:18.04
+ARG UBUNTU_VERSION=20.04
+FROM ubuntu:${UBUNTU_VERSION}
 
 ARG VERSION
 ARG OPENSTACK_VERSION
@@ -53,6 +54,7 @@ RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        build-essential \
         dumb-init \
         git \
         gnupg-agent \
@@ -173,6 +175,7 @@ RUN chown -R dragon: /ansible /share
 
 RUN apt-get clean \
     && apt-get remove -y  \
+      build-essential \
       git \
       libffi-dev \
       libssl-dev \
