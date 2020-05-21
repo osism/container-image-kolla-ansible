@@ -53,17 +53,3 @@ for play in site:
                 for line in dump.splitlines():
                     fp.write(line[2:])
                     fp.write("\n")
-
-            with open(os.path.join(DSTPATH, "awx-kolla-%s.yml" % name), "w+") as fp:
-                fp.write("---\n")
-                for line in dump.splitlines():
-                    fp.write(line[2:])
-                    fp.write("\n")
-
-                fp.write("  vars_files:\n")
-                fp.write("    - /opt/configuration/environments/configuration.yml\n")
-                fp.write("    - /opt/configuration/environments/images.yml\n")
-                fp.write("    - /opt/configuration/environments/secrets.yml\n")
-                fp.write("    - /opt/configuration/environments/kolla/configuration.yml\n")
-                fp.write("    - /opt/configuration/environments/kolla/images.yml\n")
-                fp.write("    - /opt/configuration/environments/kolla/secrets.yml\n")
