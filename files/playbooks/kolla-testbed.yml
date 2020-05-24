@@ -89,13 +89,19 @@
   import_playbook: kolla-haproxy.yml
   tags: infrastructure
 
+- name: Apply common role
+  gather_facts: no
+  hosts: all
+  serial: '{{ kolla_serial|default("0") }}'
+  roles:
+    - role: common
+      tags: infrastructure
+
 - name: Apply infrastructure roles
   gather_facts: no
   hosts: control
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - role: common
-      tags: infrastructure
     - role: elasticsearch
       tags: infrastructure
     - role: openvswitch
