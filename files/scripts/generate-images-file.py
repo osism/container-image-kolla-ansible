@@ -76,6 +76,8 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
             image = key[:-6].replace("_", "-")
             if image == "openvswitch-db":
                 image = "openvswitch-db-server"
+            elif image == "neutron-ovn-metadata-agent":
+                image = "neutron-metadata-agent"
             elif image == "placement-api" and OPENSTACK_VERSION in ["queens", "rocky"]:
                 image = "nova-placement-api"
             elif image == "ovn-nb-db":
