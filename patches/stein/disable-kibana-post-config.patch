@@ -1,8 +1,0 @@
---- a/ansible/roles/kibana/tasks/deploy.yml
-+++ b/ansible/roles/kibana/tasks/deploy.yml
-@@ -3,5 +3,3 @@
- 
- - name: Flush handlers
-   meta: flush_handlers
--
--- include_tasks: post_config.yml
