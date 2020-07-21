@@ -153,6 +153,7 @@ RUN cp /repository/ansible/group_vars/all.yml /ansible/group_vars/all/defaults-k
     && pip3 install --no-cache-dir /repository \
     && python3 /generate-images-file.py > /ansible/group_vars/all/images-project.yml \
     && python3 /remove-common-as-dependency.py \
+    && if [ $OPENSTACK_VERSION != "master" ]; then python3 /remove-common-as-dependency.py; fi \
     && python3 /split-kolla-ansible-site.py \
     && cp -r /repository/ansible/action_plugins/* /ansible/action_plugins \
     && if [ -e /repository/ansible/filter_plugins ]; then cp -r /repository/ansible/filter_plugins/* /ansible/filter_plugins; fi \
