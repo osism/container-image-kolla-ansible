@@ -17,6 +17,7 @@ USER root
 COPY overlays/$OPENSTACK_VERSION /overlays
 COPY patches /patches
 
+COPY files/inventory /ansible/inventory
 COPY files/library /ansible/library
 COPY files/plugins /ansible/plugins
 COPY files/tasks /ansible/tasks
@@ -40,6 +41,11 @@ COPY files/refresh.yml /tmp/refresh.yml
 COPY files/dragon_sudoers /etc/sudoers.d/dragon_sudoers
 
 COPY files/src /src
+
+# add inventory files
+
+ADD https://raw.githubusercontent.com/osism/cfg-generics/master/inventory/50-kolla /ansible/inventory/50-kolla
+ADD https://raw.githubusercontent.com/osism/cfg-generics/master/inventory/51-kolla /ansible/inventory/51-kolla
 
 # fix hadolint DL4006
 
