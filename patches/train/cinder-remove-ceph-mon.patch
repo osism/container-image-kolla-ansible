@@ -10,15 +10,3 @@
          inventory_hostname in groups['cinder-volume'] or
          inventory_hostname in groups['cinder-scheduler'] or
          inventory_hostname in groups['cinder-backup']
---- a/ansible/roles/cinder/tasks/deploy.yml
-+++ b/ansible/roles/cinder/tasks/deploy.yml
-@@ -3,8 +3,7 @@
-   when: inventory_hostname in groups['cinder-api']
- 
- - include_tasks: config.yml
--  when: inventory_hostname in groups['ceph-mon'] or
--        inventory_hostname in groups['cinder-api'] or
-+  when: inventory_hostname in groups['cinder-api'] or
-         inventory_hostname in groups['cinder-volume'] or
-         inventory_hostname in groups['cinder-scheduler'] or
-         inventory_hostname in groups['cinder-backup']
