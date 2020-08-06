@@ -31,6 +31,7 @@ COPY files/scripts/generate-images-file.py /generate-images-file.py
 COPY files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
 COPY files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
 COPY files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
+COPY files/scripts/secrets.sh /secrets.sh
 
 COPY files/ansible.cfg /etc/ansible/ansible.cfg
 COPY files/defaults.yml /ansible/group_vars/all/defaults.yml

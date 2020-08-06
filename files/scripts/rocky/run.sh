@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source /secrets.sh
+
 ENVIRONMENT=kolla
 
 if [[ $# -lt 2 ]]; then
