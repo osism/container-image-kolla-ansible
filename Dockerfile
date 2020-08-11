@@ -17,6 +17,7 @@ USER root
 COPY overlays/$OPENSTACK_VERSION /overlays
 COPY patches /patches
 
+COPY files/inventory /ansible/inventory
 COPY files/library /ansible/library
 COPY files/plugins /ansible/plugins
 COPY files/tasks /ansible/tasks
@@ -30,6 +31,7 @@ COPY files/scripts/generate-images-file.py /generate-images-file.py
 COPY files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
 COPY files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
 COPY files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
+COPY files/scripts/secrets.sh /secrets.sh
 
 COPY files/ansible.cfg /etc/ansible/ansible.cfg
 COPY files/defaults.yml /ansible/group_vars/all/defaults.yml
@@ -40,6 +42,11 @@ COPY files/refresh.yml /tmp/refresh.yml
 COPY files/dragon_sudoers /etc/sudoers.d/dragon_sudoers
 
 COPY files/src /src
+
+# add inventory files
+
+ADD https://raw.githubusercontent.com/osism/cfg-generics/master/inventory/50-kolla /ansible/inventory/50-kolla
+ADD https://raw.githubusercontent.com/osism/cfg-generics/master/inventory/51-kolla /ansible/inventory/51-kolla
 
 # fix hadolint DL4006
 
@@ -118,9 +125,12 @@ RUN mkdir -p \
         /ansible/secrets \
         /share
 
-# install required ansible roles
+# install required ansible collections & roles
 
-RUN ansible-galaxy install -v -f -r /ansible/galaxy/requirements.yml -p /ansible/galaxy
+RUN ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/roles \
+    && ln -s /usr/share/ansible/roles /ansible/galaxy \
+    && ansible-galaxy collection install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/collections \
+    && ln -s /usr/share/ansible/collections /ansible/collections
 
 # install required ansible plugins
 

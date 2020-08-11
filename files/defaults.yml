@@ -1,2 +1,9 @@
 ---
 certificates_dir: /share/certificates
+
+# NOTE: The Prometheus role deploys the Prometheus exporter and Prometheus server.
+#
+#       By default we only need the Prometheus exporters because we use Netdata
+#       for the collection and visualization.
+
+enable_prometheus_server: "no"

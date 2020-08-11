@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source /secrets.sh
+
 ENVIRONMENT=kolla
 
 if [[ $# -lt 2 ]]; then
@@ -21,10 +23,17 @@ if [[ -e /ansible/ara.env ]]; then
     source /ansible/ara.env
 fi
 
+if [[ ! -e /run/secrets/NETBOX_TOKEN ]]; then
+    rm -f /ansible/inventory/99-netbox.yml
+fi
+
 export ANSIBLE_CONFIG=$ENVIRONMENTS_DIRECTORY/ansible.cfg
 if [[ -e $ENVIRONMENTS_DIRECTORY/$ENVIRONMENT/ansible.cfg ]]; then
     export ANSIBLE_CONFIG=$ENVIRONMENTS_DIRECTORY/$ENVIRONMENT/ansible.cfg
 fi
+
+export ANSIBLE_INVENTORY=$ANSIBLE_DIRECTORY/inventory
+rsync -a /opt/configuration/inventory/ /ansible/inventory/
 
 cd $ENVIRONMENTS_DIRECTORY/$ENVIRONMENT
 
