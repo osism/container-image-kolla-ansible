@@ -125,9 +125,12 @@ RUN mkdir -p \
         /ansible/secrets \
         /share
 
-# install required ansible roles
+# install required ansible collections & roles
 
-RUN ansible-galaxy install -v -f -r /ansible/galaxy/requirements.yml -p /ansible/galaxy
+RUN ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/roles \
+    && ln -s /usr/share/ansible/roles /ansible/galaxy \
+    && ansible-galaxy collection install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/collections \
+    && ln -s /usr/share/ansible/collections /ansible/collections
 
 # install required ansible plugins
 
