@@ -46,9 +46,10 @@ sudo apt-get update
 sudo apt-get install -y python3 python3-docker python3-pip python3-setuptools
 
 sudo pip3 --no-cache-dir install \
-  python-openstackclient \
+  python-gilt \
   python-heatclient \
-  python-magnumclient
+  python-magnumclient \
+  python-openstackclient
 
 if [[ $OPENSTACK_VERSION == "rocky" || $OPENSTACK_VERSION == "stein" ]]; then
     sudo apt-get install -y python python-docker python-pip
@@ -59,6 +60,11 @@ else
     sudo pip3 --no-cache-dir install \
       ansible
 fi
+
+(
+  cd tests;
+  gilt overlay;
+)
 
 mkdir -p ~/.config/openstack
 cp tests/environments/openstack/clouds.yml ~/.config/openstack/clouds.yml
