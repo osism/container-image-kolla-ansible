@@ -9,3 +9,8 @@ certificates_dir: /share/certificates
 enable_prometheus: "yes"
 enable_prometheus_alertmanager: "no"
 enable_prometheus_server: "no"
+
+# NOTE: The node exporter is not required. Netdata and Zabbix are used for basic
+#       monitoring.
+
+enable_prometheus_node_exporter: "no"
