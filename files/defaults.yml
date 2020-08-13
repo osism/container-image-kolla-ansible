@@ -6,4 +6,6 @@ certificates_dir: /share/certificates
 #       By default we only need the Prometheus exporters because we use Netdata
 #       for the collection and visualization.
 
+enable_prometheus: "yes"
+enable_prometheus_alertmanager: "no"
 enable_prometheus_server: "no"
