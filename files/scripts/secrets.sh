@@ -25,4 +25,7 @@ file_env() {
 }
 
 NETBOX_TOKEN_FILE=${NETBOX_TOKEN_FILE:-/run/secrets/NETBOX_TOKEN}
-file_env 'NETBOX_TOKEN'
+
+if [[ -e $NETBOX_TOKEN_FILE ]]; then
+    file_env 'NETBOX_TOKEN'
+fi
