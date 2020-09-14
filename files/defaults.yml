@@ -1,10 +1,11 @@
 ---
-certificates_dir: /share/certificates
-
-# NOTE: The Prometheus role deploys the Prometheus exporter and Prometheus server.
+##########################################################
+# NOTE: The Prometheus role deploys the Prometheus
+#       exporter and Prometheus alertmanager/server.
 #
-#       By default we only need the Prometheus exporters because we use Netdata
-#       for the collection and visualization.
+#       By default we only need the Prometheus exporters
+#       because we use Netdata for the collection and
+#       visualization.
 
 enable_prometheus: "yes"
 enable_prometheus_alertmanager: "no"
@@ -14,3 +15,53 @@ enable_prometheus_server: "no"
 #       monitoring.
 
 enable_prometheus_node_exporter: "no"
+
+##########################################################
+# NOTE: The Chrony integrated in Kolla is not used. The
+#       osism.chrony role is used.
+
+enable_chrony: "no"
+
+##########################################################
+# Enable default set of services
+
+# infrastructure
+
+enable_central_logging: "yes"
+enable_redis: "yes"
+
+# openstack
+
+enable_cinder: "yes"
+
+##########################################################
+# Set default configuartions
+
+certificates_dir: /share/certificates
+
+kolla_base_distro: ubuntu
+kolla_install_type: source
+
+config_strategy: COPY_ALWAYS
+node_custom_config: "{{ configuration_directory }}/environments/kolla/files/overlays"
+
+docker_namespace: osism
+docker_restart_policy_retry: 0
+
+openstack_logging_debug: "False"  # NOTE: This has to be "False", not "false"!
+
+# horizon
+horizon_backend_database: "yes"
+
+# keystone
+keystone_token_provider: "fernet"
+
+# neutron
+
+enable_neutron_qos: "yes"
+
+# nova
+nova_console: novnc
+
+# octavia
+octavia_loadbalancer_topology: "ACTIVE_STANDBY"
