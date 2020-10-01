@@ -116,6 +116,9 @@
       tags: infrastructure
     - role: kibana
       tags: infrastructure
+    - role: ovn
+      tags: infrastructure
+      when: neutron_plugin_agent|default('openvswitch') == 'ovn'
 
 - name: Run rabbitmq playbook
   import_playbook: kolla-rabbitmq.yml
