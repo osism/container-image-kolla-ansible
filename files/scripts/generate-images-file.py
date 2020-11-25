@@ -27,8 +27,10 @@ UNSUPPORTED_ROLES = [
 
 print("---")
 print("docker_namespace: osism")
-if OPENSTACK_VERSION != "master":
-    print("docker_openstack_version: %s" % OPENSTACK_VERSION)
+if OPENSTACK_VERSION == "master":
+    print("kolla_image_version: latest")
+else:
+    print("kolla_image_version: \"%s-{{ repository_version }}\" % OPENSTACK_VERSION)
 
 for rolepath in glob.glob("%s/*" % ROLESPATH):
     if os.path.basename(rolepath) in UNSUPPORTED_ROLES or not os.path.isdir(rolepath):
@@ -50,10 +52,7 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
 
     tag_is_missing = True
     if rolename in ['panko', 'skydive', 'common', 'freezer']:
-        if OPENSTACK_VERSION == "master":
-            print("%s_tag: \"{{ repository_version }}\"" % rolename)
-        else:
-            print("%s_tag: \"{{ docker_openstack_version }}-{{ repository_version }}\"" % rolename)
+        print("%s_tag: \"{{ kolla_image_version }}\"" % rolename)
 
         tag_is_missing = False
     elif rolename in ['nova-cell']:
@@ -62,10 +61,7 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
     for key in [x for x in defaults if x.endswith("_tag") or x.endswith("_image")]:
         if key == "%s_tag" % rolename:
             if tag_is_missing:
-                if OPENSTACK_VERSION == "master":
-                    print("%s: \"{{ repository_version }}\"" % key)
-                else:
-                    print("%s: \"{{ docker_openstack_version }}-{{ repository_version }}\"" % key)
+                print("%s: \"{{ kolla_image_version }}\"" % key)
         elif key.endswith("_tag"):
             if rolename == "nova-cell":
                 if key != "nova_tag":
