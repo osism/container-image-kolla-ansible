@@ -1,6 +1,6 @@
 --- a/ansible/group_vars/all.yml
 +++ b/ansible/group_vars/all.yml
-@@ -1102,6 +1102,7 @@ use_common_mariadb_user: "no"
+@@ -1104,6 +1104,7 @@ use_common_mariadb_user: "no"
  ############
  # Prometheus
  ############
@@ -15,14 +15,14 @@
      container_name: prometheus_server
      group: prometheus
 -    enabled: true
-+    enabled: "{{ enable_prometheus_server }}"
++    enabled: "{{ enable_prometheus_server | bool }}"
      image: "{{ prometheus_server_image_full }}"
      volumes: "{{ prometheus_server_default_volumes + prometheus_server_extra_volumes }}"
      dimensions: "{{ prometheus_server_dimensions }}"
      haproxy:
        prometheus_server:
--        enabled: "{{ enable_prometheus }}"
-+        enabled: "{{ enable_prometheus_server }}"
+-        enabled: "{{ enable_prometheus | bool }}"
++        enabled: "{{ enable_prometheus_server | bool }}"
          mode: "http"
          external: false
          port: "{{ prometheus_port }}"

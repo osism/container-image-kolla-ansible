@@ -1,7 +1,7 @@
 ---
 name: Check docker syntax
 
-on:
+on:  # yamllint disable-line rule:truthy
   push:
     paths:
       - Dockerfile

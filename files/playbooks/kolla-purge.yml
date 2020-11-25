@@ -33,7 +33,7 @@
 
   tasks:
 
-   # source: https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
+    # source: https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
     - name: Get running qemu processes
       shell: "ps -ef | grep -v grep | grep -w qemu | awk '{print $2}'"
       register: running_processes

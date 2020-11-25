@@ -15,7 +15,7 @@
      container_name: prometheus_server
      group: prometheus
 -    enabled: true
-+    enabled: "{{ enable_prometheus_server }}"
++    enabled: "{{ enable_prometheus_server | bool }}"
      image: "{{ prometheus_server_image_full }}"
      volumes:
        - "{{ node_config_directory }}/prometheus-server/:{{ container_config_directory }}/:ro"
@@ -23,8 +23,8 @@
      dimensions: "{{ prometheus_server_dimensions }}"
      haproxy:
        prometheus_server:
--        enabled: "{{ enable_prometheus }}"
-+        enabled: "{{ enable_prometheus_server }}"
+-        enabled: "{{ enable_prometheus | bool }}"
++        enabled: "{{ enable_prometheus_server | bool }}"
          mode: "http"
          external: false
          port: "{{ prometheus_port }}"

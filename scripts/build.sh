@@ -19,6 +19,8 @@ REPOSITORY=${REPOSITORY:-osism/kolla-ansible}
 REVISION=$(git rev-parse --short HEAD)
 VERSION=${VERSION:-latest}
 
+. defaults/$OPENSTACK_VERSION.sh
+
 if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
 fi
@@ -42,7 +44,6 @@ docker build \
     --label "org.opencontainers.image.url=https://www.osism.de" \
     --label "org.opencontainers.image.vendor=Betacloud Solutions GmbH" \
     --label "org.opencontainers.image.version=$VERSION" \
-    --squash \
     --no-cache \
     --tag "$tag-$(git rev-parse --short HEAD)" \
     $BUID_OPTS .

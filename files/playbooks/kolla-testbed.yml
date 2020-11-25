@@ -5,13 +5,13 @@
   tasks:
     - name: Group hosts based on OpenStack release
       group_by:
-          key: openstack_release_{{ openstack_release }}
+        key: openstack_release_{{ openstack_release }}
     - name: Group hosts based on Kolla action
       group_by:
-          key: kolla_action_{{ kolla_action }}
+        key: kolla_action_{{ kolla_action }}
     - name: Group hosts based on enabled services
       group_by:
-          key: '{{ item }}'
+        key: '{{ item }}'
       with_items:
         - enable_aodh_{{ enable_aodh | default('false') | bool }}
         - enable_barbican_{{ enable_barbican | default('false') | bool }}

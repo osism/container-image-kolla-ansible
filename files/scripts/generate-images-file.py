@@ -30,7 +30,7 @@ print("docker_namespace: osism")
 if OPENSTACK_VERSION == "master":
     print("kolla_image_version: latest")
 else:
-    print("kolla_image_version: \"%s-{{ repository_version }}\" % OPENSTACK_VERSION)
+    print("kolla_image_version: \"%s-{{ repository_version }}\"" % OPENSTACK_VERSION)
 
 for rolepath in glob.glob("%s/*" % ROLESPATH):
     if os.path.basename(rolepath) in UNSUPPORTED_ROLES or not os.path.isdir(rolepath):
