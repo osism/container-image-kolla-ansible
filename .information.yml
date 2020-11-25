@@ -1,6 +1,0 @@
----
-docker_image_name: kolla-ansible
-versions:
-  - queens
-  - rocky
-  - stein

@@ -15,10 +15,6 @@ OPENSTACK_VERSION=${OPENSTACK_VERSION:-master}
 REPOSITORY=${REPOSITORY:-osism/kolla-ansible}
 VERSION=${VERSION:-latest}
 
-if [[ -n $TRAVIS_TAG ]]; then
-    VERSION=${TRAVIS_TAG:1}
-fi
-
 COMMIT=$(git rev-parse --short HEAD)
 
 if [[ -n $DOCKER_REGISTRY ]]; then
@@ -36,8 +32,6 @@ else
     docker tag "$tag-$COMMIT" "$tag-$VERSION"
     docker push "$tag-$VERSION"
 
-    if [[ -z $TRAVIS_TAG ]]; then
-        docker tag "$tag-$COMMIT" "$tag"
-        docker push "$tag"
-    fi
+    docker tag "$tag-$COMMIT" "$tag"
+    docker push "$tag"
 fi

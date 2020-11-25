@@ -19,10 +19,6 @@ REPOSITORY=${REPOSITORY:-osism/kolla-ansible}
 REVISION=$(git rev-parse --short HEAD)
 VERSION=${VERSION:-latest}
 
-if [[ -n $TRAVIS_TAG ]]; then
-    VERSION=${TRAVIS_TAG:1}
-fi
-
 if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
 fi
