@@ -220,6 +220,6 @@ ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
 LABEL "org.opencontainers.image.documentation"="https://docs.osism.de" \
       "org.opencontainers.image.licenses"="ASL 2.0" \
-      "org.opencontainers.image.source"="https://github.com/osism/docker-kolla-ansible" \
+      "org.opencontainers.image.source"="https://github.com/osism/docker-image-kolla-ansible" \
       "org.opencontainers.image.url"="https://www.osism.de" \
       "org.opencontainers.image.vendor"="Betacloud Solutions GmbH"

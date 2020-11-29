@@ -39,7 +39,7 @@ docker build \
     --label "org.opencontainers.image.documentation=https://docs.osism.de" \
     --label "org.opencontainers.image.licenses=ASL 2.0" \
     --label "org.opencontainers.image.revision=$REVISION" \
-    --label "org.opencontainers.image.source=https://github.com/osism/docker-kolla-ansible" \
+    --label "org.opencontainers.image.source=https://github.com/osism/docker-image-kolla-ansible" \
     --label "org.opencontainers.image.title=kolla-ansible" \
     --label "org.opencontainers.image.url=https://www.osism.de" \
     --label "org.opencontainers.image.vendor=Betacloud Solutions GmbH" \
