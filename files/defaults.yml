@@ -1,5 +1,11 @@
 ---
 ##########################################################
+# generic
+
+operator_user: dragon
+operator_group: "{{ operator_user }}"
+
+##########################################################
 # NOTE: The Prometheus role deploys the Prometheus
 #       exporter and Prometheus alertmanager/server.
 #
