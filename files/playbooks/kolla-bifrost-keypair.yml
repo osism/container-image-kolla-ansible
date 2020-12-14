@@ -1,0 +1,26 @@
+---
+- name: Write bifrost keypair
+  hosts: manager
+  gather_facts: false
+  become: false
+
+  vars:
+    bifrost_private_key_file: "{{ ansible_env.HOME }}/.ssh/id_rsa.bifrost"
+    bifrost_public_key_file: "{{ ansible_env.HOME }}/.ssh/id_rsa.bifrost.pub"
+
+  tasks:
+    - name: "Write {{ bifrost_private_key_file }}"
+      copy:
+        dest: "{{ bifrost_private_key_file }}"
+        mode: 0600
+        content: "{{ bifrost_ssh_key.private_key }}"
+        owner: "{{ operator_user }}"
+        group: "{{ operator_group }}"
+
+    - name: "Write {{ bifrost_public_key_file }}"
+      copy:
+        dest: "{{ bifrost_public_key_file }}"
+        mode: 0600
+        content: "{{ bifrost_ssh_key.public_key }}"
+        owner: "{{ operator_user }}"
+        group: "{{ operator_group }}"
