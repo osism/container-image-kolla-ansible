@@ -32,6 +32,7 @@ else
 fi
 
 docker buildx build \
+    --load \
     --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
     --build-arg "UBUNTU_VERSION=$UBUNTU_VERSION" \
     --build-arg "VERSION=$VERSION" \
