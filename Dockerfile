@@ -22,10 +22,11 @@ COPY files/library /ansible/library
 COPY files/plugins /ansible/plugins
 COPY files/tasks /ansible/tasks
 
+COPY files/playbooks/$OPENSTACK_VERSION/kolla-common.yml /ansible/kolla-common.yml
+COPY files/playbooks/kolla-bifrost-keypair.yml /ansible/kolla-bifrost-keypair.yml
 COPY files/playbooks/kolla-facts.yml /ansible/kolla-facts.yml
 COPY files/playbooks/kolla-purge.yml /ansible/kolla-purge.yml
 COPY files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
-COPY files/playbooks/$OPENSTACK_VERSION/kolla-common.yml /ansible/kolla-common.yml
 
 COPY files/scripts/generate-images-file.py /generate-images-file.py
 COPY files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
