@@ -1,7 +1,7 @@
 ---
 name: Check docker syntax
 
-on:  # yamllint disable-line rule:truthy
+"on":
   push:
     paths:
       - Dockerfile
@@ -13,11 +13,7 @@ on:  # yamllint disable-line rule:truthy
 
 jobs:
   check-docker-syntax:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v1
-      - uses: reviewdog/action-hadolint@v1
-        with:
-          hadolint_flags: --config .github/hadolint.yml
+      - uses: brpaz/hadolint-action@v1.2.1
