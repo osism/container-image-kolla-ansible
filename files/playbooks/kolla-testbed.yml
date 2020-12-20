@@ -90,7 +90,7 @@
   tags: infrastructure
 
 - name: Apply common role
-  gather_facts: no
+  gather_facts: false
   hosts: all
   serial: '{{ kolla_serial|default("0") }}'
   roles:
@@ -98,7 +98,7 @@
       tags: infrastructure
 
 - name: Apply infrastructure roles
-  gather_facts: no
+  gather_facts: false
   hosts: control
   serial: '{{ kolla_serial|default("0") }}'
   roles:
@@ -125,7 +125,7 @@
   tags: infrastructure
 
 - name: Apply base openstack roles
-  gather_facts: no
+  gather_facts: false
   hosts: control
   serial: '{{ kolla_serial|default("0") }}'
   roles:

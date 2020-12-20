@@ -5,4 +5,4 @@
   roles:
     - {role: common, tags: common}
 
-  gather_facts: no
+  gather_facts: false

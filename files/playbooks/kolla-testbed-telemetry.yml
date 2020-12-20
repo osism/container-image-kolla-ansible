@@ -86,7 +86,7 @@
   tags: always
 
 - name: Apply openstack telemetry roles
-  gather_facts: no
+  gather_facts: false
   hosts: control
   serial: '{{ kolla_serial|default("0") }}'
   roles:
