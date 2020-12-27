@@ -1,5 +1,11 @@
 ---
 ##########################################################
+# ansible
+
+ansible_become: true
+ansible_become_user: root
+
+##########################################################
 # generic
 
 operator_user: dragon
@@ -55,6 +61,13 @@ docker_namespace: osism
 docker_restart_policy_retry: 0
 
 openstack_logging_debug: "False"  # NOTE: This has to be "False", not "false"!
+
+# haproxy
+
+kolla_enable_tls_external: "yes"
+
+haproxy_client_timeout: 5m
+haproxy_server_timeout: 5m
 
 # horizon
 horizon_backend_database: "yes"
