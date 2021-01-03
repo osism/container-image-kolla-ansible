@@ -84,3 +84,8 @@ nova_console: novnc
 
 # octavia
 octavia_loadbalancer_topology: "ACTIVE_STANDBY"
+
+# ceph
+
+ceph_cinder_keyring: "ceph.client.cinder.keyring"
+ceph_nova_keyring: "ceph.client.nova.keyring"
