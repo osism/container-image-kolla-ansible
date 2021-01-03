@@ -1,0 +1,31 @@
+---
+- name: mariadb - change row format to DYNAMIC
+  hosts: mariadb
+
+  vars:
+    mariadb_service_container_name: "mariadb"
+
+  tasks:
+    - name: Find tables to change row format to DYNAMIC
+      command: >-
+        docker exec {{ mariadb_service_container_name }}
+        mysql -uroot -p{{ database_password }}
+        --silent --skip-column-names
+        -e "SELECT NAME
+        FROM information_schema.INNODB_SYS_TABLES
+        WHERE ROW_FORMAT IN('Redundant', 'Compact')
+        AND NAME NOT IN('SYS_DATAFILES', 'SYS_FOREIGN', 'SYS_FOREIGN_COLS', 'SYS_TABLESPACES', 'SYS_VIRTUAL', 'SYS_ZIP_DICT', 'SYS_ZIP_DICT_COLS');"
+      changed_when: false
+      register: tables_needing_row_format_change
+      run_once: true
+      no_log: true
+
+    - name: Change row format to DYNAMIC for legacy tables
+      command: >-
+        docker exec {{ mariadb_service_container_name }}
+        mysql -uroot -p{{ database_password }}
+        --silent --skip-column-names
+        -e "{% for table in tables_needing_row_format_change.stdout_lines %}ALTER TABLE {{ table | regex_replace('/', '.') }} ROW_FORMAT=DYNAMIC;{% endfor %}"
+      changed_when: true
+      run_once: true
+      no_log: true
