@@ -84,6 +84,7 @@ nova_console: novnc
 
 # octavia
 octavia_loadbalancer_topology: "ACTIVE_STANDBY"
+octavia_amp_image_tag: amphora
 
 # ceph
 
