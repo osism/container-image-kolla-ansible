@@ -90,3 +90,6 @@ octavia_amp_image_tag: amphora
 
 ceph_cinder_keyring: "ceph.client.cinder.keyring"
 ceph_nova_keyring: "ceph.client.nova.keyring"
+
+# rabbitmq
+rabbitmq_monitoring_user: monitoring
