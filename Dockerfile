@@ -24,6 +24,7 @@ COPY files/playbooks/$OPENSTACK_VERSION/kolla-common.yml /ansible/kolla-common.y
 COPY files/playbooks/kolla-bifrost-keypair.yml /ansible/kolla-bifrost-keypair.yml
 COPY files/playbooks/kolla-facts.yml /ansible/kolla-facts.yml
 COPY files/playbooks/kolla-mariadb-dynamic-rows.yml /ansible/kolla-mariadb-dynamic-rows.yml
+COPY files/playbooks/kolla-nova-compute.yml /ansible/kolla-nova-compute.yml
 COPY files/playbooks/kolla-purge.yml /ansible/kolla-purge.yml
 COPY files/playbooks/kolla-rgw-endpoint.yml /ansible/kolla-rgw-endpoint.yml
 COPY files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
