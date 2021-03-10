@@ -25,10 +25,6 @@ jobs:
     strategy:
       matrix:
         openstack_version:
-          - rocky
-          - stein
-          - train
-          - ussuri
           - victoria
           - master
     steps:
