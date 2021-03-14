@@ -28,6 +28,7 @@ COPY files/playbooks/kolla-nova-compute.yml /ansible/kolla-nova-compute.yml
 COPY files/playbooks/kolla-purge.yml /ansible/kolla-purge.yml
 COPY files/playbooks/kolla-rgw-endpoint.yml /ansible/kolla-rgw-endpoint.yml
 COPY files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
+COPY files/playbooks/kolla-testbed-identity.yml /ansible/kolla-testbed-identity.yml
 
 COPY files/scripts/generate-images-file.py /generate-images-file.py
 COPY files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
