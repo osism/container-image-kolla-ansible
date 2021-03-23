@@ -26,6 +26,8 @@ sections = []
 for section in config.sections():
     if section.endswith(':children'):
         sections.append(section[:-9])
+    else:
+        sections.append("%s:children" % section)
 
     sections.append(section)
 
