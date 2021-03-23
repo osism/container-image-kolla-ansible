@@ -36,7 +36,7 @@ export ANSIBLE_INVENTORY=$ANSIBLE_DIRECTORY/inventory
 rsync -a /ansible/group_vars/ /ansible/inventory/group_vars/
 rsync -a /opt/configuration/inventory/ /ansible/inventory/
 python3 /src/handle-inventory-overwrite.py
-cat /ansible/inventory/[0-9]* > /ansilble/inventory/hosts
+cat /ansible/inventory/[0-9]* > /ansible/inventory/hosts
 rm /ansible/inventory/[0-9]*
 
 cd $ENVIRONMENTS_DIRECTORY/$ENVIRONMENT
