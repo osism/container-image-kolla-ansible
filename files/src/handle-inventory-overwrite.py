@@ -27,7 +27,7 @@ for section in config.sections():
     if section.endswith(':children'):
         sections.append(section[:-9])
 
-        sections.append(section)
+    sections.append(section)
 
 for f in os.scandir(dirname):
     if f.is_file() and not f.path.endswith(filename):
