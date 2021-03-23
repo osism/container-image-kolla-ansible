@@ -198,7 +198,6 @@ RUN apt-get clean \
       /patches \
       /release \
       /root/.cache \
-      /src \
       /tmp/* \
       /usr/share/doc/* \
       /usr/share/man/* \
