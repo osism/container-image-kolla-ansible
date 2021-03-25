@@ -93,3 +93,6 @@ ceph_nova_keyring: "ceph.client.nova.keyring"
 
 # rabbitmq
 rabbitmq_monitoring_user: monitoring
+
+# gnocchi
+enable_gnocchi_statsd: "no"
