@@ -96,3 +96,8 @@ rabbitmq_monitoring_user: monitoring
 
 # gnocchi
 enable_gnocchi_statsd: "no"
+
+# fluentd
+
+# NOTE: https://github.com/osism/issues/issues/3
+fluentd_enable_watch_timer: "true"

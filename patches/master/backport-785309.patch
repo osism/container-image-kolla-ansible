@@ -1,0 +1,124 @@
+From a48a4b50eea69f9a865406541f4aaf5f695e4291 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@betacloud-solutions.de>
+Date: Thu, 08 Apr 2021 08:40:23 +0200
+Subject: [PATCH] Add fluentd_enable_watch_timer
+
+Change-Id: Ic8ce6fbc3ed8f31d5d090e114b35703532679729
+---
+
+diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
+index fd481b8..8de0596 100644
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -175,9 +175,15 @@
+ # Arbitrary unique number from 0..255
+ keepalived_virtual_router_id: "51"
+ 
++#######################
++# Fluentd options
++#######################
++
++# Enable the additional watch timer
++fluentd_enable_watch_timer: "false"
+ 
+ #######################
+-# Elasticsearch Options
++# Elasticsearch options
+ #######################
+ es_heap_size: "1G"
+ elasticsearch_datadir_volume: "elasticsearch"
+diff --git a/ansible/roles/common/templates/conf/input/00-global.conf.j2 b/ansible/roles/common/templates/conf/input/00-global.conf.j2
+index b7fba50..2fda66e 100644
+--- a/ansible/roles/common/templates/conf/input/00-global.conf.j2
++++ b/ansible/roles/common/templates/conf/input/00-global.conf.j2
+@@ -20,6 +20,6 @@
+   keep_time_key true
+   time_format %F %T.%L
+   ignore_repeated_permission_error true
+-  enable_watch_timer false
++  enable_watch_timer {{ fluentd_enable_watch_timer }}
+ </source>
+ {%- endif %}
+diff --git a/ansible/roles/common/templates/conf/input/02-mariadb.conf.j2 b/ansible/roles/common/templates/conf/input/02-mariadb.conf.j2
+index 11152b7..7cea5ac 100644
+--- a/ansible/roles/common/templates/conf/input/02-mariadb.conf.j2
++++ b/ansible/roles/common/templates/conf/input/02-mariadb.conf.j2
+@@ -8,7 +8,7 @@
+   format multiline
+   format_firstline /^(\d{4}-\d{2}-\d{2}|\d{6}) /
+   format1 /^(?<Payload>.*)/
+-  enable_watch_timer false
++  enable_watch_timer {{ fluentd_enable_watch_timer }}
+ </source>
+ <source>
+   @type tail
+@@ -22,5 +22,5 @@
+   keep_time_key true
+   time_format %y/%m/%d@%T
+   ignore_repeated_permission_error true
+-  enable_watch_timer false
++  enable_watch_timer {{ fluentd_enable_watch_timer }}
+ </source>
+diff --git a/ansible/roles/common/templates/conf/input/03-rabbitmq.conf.j2 b/ansible/roles/common/templates/conf/input/03-rabbitmq.conf.j2
+index f70c5bd..2e5f1b5 100644
+--- a/ansible/roles/common/templates/conf/input/03-rabbitmq.conf.j2
++++ b/ansible/roles/common/templates/conf/input/03-rabbitmq.conf.j2
+@@ -6,5 +6,5 @@
+   format multiline
+   format_firstline /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}/
+   format1 /^(?<Timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}) \[(?<log_level>\w+)\] (?<Payload>.*)/
+-  enable_watch_timer false
++  enable_watch_timer {{ fluentd_enable_watch_timer }}
+ </source>
+diff --git a/ansible/roles/common/templates/conf/input/04-openstack-wsgi.conf.j2 b/ansible/roles/common/templates/conf/input/04-openstack-wsgi.conf.j2
+index 130d298..07cedf1 100644
+--- a/ansible/roles/common/templates/conf/input/04-openstack-wsgi.conf.j2
++++ b/ansible/roles/common/templates/conf/input/04-openstack-wsgi.conf.j2
+@@ -5,5 +5,5 @@
+   pos_file /var/run/{{ fluentd_binary }}/kolla-openstack-wsgi.pos
+   tag kolla.*
+   format /^(?<Payload>.*)$/
+-  enable_watch_timer false
++  enable_watch_timer {{ fluentd_enable_watch_timer }}
+ </source>
+diff --git a/ansible/roles/common/templates/conf/input/05-libvirt.conf.j2 b/ansible/roles/common/templates/conf/input/05-libvirt.conf.j2
+index 040b940..6f9b879 100644
+--- a/ansible/roles/common/templates/conf/input/05-libvirt.conf.j2
++++ b/ansible/roles/common/templates/conf/input/05-libvirt.conf.j2
+@@ -6,5 +6,5 @@
+   format /^(?<Timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}\+\d{4}): (?<Pid>\d+): (?<log_level>\S+) : (?<Payload>.*)?$/
+   time_key Timestamp
+   time_format %F %T.%L%z
+-  enable_watch_timer false
++  enable_watch_timer {{ fluentd_enable_watch_timer }}
+ </source>
+diff --git a/etc/kolla/globals.yml b/etc/kolla/globals.yml
+index 069c967..34e1f1e 100644
+--- a/etc/kolla/globals.yml
++++ b/etc/kolla/globals.yml
+@@ -159,6 +159,13 @@
+ # where the VIPs of different regions reside on a common subnet.
+ #keepalived_virtual_router_id: "51"
+ 
++#######################
++# Fluentd options
++#######################
++
++# Enable the additional watch timer
++fluentd_enable_watch_timer: "false"
++
+ ###################
+ # Dimension options
+ ###################
+diff --git a/releasenotes/notes/add-parameter-fluentd-enable-watch-timer-08fbe65ba2b549e8.yaml b/releasenotes/notes/add-parameter-fluentd-enable-watch-timer-08fbe65ba2b549e8.yaml
+new file mode 100644
+index 0000000..9cf281f
+--- /dev/null
++++ b/releasenotes/notes/add-parameter-fluentd-enable-watch-timer-08fbe65ba2b549e8.yaml
+@@ -0,0 +1,6 @@
++---
++features:
++  - |
++    With the boolean parameter ``fluentd_enable_watch_timer`` it is
++    now possible the additional watch timer of Fluentd. It is disabled
++    by default.
