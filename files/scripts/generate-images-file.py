@@ -84,4 +84,6 @@ for rolepath in glob.glob("%s/*" % ROLESPATH):
                 image = "kuryr-libnetwork"
             elif image == "ironic-dnsmasq":
                 image = "dnsmasq"
+            elif image == "monasca-logstash":
+                image = "logstash"
             print("%s: \"{{ docker_registry }}/{{ docker_namespace }}/%s\"" % (key, image))
