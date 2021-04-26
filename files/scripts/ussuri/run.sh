@@ -33,12 +33,15 @@ if [[ -e $ENVIRONMENTS_DIRECTORY/$ENVIRONMENT/ansible.cfg ]]; then
 fi
 
 export ANSIBLE_INVENTORY=$ANSIBLE_DIRECTORY/inventory
-rsync -a /ansible/group_vars/ /ansible/inventory/group_vars/
-rsync -a /ansible/inventory.generics/ /ansible/inventory/
-rsync -a /opt/configuration/inventory/ /ansible/inventory/
-python3 /src/handle-inventory-overwrite.py
-cat /ansible/inventory/[0-9]* > /ansible/inventory/hosts
-rm /ansible/inventory/[0-9]*
+
+if [[ -w $ANSIBLE_INVENTORY ]]; then
+    rsync -a /ansible/group_vars/ /ansible/inventory/group_vars/
+    rsync -a /ansible/inventory.generics/ /ansible/inventory/
+    rsync -a /opt/configuration/inventory/ /ansible/inventory/
+    python3 /src/handle-inventory-overwrite.py
+    cat /ansible/inventory/[0-9]* > /ansible/inventory/hosts
+    rm /ansible/inventory/[0-9]*
+fi
 
 cd $ENVIRONMENTS_DIRECTORY/$ENVIRONMENT
 
