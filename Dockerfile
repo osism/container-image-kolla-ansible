@@ -30,15 +30,12 @@ COPY files/playbooks/kolla-rgw-endpoint.yml /ansible/kolla-rgw-endpoint.yml
 COPY files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
 COPY files/playbooks/kolla-testbed-identity.yml /ansible/kolla-testbed-identity.yml
 
-COPY files/scripts/generate-images-file.py /generate-images-file.py
 COPY files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
 COPY files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
 COPY files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
 COPY files/scripts/secrets.sh /secrets.sh
 
 COPY files/ansible.cfg /etc/ansible/ansible.cfg
-COPY files/defaults.yml /ansible/group_vars/all/defaults.yml
-COPY files/images.yml /ansible/group_vars/all/images.yml
 COPY files/requirements.yml /ansible/galaxy/requirements.yml
 COPY files/refresh-containers.yml /tmp/refresh-containers.yml
 
@@ -151,13 +148,19 @@ RUN for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do \
        done \
     && rsync -avz /overlays/ /repository/
 
+# hadolint ignore=DL3003
+RUN git clone https://github.com/osism/ansible-defaults /defaults \
+    && ( cd /defaults && git fetch --all --force ) \
+    && if [ $VERSION != "latest" ]; then  ( cd /defaults && git checkout tags/v$VERSION -b v$VERSION ); fi
+
 # project specific instructions
 
-RUN cp /repository/ansible/group_vars/all.yml /ansible/group_vars/all/defaults-kolla.yml \
-    && ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
+RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
     && pip3 install --no-cache-dir -r /repository/requirements.txt \
     && pip3 install --no-cache-dir /repository \
-    && python3 /generate-images-file.py > /ansible/group_vars/all/images-project.yml \
+    && mkdir -p /ansible/group_vars \
+    && cp -r /defaults/* /ansible/group_vars/ \
+    && rm -f /ansible/group_vars/LICENSE /ansible/group_vars/README.md \
     && python3 /remove-common-as-dependency.py \
     && python3 /split-kolla-ansible-site.py \
     && cp -r /repository/ansible/action_plugins/* /ansible/action_plugins \
@@ -168,7 +171,6 @@ RUN cp /repository/ansible/group_vars/all.yml /ansible/group_vars/all/defaults-k
     && if [ $OPENSTACK_VERSION != "rocky" ] && [ $OPENSTACK_VERSION != "stein" ]; then cp /repository/ansible/nova.yml /ansible/kolla-nova.yml; fi \
     && if [ $OPENSTACK_VERSION == "rocky" ]; then mkdir /ansible/roles/placement; fi \
     && rm -f /ansible/kolla-kolla-host.yml /ansible/kolla-post-deploy.yml \
-    && rm /generate-images-file.py \
     && rm /remove-common-as-dependency.py \
     && rm /split-kolla-ansible-site.py \
     && mkdir /ansible/files \
