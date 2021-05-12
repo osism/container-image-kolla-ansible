@@ -34,6 +34,7 @@ COPY files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.p
 COPY files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
 COPY files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
 COPY files/scripts/secrets.sh /secrets.sh
+COPY files/scripts/entrypoint.sh /entrypoint.sh
 
 COPY files/ansible.cfg /etc/ansible/ansible.cfg
 COPY files/requirements.yml /ansible/galaxy/requirements.yml
