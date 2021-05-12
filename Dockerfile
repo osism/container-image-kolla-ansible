@@ -39,8 +39,6 @@ COPY files/ansible.cfg /etc/ansible/ansible.cfg
 COPY files/requirements.yml /ansible/galaxy/requirements.yml
 COPY files/refresh-containers.yml /tmp/refresh-containers.yml
 
-COPY files/dragon_sudoers /etc/sudoers.d/dragon_sudoers
-
 COPY files/src /src
 
 # add inventory files
@@ -78,7 +76,6 @@ RUN apt-get update \
         python3-wheel \
         rsync \
         sshpass \
-        sudo \
         vim-tiny \
     && python3 -m pip install --upgrade pip \
     && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
@@ -86,8 +83,7 @@ RUN apt-get update \
 
 # add user
 
-RUN chmod 0440 /etc/sudoers.d/dragon_sudoers \
-    && groupadd -g $GROUP_ID dragon \
+RUN groupadd -g $GROUP_ID dragon \
     && groupadd -g $GROUP_ID_DOCKER docker \
     && useradd -g dragon -G docker -u $USER_ID -m -d /ansible dragon
 
