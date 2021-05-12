@@ -8,14 +8,14 @@ name: Build docker image
   push:
     paths:
       - .github/workflows/build-docker-image.yml
-      - Dockerfile
+      - Containerfile
       - files/**
       - patches/**
       - scripts/*
   pull_request:
     paths:
       - .github/workflows/build-docker-image.yml
-      - Dockerfile
+      - Containerfile
       - files/**
       - patches/**
       - scripts/*

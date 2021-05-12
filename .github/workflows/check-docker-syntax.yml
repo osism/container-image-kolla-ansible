@@ -4,11 +4,11 @@ name: Check docker syntax
 "on":
   push:
     paths:
-      - Dockerfile
+      - Containerfile
       - .github/workflows/check-docker-syntax.yml
   pull_request:
     paths:
-      - Dockerfile
+      - Containerfile
       - .github/workflows/check-docker-syntax.yml
 
 jobs:
