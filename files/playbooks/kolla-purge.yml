@@ -39,6 +39,7 @@
       register: running_processes
 
     - name: Kill running qemu processes
+      become: true
       shell: "kill {{ item }}"
       with_items: "{{ running_processes.stdout_lines }}"
 
@@ -50,6 +51,7 @@
       register: killed_processes
 
     - name: Force kill stuck qemu processes
+      become: true
       shell: "kill -9 {{ item }}"
       with_items: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
 
