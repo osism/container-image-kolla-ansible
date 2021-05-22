@@ -86,7 +86,7 @@ RUN apt-get update \
 
 RUN groupadd -g $GROUP_ID dragon \
     && groupadd -g $GROUP_ID_DOCKER docker \
-    && useradd -g dragon -G docker -u $USER_ID -m -d /ansible dragon
+    && useradd -l -g dragon -G docker -u $USER_ID -m -d /ansible dragon
 
 # # run preparations
 
