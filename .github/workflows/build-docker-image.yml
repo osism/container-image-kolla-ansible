@@ -27,6 +27,7 @@ jobs:
       matrix:
         openstack_version:
           - victoria
+          - wallaby
           - master
     steps:
       - uses: actions/checkout@v2
