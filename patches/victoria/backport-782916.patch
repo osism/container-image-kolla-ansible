@@ -1,5 +1,5 @@
 From 1518bb1a9d42077758fec4f96d44cb13c8d2dc03 Mon Sep 17 00:00:00 2001
-From: Christian Berendt <berendt@betacloud-solutions.de>
+From: Christian Berendt <berendt@osism.tech>
 Date: Thu, 25 Mar 2021 09:34:28 +0100
 Subject: [PATCH] gnocchi: fix external ceph integration when gnocchi-stats is disabled
 

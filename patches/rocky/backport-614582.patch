@@ -1,5 +1,5 @@
 From cc20eaa3de12a81601e44f4920a61686ee45bd6d Mon Sep 17 00:00:00 2001
-From: Christian Berendt <berendt@betacloud-solutions.de>
+From: Christian Berendt <berendt@osism.tech>
 Date: Wed, 31 Oct 2018 17:22:19 +0100
 Subject: [PATCH] Set "no_log" for "databases user and setting permissions" tasks
 
