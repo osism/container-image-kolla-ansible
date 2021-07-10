@@ -37,12 +37,12 @@ docker buildx build \
     --build-arg "UBUNTU_VERSION=$UBUNTU_VERSION" \
     --build-arg "VERSION=$VERSION" \
     --label "org.opencontainers.image.created=$CREATED" \
-    --label "org.opencontainers.image.documentation=https://docs.osism.de" \
+    --label "org.opencontainers.image.documentation=https://docs.osism.tech" \
     --label "org.opencontainers.image.licenses=ASL 2.0" \
     --label "org.opencontainers.image.revision=$REVISION" \
     --label "org.opencontainers.image.source=https://github.com/osism/docker-image-kolla-ansible" \
     --label "org.opencontainers.image.title=kolla-ansible" \
-    --label "org.opencontainers.image.url=https://www.osism.de" \
+    --label "org.opencontainers.image.url=https://www.osism.tech" \
     --label "org.opencontainers.image.vendor=OSISM GmbH" \
     --label "org.opencontainers.image.version=$VERSION" \
     --tag "$tag-$(git rev-parse --short HEAD)" \
