@@ -38,12 +38,6 @@ if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
 fi
 
-if [[ $OPENSTACK_VERSION == "master" ]]; then
-    tag=$REPOSITORY:latest
-else
-    tag=$REPOSITORY:$OPENSTACK_VERSION
-fi
-
 # run preparations
 
 sudo apt-get update
@@ -100,7 +94,7 @@ docker run --network=host --name test -d \
   -v /etc/hosts:/etc/hosts:ro \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$(pwd)/tests:/opt/configuration:ro" \
-  "$tag-$COMMIT" sleep infinity
+  "$COMMIT" sleep infinity
 docker cp tests/run.sh test:/run.sh
 
 # prepare ssh

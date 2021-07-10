@@ -31,12 +31,6 @@ if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
 fi
 
-if [[ $OPENSTACK_VERSION == "master" ]]; then
-    tag=$REPOSITORY:latest
-else
-    tag=$REPOSITORY:$OPENSTACK_VERSION
-fi
-
 docker buildx build \
     --load \
     --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
@@ -51,5 +45,5 @@ docker buildx build \
     --label "org.opencontainers.image.url=https://www.osism.tech" \
     --label "org.opencontainers.image.vendor=OSISM GmbH" \
     --label "org.opencontainers.image.version=$VERSION" \
-    --tag "$tag-$(git rev-parse --short HEAD)" \
+    --tag "$(git rev-parse --short HEAD)" \
     $BUID_OPTS .
