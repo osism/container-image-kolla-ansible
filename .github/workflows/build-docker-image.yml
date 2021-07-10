@@ -11,14 +11,14 @@ name: Build docker image
       - Containerfile
       - files/**
       - patches/**
-      - scripts/*
+      - scripts/**
   pull_request:
     paths:
       - .github/workflows/build-docker-image.yml
       - Containerfile
       - files/**
       - patches/**
-      - scripts/*
+      - scripts/**
 
 jobs:
   build-docker-image:
