@@ -32,7 +32,7 @@ fi
 if [[ $OPENSTACK_VERSION == "master" ]]; then
     tag=$REPOSITORY:latest
 
-    docker tag "$tag-$COMMIT" "$tag"
+    docker tag "$COMMIT" "$tag"
     docker push "$tag"
 else
     if [[ $VERSION == "latest" ]]; then
@@ -41,6 +41,6 @@ else
         tag=$REPOSITORY:$VERSION
     fi
 
-    docker tag "$tag-$COMMIT" "$tag"
+    docker tag "$COMMIT" "$tag"
     docker push "$tag"
 fi
