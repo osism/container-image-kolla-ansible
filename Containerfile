@@ -42,30 +42,20 @@ COPY files/refresh-containers.yml /tmp/refresh-containers.yml
 
 COPY files/src /src
 
-# add inventory files
-
-ADD https://raw.githubusercontent.com/osism/cfg-generics/master/inventory/50-ceph /ansible/inventory.generics/50-ceph
-ADD https://raw.githubusercontent.com/osism/cfg-generics/master/inventory/51-ceph /ansible/inventory.generics/51-ceph
-
-ADD https://raw.githubusercontent.com/osism/cfg-generics/master/inventory/50-kolla /ansible/inventory.generics/50-kolla
-ADD https://raw.githubusercontent.com/osism/cfg-generics/master/inventory/51-kolla /ansible/inventory.generics/51-kolla
-
 # fix hadolint DL4006
-
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # show motd
-
 RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc
 
 # upgrade/install required packages
-
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         dumb-init \
         git \
         gnupg-agent \
+        jq \
         libffi-dev \
         libssl-dev \
         libyaml-dev \
@@ -78,33 +68,52 @@ RUN apt-get update \
         rsync \
         sshpass \
         vim-tiny \
-    && python3 -m pip install --upgrade pip \
+    && python3 -m pip install --no-cache-dir --upgrade pip==21.1.3 \
+    && pip3 install --no-cache-dir -r /src/requirements.txt \
     && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
     && rm -rf /var/lib/apt/lists/*
 
 # add user
-
 RUN groupadd -g $GROUP_ID dragon \
     && groupadd -g $GROUP_ID_DOCKER docker \
     && useradd -l -g dragon -G docker -u $USER_ID -m -d /ansible dragon
 
-# # run preparations
+# prepare release repository
+RUN git clone https://github.com/osism/release /release
 
+# prepare project repository
+
+# hadolint ignore=DL3003
+RUN git clone https://github.com/osism/ansible-playbooks /playbooks \
+    && ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/$VERSION/base.yml")" )
+
+# hadolint ignore=DL3003
+RUN git clone https://github.com/osism/ansible-defaults /defaults \
+    && ( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/$VERSION/base.yml")" )
+
+# hadolint ignore=DL3003
+RUN git clone https://github.com/osism/cfg-generics /generics  \
+    && ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/$VERSION/base.yml")" )
+
+# add inventory files
+RUN mkdir -p /ansible/inventory.generics \
+    && cp /generics/inventory/50-ceph /ansible/inventory.generics/50-ceph \
+    && cp /generics/inventory/51-ceph /ansible/inventory.generics/51-ceph \
+    && cp /generics/inventory/50-kolla /ansible/inventory.generics/50-kolla \
+    && cp /generics/inventory/51-kolla /ansible/inventory.generics/51-kolla
+
+# run preparations
 WORKDIR /src
-RUN git clone https://github.com/osism/release /release \
-    && pip3 install --no-cache-dir -r requirements.txt \
-    && mkdir -p /ansible/galaxy /ansible/group_vars/all \
+RUN mkdir -p /ansible/galaxy /ansible/group_vars/all \
     && python3 /src/render-python-requirements.py \
     && python3 /src/render-versions.py
 
 WORKDIR /
 
 # install required python packages
-
 RUN pip3 install --no-cache-dir -r /requirements.txt
 
 # set ansible version in the motd
-
 RUN ansible_version=$(python3 -c 'import ansible; print(ansible.release.__version__)') \
     && sed -i -e "s/ANSIBLE_VERSION/$ansible_version/" /etc/motd
 
@@ -119,7 +128,8 @@ RUN mkdir -p \
         /ansible/roles \
         /ansible/tasks
 
-# exportes as volumes
+# volumes
+# hadolint ignore=DL3059
 RUN mkdir -p \
         /ansible/cache \
         /ansible/logs \
@@ -128,17 +138,16 @@ RUN mkdir -p \
         /interface
 
 # install required ansible collections & roles
-
 RUN ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/roles \
     && ln -s /usr/share/ansible/roles /ansible/galaxy \
     && ansible-galaxy collection install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/collections \
     && ln -s /usr/share/ansible/collections /ansible/collections
 
 # prepare project repository
-
 RUN if [ $OPENSTACK_VERSION = "master" ]; then git clone https://github.com/openstack/kolla-ansible /repository; fi \
     && if [ $OPENSTACK_VERSION != "master" ]; then git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository; fi
 
+# hadolint ignore=DL3059
 RUN for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do \
         echo $patchfile; \
         ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1; \
@@ -146,13 +155,7 @@ RUN for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do \
        done \
     && rsync -avz /overlays/ /repository/
 
-# hadolint ignore=DL3003
-RUN git clone https://github.com/osism/ansible-defaults /defaults \
-    && ( cd /defaults && git fetch --all --force ) \
-    && if [ $VERSION != "latest" ]; then  ( cd /defaults && git checkout tags/v$VERSION -b v$VERSION ); fi
-
 # project specific instructions
-
 RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
     && pip3 install --no-cache-dir -r /repository/requirements.txt \
     && pip3 install --no-cache-dir /repository \
@@ -176,14 +179,13 @@ RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
     && find /ansible/roles/ -name config.yml -print0 | xargs -0 -I{} dirname {} | xargs -I{} cp /tmp/refresh-containers.yml {}/refresh-containers.yml \
     && rm /tmp/refresh-containers.yml
 
+# copy ara configuration
 RUN python3 -m ara.setup.env > /ansible/ara.env
 
 # set correct permssions
-
 RUN chown -R dragon: /ansible /share /interface
 
 # cleanup
-
 RUN apt-get clean \
     && apt-get remove -y  \
       build-essential \
@@ -209,9 +211,3 @@ USER dragon
 WORKDIR /ansible
 
 ENTRYPOINT ["/entrypoint.sh"]
-
-LABEL "org.opencontainers.image.documentation"="https://docs.osism.de" \
-      "org.opencontainers.image.licenses"="ASL 2.0" \
-      "org.opencontainers.image.source"="https://github.com/osism/docker-image-kolla-ansible" \
-      "org.opencontainers.image.url"="https://www.osism.de" \
-      "org.opencontainers.image.vendor"="OSISM GmbH"
