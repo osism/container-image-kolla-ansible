@@ -22,8 +22,7 @@ environment = jinja2.Environment(loader=loader)
 
 template = environment.get_template("versions.yml.j2")
 result = template.render({
-  'kolla_ansible_version': OPENSTACK_VERSION,
-  'repository_version': versions['repository_version']
+  'kolla_ansible_version': OPENSTACK_VERSION
 })
 with open("/ansible/group_vars/all/versions.yml", "w+") as fp:
     fp.write(result)
