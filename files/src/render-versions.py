@@ -5,12 +5,12 @@ import yaml
 
 # get environment parameters
 
-OSISM_VERSION = os.environ.get("OSISM_VERSION", "latest")
-OPENSTACK_VERSION = os.environ.get("OPENSTACK_VERSION", "master")
+VERSION = os.environ.get("VERSION", "latest")
+OPENSTACK_VERSION = os.environ.get("OPENSTACK_VERSION", "latest")
 
 # load versions files from release repository
 
-with open("/release/%s/base.yml" % OSISM_VERSION, "rb") as fp:
+with open("/release/%s/base.yml" % VERSION, "rb") as fp:
     versions = yaml.load(fp, Loader=yaml.FullLoader)
 
 # prepare jinja2 environment
@@ -22,7 +22,7 @@ environment = jinja2.Environment(loader=loader)
 
 template = environment.get_template("versions.yml.j2")
 result = template.render({
-  'kolla_ansible_version': OPENSTACK_VERSION
+  'openstack_version': OPENSTACK_VERSION
 })
 with open("/ansible/group_vars/all/versions.yml", "w+") as fp:
     fp.write(result)
@@ -31,7 +31,6 @@ with open("/ansible/group_vars/all/versions.yml", "w+") as fp:
 
 template = environment.get_template("motd.j2")
 result = template.render({
-  'kolla_ansible_version': OPENSTACK_VERSION,
   'manager_version': versions['manager_version']
 })
 with open("/etc/motd", "w+") as fp:
