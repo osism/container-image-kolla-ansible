@@ -8,3 +8,6 @@ collections:
     source: https://galaxy.ansible.com
   - name: ansible.netcommon
     source: https://galaxy.ansible.com
+  - name: https://github.com/osism/ansible-collection-services.git
+    type: git
+    version: master
