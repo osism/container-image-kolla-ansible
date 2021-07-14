@@ -21,9 +21,21 @@ environment = jinja2.Environment(loader=loader)
 # render versions.yml
 
 template = environment.get_template("versions.yml.j2")
-result = template.render({
-  'openstack_version': OPENSTACK_VERSION
-})
+
+if VERSION == "latest":
+    result = template.render({
+      'openstack_version': OPENSTACK_VERSION,
+      'openstackclient_version': OPENSTACK_VERSION
+    })
+else:
+    with open("/release/%s/openstack.yml" % VERSION, "rb") as fp:
+        versions_openstack = yaml.load(fp, Loader=yaml.FullLoader)
+
+    result = template.render({
+      'openstack_version': versions['manager_version'],
+      'openstackclient_version': versions_openstack['docker_images']['openstackclient'] 
+    })
+
 with open("/ansible/group_vars/all/versions.yml", "w+") as fp:
     fp.write(result)
 
