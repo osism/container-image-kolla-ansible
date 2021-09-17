@@ -95,6 +95,10 @@ RUN git clone https://github.com/osism/ansible-defaults /defaults \
 RUN git clone https://github.com/osism/cfg-generics /generics  \
     && ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/$VERSION/base.yml")" )
 
+# hadolint ignore=DL3003
+RUN git clone https://github.com/osism/kolla-operations /operations \
+    && ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/$VERSION/base.yml")" )
+
 # add inventory files
 RUN mkdir -p /ansible/inventory.generics \
     && cp /generics/inventory/50-ceph /ansible/inventory.generics/50-ceph \
