@@ -29,11 +29,13 @@ if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
 fi
 
+buildah login --password $DOCKER_PASSWORD --username $DOCKER_USERNAME $DOCKER_REGISTRY
+
 if [[ $OPENSTACK_VERSION == "master" ]]; then
     tag=$REPOSITORY:latest
 
-    docker tag "$COMMIT" "$tag"
-    docker push "$tag"
+    buildah tag "$COMMIT" "$tag"
+    buildah push "$tag"
 else
     if [[ $VERSION == "latest" ]]; then
         tag=$REPOSITORY:$OPENSTACK_VERSION
@@ -41,6 +43,6 @@ else
         tag=$REPOSITORY:$VERSION
     fi
 
-    docker tag "$COMMIT" "$tag"
-    docker push "$tag"
+    buildah tag "$COMMIT" "$tag"
+    buildah push "$tag"
 fi
