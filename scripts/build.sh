@@ -31,8 +31,8 @@ if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
 fi
 
-docker buildx build \
-    --load \
+buildah build-using-dockerfile \
+    --format docker \
     --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
     --build-arg "UBUNTU_VERSION=$UBUNTU_VERSION" \
     --build-arg "VERSION=$VERSION" \
