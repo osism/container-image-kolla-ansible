@@ -1,0 +1,20 @@
+From 4f78c696c299177392e634b82ea79104cb4d0a52 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Mon, 04 Oct 2021 09:49:01 +0200
+Subject: [PATCH] Do not become root when searching for custom prometheus alert rules files
+
+Change-Id: I6da412d6d3e7d067c8d903ee884711ac509d24aa
+---
+
+diff --git a/ansible/roles/prometheus/tasks/config.yml b/ansible/roles/prometheus/tasks/config.yml
+index 2140f35..f65b20b 100644
+--- a/ansible/roles/prometheus/tasks/config.yml
++++ b/ansible/roles/prometheus/tasks/config.yml
+@@ -30,7 +30,6 @@
+     - Restart {{ item.key }} container
+ 
+ - name: Find custom prometheus alert rules files
+-  become: true
+   find:
+     path: "{{ node_custom_config }}/prometheus/"
+     pattern: "*.rules"
