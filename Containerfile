@@ -15,7 +15,6 @@ USER root
 COPY overlays/$OPENSTACK_VERSION /overlays
 COPY patches /patches
 
-COPY files/inventory /ansible/inventory
 COPY files/library /ansible/library
 COPY files/plugins /ansible/plugins
 COPY files/tasks /ansible/tasks
@@ -100,7 +99,7 @@ RUN git clone https://github.com/osism/kolla-operations /operations \
     && ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/$VERSION/base.yml")" )
 
 # add inventory files
-RUN mkdir -p /ansible/inventory.generics \
+RUN mkdir -p /ansible/inventory.generics /ansible/inventory \
     && cp /generics/inventory/50-ceph /ansible/inventory.generics/50-ceph \
     && cp /generics/inventory/51-ceph /ansible/inventory.generics/51-ceph \
     && cp /generics/inventory/50-kolla /ansible/inventory.generics/50-kolla \
