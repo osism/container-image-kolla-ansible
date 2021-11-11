@@ -1,6 +1,6 @@
 ---
 - git: https://github.com/osism/cfg-generics.git
-  version: master
+  version: main
   files:
     - src: inventory/*
       dst: ./inventory/
