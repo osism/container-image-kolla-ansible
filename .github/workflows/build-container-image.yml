@@ -45,4 +45,6 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           OPENSTACK_VERSION: ${{ matrix.openstack_version }}
           REPOSITORY: osism/kolla-ansible
-        if: github.ref == 'refs/heads/main'
+        if: |
+          github.repository == 'osism/container-image-kolla-ansible' &&
+          github.ref == 'refs/heads/main'
