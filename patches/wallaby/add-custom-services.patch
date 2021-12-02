@@ -1,0 +1,328 @@
+commit c7d4e005b164b7d4844919576d99562681616033
+Author: Mark Goddard <mark@stackhpc.com>
+Date:   Tue Oct 19 09:50:26 2021 +0100
+
+    WIP: Support custom services
+    
+    Change-Id: Iec810f2edd68c3e53f2048b06f981d9ffb2740cc
+
+diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
+index 0b1ca2dfe..de4c33861 100644
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -613,6 +613,7 @@ enable_cinder_backend_nfs: "no"
+ enable_cinder_backend_quobyte: "no"
+ enable_cloudkitty: "no"
+ enable_collectd: "no"
++enable_custom_services: "no"
+ enable_cyborg: "no"
+ enable_designate: "no"
+ enable_etcd: "no"
+diff --git a/ansible/roles/custom-service/defaults/main.yml b/ansible/roles/custom-service/defaults/main.yml
+new file mode 100644
+index 000000000..81654b7dd
+--- /dev/null
++++ b/ansible/roles/custom-service/defaults/main.yml
+@@ -0,0 +1,11 @@
++---
++project_name: "custom_service"
++
++custom_service_services: {}
++
++custom_service_default_volumes:
++  - "/etc/localtime:/etc/localtime:ro"
++  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
++  - "kolla_logs:/var/log/kolla/"
++
++custom_service_extra_volumes: "{{ default_extra_volumes }}"
+diff --git a/ansible/roles/custom-service/handlers/main.yml b/ansible/roles/custom-service/handlers/main.yml
+new file mode 100644
+index 000000000..f22b569c2
+--- /dev/null
++++ b/ansible/roles/custom-service/handlers/main.yml
+@@ -0,0 +1,18 @@
++---
++# FIXME(mgoddard): all containers get restarted if any needs to restart.
++
++- name: Restart custom service containers
++  vars:
++    service_name: "{{ item.key }}"
++    service: "{{ item.value }}"
++  become: true
++  kolla_docker:
++    action: "recreate_or_restart_container"
++    common_options: "{{ docker_common_options }}"
++    name: "{{ service.container_name }}"
++    image: "{{ service.image }}"
++    volumes: "{{ service.volumes | default(omit) }}"
++    dimensions: "{{ service.dimensions | default(omit) }}"
++    privileged: "{{ service.privileged | default(omit) }}"
++    # TODO(mgoddard): add all params
++  with_dict: "{{ custom_service_services }}"
+diff --git a/ansible/roles/custom-service/tasks/check-containers.yml b/ansible/roles/custom-service/tasks/check-containers.yml
+new file mode 100644
+index 000000000..764313b11
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/check-containers.yml
+@@ -0,0 +1,18 @@
++---
++- name: Check custom service containers
++  become: true
++  kolla_docker:
++    action: "compare_container"
++    common_options: "{{ docker_common_options }}"
++    name: "{{ item.value.container_name }}"
++    image: "{{ item.value.image }}"
++    volumes: "{{ item.value.volumes | default(omit) }}"
++    dimensions: "{{ item.value.dimensions | default(omit) }}"
++    privileged: "{{ item.value.privileged | default(omit) }}"
++    # TODO(mgoddard): add all params
++  when:
++    - inventory_hostname in groups[item.value.group]
++    - item.value.enabled | bool
++  with_dict: "{{ custom_service_services }}"
++  notify:
++    - "Restart custom service containers"
+diff --git a/ansible/roles/custom-service/tasks/check.yml b/ansible/roles/custom-service/tasks/check.yml
+new file mode 100644
+index 000000000..ed97d539c
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/check.yml
+@@ -0,0 +1 @@
++---
+diff --git a/ansible/roles/custom-service/tasks/config.yml b/ansible/roles/custom-service/tasks/config.yml
+new file mode 100644
+index 000000000..ed97d539c
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/config.yml
+@@ -0,0 +1 @@
++---
+diff --git a/ansible/roles/custom-service/tasks/deploy-containers.yml b/ansible/roles/custom-service/tasks/deploy-containers.yml
+new file mode 100644
+index 000000000..eb24ab5c7
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/deploy-containers.yml
+@@ -0,0 +1,2 @@
++---
++- import_tasks: check-containers.yml
+diff --git a/ansible/roles/custom-service/tasks/deploy.yml b/ansible/roles/custom-service/tasks/deploy.yml
+new file mode 100644
+index 000000000..49edff81e
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/deploy.yml
+@@ -0,0 +1,7 @@
++---
++- import_tasks: config.yml
++
++- import_tasks: check-containers.yml
++
++- name: Flush handlers
++  meta: flush_handlers
+diff --git a/ansible/roles/custom-service/tasks/loadbalancer.yml b/ansible/roles/custom-service/tasks/loadbalancer.yml
+new file mode 100644
+index 000000000..8e944680f
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/loadbalancer.yml
+@@ -0,0 +1,6 @@
++---
++- name: "Configure haproxy for {{ project_name }}"
++  import_role:
++    name: haproxy-config
++  vars:
++    project_services: "{{ custom_service_services }}"
+diff --git a/ansible/roles/custom-service/tasks/main.yml b/ansible/roles/custom-service/tasks/main.yml
+new file mode 100644
+index 000000000..bc5d1e625
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/main.yml
+@@ -0,0 +1,2 @@
++---
++- include_tasks: "{{ kolla_action }}.yml"
+diff --git a/ansible/roles/custom-service/tasks/precheck.yml b/ansible/roles/custom-service/tasks/precheck.yml
+new file mode 100644
+index 000000000..54001f97a
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/precheck.yml
+@@ -0,0 +1,8 @@
++---
++- import_role:
++    name: service-precheck
++  vars:
++    service_precheck_services: "{{ custom_service_services }}"
++    service_name: "{{ project_name }}"
++
++# TODO(mgoddard): Check ports based on haproxy config?
+diff --git a/ansible/roles/custom-service/tasks/pull.yml b/ansible/roles/custom-service/tasks/pull.yml
+new file mode 100644
+index 000000000..53f9c5fda
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/pull.yml
+@@ -0,0 +1,3 @@
++---
++- import_role:
++    role: service-images-pull
+diff --git a/ansible/roles/custom-service/tasks/reconfigure.yml b/ansible/roles/custom-service/tasks/reconfigure.yml
+new file mode 100644
+index 000000000..5b10a7e11
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/reconfigure.yml
+@@ -0,0 +1,2 @@
++---
++- import_tasks: deploy.yml
+diff --git a/ansible/roles/custom-service/tasks/restart_services.yml b/ansible/roles/custom-service/tasks/restart_services.yml
+new file mode 100644
+index 000000000..92958e5d7
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/restart_services.yml
+@@ -0,0 +1,13 @@
++---
++- name: Restart custom_service container
++  vars:
++    service_name: "{{ item }}"
++    service: "{{ custom_service_services[service_name] }}"
++  become: true
++  kolla_docker:
++    action: "recreate_or_restart_container"
++    common_options: "{{ docker_common_options }}"
++    name: "{{ service.container_name }}"
++    image: "{{ service.image }}"
++    volumes: "{{ service.volumes }}"
++    dimensions: "{{ service.dimensions }}"
+diff --git a/ansible/roles/custom-service/tasks/stop.yml b/ansible/roles/custom-service/tasks/stop.yml
+new file mode 100644
+index 000000000..429beaff8
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/stop.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-stop
++  vars:
++    project_services: "{{ custom_service_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/custom-service/tasks/upgrade.yml b/ansible/roles/custom-service/tasks/upgrade.yml
+new file mode 100644
+index 000000000..5b10a7e11
+--- /dev/null
++++ b/ansible/roles/custom-service/tasks/upgrade.yml
+@@ -0,0 +1,2 @@
++---
++- import_tasks: deploy.yml
+diff --git a/ansible/site.yml b/ansible/site.yml
+index d724f6b2a..dbaef26a8 100644
+--- a/ansible/site.yml
++++ b/ansible/site.yml
+@@ -26,6 +26,7 @@
+         - enable_cinder_{{ enable_cinder | bool }}
+         - enable_cloudkitty_{{ enable_cloudkitty | bool }}
+         - enable_collectd_{{ enable_collectd | bool }}
++        - enable_custom_services_{{ enable_custom_services | bool }}
+         - enable_cyborg_{{ enable_cyborg | bool }}
+         - enable_designate_{{ enable_designate | bool }}
+         - enable_elasticsearch_{{ enable_elasticsearch | bool }}
+@@ -355,6 +356,11 @@
+             tasks_from: loadbalancer
+           tags: zun
+           when: enable_zun | bool
++        - include_role:
++            name: custom-service
++            tasks_from: loadbalancer
++          tags: custom-service
++          when: enable_custom_services | bool
+       when:
+         - enable_haproxy | bool
+         - kolla_action in ['deploy', 'reconfigure', 'upgrade', 'config']
+@@ -455,6 +461,17 @@
+         tags: prometheus,
+         when: enable_prometheus | bool }
+ 
++- name: Apply role custom-service
++  gather_facts: false
++  hosts:
++    - custom-services
++    - '&enable_custom_services_True'
++  serial: '{{ kolla_serial|default("0") }}'
++  roles:
++    - { role: custom-service,
++        tags: custom-service,
++        when: enable_custom_services | bool }
++
+ - name: Apply role iscsi
+   gather_facts: false
+   hosts:
+diff --git a/tests/templates/globals-default.j2 b/tests/templates/globals-default.j2
+index f8e26fc01..44b89cad0 100644
+--- a/tests/templates/globals-default.j2
++++ b/tests/templates/globals-default.j2
+@@ -161,6 +161,21 @@ enable_central_logging: "yes"
+ enable_grafana: "yes"
+ enable_prometheus: "yes"
+ enable_prometheus_openstack_exporter: "no"
++enable_custom_services: "yes"
++custom_service_services:
++  nginx:
++    container_name: nginx
++    group: nginx
++    enabled: true
++    image: docker.io/nginx
++    privileged: true
++    volumes: "{% raw %}{{ custom_service_default_volumes }}{% endraw %}"
++    haproxy:
++      nginx:
++        enabled: true
++        mode: "http"
++        port: 8080
++        listen_port: 80
+ {% endif %}
+ 
+ {% if scenario == "magnum" %}
+diff --git a/tests/templates/inventory.j2 b/tests/templates/inventory.j2
+index ca2f7127a..04080495a 100644
+--- a/tests/templates/inventory.j2
++++ b/tests/templates/inventory.j2
+@@ -313,6 +313,9 @@ control
+ [blazar:children]
+ control
+ 
++[custom-services:children]
++control
++
+ # Additional control implemented here. These groups allow you to control which
+ # services run on which hosts at a per-service level.
+ #
+@@ -837,3 +840,6 @@ ovn-database
+ 
+ [ovn-sb-db:children]
+ ovn-database
++
++[nginx:children]
++custom-services
+diff --git a/tests/test-prometheus-efk.sh b/tests/test-prometheus-efk.sh
+index 86406223a..6551a6d50 100755
+--- a/tests/test-prometheus-efk.sh
++++ b/tests/test-prometheus-efk.sh
+@@ -162,6 +162,16 @@ function test_prometheus {
+     echo "SUCCESS: Prometheus"
+ }
+ 
++function test_custom_service_nginx {
++    NGINX_URL=${OS_AUTH_URL%:*}:8080
++    args=(
++        --include
++        --location
++        --fail
++    )
++    curl "${args[@]}" $NGINX_URL
++}
++
+ function test_prometheus_efk_logged {
+     . /etc/kolla/admin-openrc.sh
+ 
+@@ -169,6 +179,7 @@ function test_prometheus_efk_logged {
+     test_elasticsearch
+     test_grafana
+     test_prometheus
++    test_custom_service_nginx
+ }
+ 
+ function test_prometheus_efk {
