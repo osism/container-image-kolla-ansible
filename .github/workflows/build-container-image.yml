@@ -18,6 +18,7 @@ jobs:
         openstack_version:
           - victoria
           - wallaby
+          - xena
           - master
     steps:
       - uses: actions/checkout@v2
