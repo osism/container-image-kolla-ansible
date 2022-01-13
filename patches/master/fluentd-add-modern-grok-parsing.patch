@@ -1,0 +1,44 @@
+commit 1a3c4f1bbfeaf276127172f91f41881363a2ef61
+Author: Radosław Piliszek <radoslaw.piliszek@gmail.com>
+Date:   Tue Dec 28 14:15:58 2021 +0000
+
+    fluentd: add modern parsing config
+    
+    To satisfy the needs of the modern parser plugin.
+    
+    Needed-By: https://review.opendev.org/c/openstack/kolla/+/823071
+    Co-Authored-By: Dr. Jens Harbott <harbott@osism.tech>
+    Change-Id: I2b748d0544c14bebefe8c62aa5aafaaa5371ce53
+
+diff --git a/ansible/roles/common/templates/conf/format/apache_access.conf.j2 b/ansible/roles/common/templates/conf/format/apache_access.conf.j2
+index c693a3735..910904870 100644
+--- a/ansible/roles/common/templates/conf/format/apache_access.conf.j2
++++ b/ansible/roles/common/templates/conf/format/apache_access.conf.j2
+@@ -7,4 +7,11 @@
+   time_key Timestamp
+   time_format %d/%b/%Y:%H:%M:%S %z
+   keep_time_key true
++  <parse>
++    @type grok
++    grok_pattern \[%{HTTPDATE:Timestamp}\] "(?:%{WORD:http_method} %{NOTSPACE:http_url}(?: HTTP/%{NUMBER:http_version})?|%{DATA:rawrequest})" %{NUMBER:http_status} (?:\d+|-)
++    time_key Timestamp
++    time_format %d/%b/%Y:%H:%M:%S %z
++    keep_time_key true
++  </parse>
+ </filter>
+diff --git a/ansible/roles/common/templates/conf/format/wsgi_access.conf.j2 b/ansible/roles/common/templates/conf/format/wsgi_access.conf.j2
+index 036d788c8..5dbe537c9 100644
+--- a/ansible/roles/common/templates/conf/format/wsgi_access.conf.j2
++++ b/ansible/roles/common/templates/conf/format/wsgi_access.conf.j2
+@@ -7,4 +7,11 @@
+   time_key Timestamp
+   time_format %d/%b/%Y:%H:%M:%S %z
+   keep_time_key true
++  <parse>
++    @type grok
++    grok_pattern %{IPORHOST:clientip} %{HTTPDUSER:ident} %{USER:auth} \[%{HTTPDATE:Timestamp}\] "(?:%{WORD:http_method} %{NOTSPACE:http_url}(?: HTTP/%{NUMBER:http_version})?|%{DATA:rawrequest})" %{NUMBER:http_status} (?:%{NUMBER:http_bytes}|-) (?:%{NUMBER:http_response_time_us}|-) %{QS:referrer} %{QS:agent}
++    time_key Timestamp
++    time_format %d/%b/%Y:%H:%M:%S %z
++    keep_time_key true
++  </parse>
+ </filter>
