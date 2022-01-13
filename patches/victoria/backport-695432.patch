@@ -25,10 +25,10 @@ Change-Id: I0203a3470d7f8f2a54d5e126d947f540d93b8210
 ---
 
 diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
-index 3dca393..3787a97 100644
+index 678ccaea2..d15417c8a 100644
 --- a/ansible/group_vars/all.yml
 +++ b/ansible/group_vars/all.yml
-@@ -557,6 +557,7 @@
+@@ -584,6 +584,7 @@ enable_glance: "{{ enable_openstack_core | bool }}"
  enable_haproxy: "yes"
  enable_keepalived: "{{ enable_haproxy | bool }}"
  enable_keystone: "{{ enable_openstack_core | bool }}"
@@ -36,15 +36,15 @@ index 3dca393..3787a97 100644
  enable_mariadb: "yes"
  enable_memcached: "yes"
  enable_neutron: "{{ enable_openstack_core | bool }}"
-@@ -1011,6 +1012,7 @@
- enable_nova_horizon_policy_file: "{{ enable_nova }}"
+@@ -1046,6 +1047,7 @@ enable_nova_horizon_policy_file: "{{ enable_nova }}"
+ horizon_enable_tls_backend: "{{ kolla_enable_tls_backend }}"
  
  horizon_internal_endpoint: "{{ internal_protocol }}://{{ kolla_internal_fqdn | put_address_in_context('url') }}:{{ horizon_tls_port if kolla_enable_tls_internal | bool else horizon_port }}"
 +horizon_public_endpoint: "{{ public_protocol }}://{{ kolla_external_fqdn | put_address_in_context('url') }}:{{ horizon_tls_port if kolla_enable_tls_external | bool else horizon_port }}"
  
- ###################
- # External Ceph options
-@@ -1153,3 +1155,45 @@
+ #################
+ # Qinling options
+@@ -1195,3 +1197,45 @@ swift_public_endpoint: "{{ public_protocol }}://{{ swift_external_fqdn | put_add
  octavia_admin_endpoint: "{{ admin_protocol }}://{{ octavia_internal_fqdn | put_address_in_context('url') }}:{{ octavia_api_port }}"
  octavia_internal_endpoint: "{{ internal_protocol }}://{{ octavia_internal_fqdn | put_address_in_context('url') }}:{{ octavia_api_port }}"
  octavia_public_endpoint: "{{ public_protocol }}://{{ octavia_external_fqdn | put_address_in_context('url') }}:{{ octavia_api_port }}"
@@ -91,20 +91,20 @@ index 3dca393..3787a97 100644
 +keystone_identity_providers: []
 +keystone_identity_mappings: []
 diff --git a/ansible/roles/haproxy-config/defaults/main.yml b/ansible/roles/haproxy-config/defaults/main.yml
-index 4cfc7b7..0de7601 100644
+index 1fc226dac..e8f6aa118 100644
 --- a/ansible/roles/haproxy-config/defaults/main.yml
 +++ b/ansible/roles/haproxy-config/defaults/main.yml
-@@ -15,3 +15,5 @@
+@@ -13,3 +13,5 @@ haproxy_backend_tcp_extra: []
  
  haproxy_health_check: "check inter 2000 rise 2 fall 5"
  haproxy_health_check_ssl: "check check-ssl inter 2000 rise 2 fall 5"
 +
 +haproxy_enable_federation_openid: "{{ keystone_identity_providers | selectattr('protocol','equalto','openid') | list | count > 0 }}"
 diff --git a/ansible/roles/horizon/defaults/main.yml b/ansible/roles/horizon/defaults/main.yml
-index d0a153d..5594f6e 100644
+index b8bc5a68e..ea6035174 100644
 --- a/ansible/roles/horizon/defaults/main.yml
 +++ b/ansible/roles/horizon/defaults/main.yml
-@@ -123,7 +123,7 @@
+@@ -124,7 +124,7 @@ horizon_extra_volumes: "{{ default_extra_volumes }}"
  # OpenStack
  ####################
  horizon_logging_debug: "{{ openstack_logging_debug }}"
@@ -113,10 +113,10 @@ index d0a153d..5594f6e 100644
  
  
  ####################
-@@ -149,3 +149,9 @@
- # TLS
- ####################
- horizon_enable_tls_backend: "{{ kolla_enable_tls_backend }}"
+@@ -145,3 +145,9 @@ horizon_dev_mode: "{{ kolla_dev_mode }}"
+ horizon_murano_dev_mode: "{{ kolla_dev_mode }}"
+ horizon_source_version: "{{ kolla_source_version }}"
+ horizon_murano_source_version: "{{ kolla_source_version }}"
 +
 +# This variable was created for administrators to define which one of the Keystone's URLs should be configured in Horizon.
 +# In some cases, such as when using OIDC, horizon will need to be configured with Keystone's public URL.
@@ -124,10 +124,10 @@ index d0a153d..5594f6e 100644
 +# the Keystone public URL is already defined with variable "keystone_public_url".
 +horizon_use_keystone_public_url: False
 diff --git a/ansible/roles/horizon/templates/local_settings.j2 b/ansible/roles/horizon/templates/local_settings.j2
-index 136741b..ecaba31 100644
+index 136741b8c..ecaba31d2 100644
 --- a/ansible/roles/horizon/templates/local_settings.j2
 +++ b/ansible/roles/horizon/templates/local_settings.j2
-@@ -209,8 +209,9 @@
+@@ -209,8 +209,9 @@ OPENSTACK_HOST = "{{ kolla_internal_fqdn }}"
  OPENSTACK_KEYSTONE_URL = "{{ horizon_keystone_url }}"
  OPENSTACK_KEYSTONE_DEFAULT_ROLE = "{{ keystone_default_user_role }}"
  
@@ -138,7 +138,7 @@ index 136741b..ecaba31 100644
  
  # Determines which authentication choice to show as default.
  #WEBSSO_INITIAL_CHOICE = "credentials"
-@@ -223,13 +224,13 @@
+@@ -223,13 +224,13 @@ OPENSTACK_KEYSTONE_DEFAULT_ROLE = "{{ keystone_default_user_role }}"
  # Do not remove the mandatory credentials mechanism.
  # Note: The last two tuples are sample mapping keys to a identity provider
  # and federation protocol combination (WEBSSO_IDP_MAPPING).
@@ -159,7 +159,7 @@ index 136741b..ecaba31 100644
  
  # A dictionary of specific identity provider and federation protocol
  # combinations. From the selected authentication mechanism, the value
-@@ -238,10 +239,12 @@
+@@ -238,10 +239,12 @@ OPENSTACK_KEYSTONE_DEFAULT_ROLE = "{{ keystone_default_user_role }}"
  # specific WebSSO endpoint in keystone, otherwise it will use the value
  # as the protocol_id when redirecting to the WebSSO by protocol endpoint.
  # NOTE: The value is expected to be a tuple formatted as: (<idp_id>, <protocol_id>).
@@ -177,10 +177,10 @@ index 136741b..ecaba31 100644
  # Disable SSL certificate checks (useful for self-signed certificates):
  #OPENSTACK_SSL_NO_VERIFY = True
 diff --git a/ansible/roles/keystone/defaults/main.yml b/ansible/roles/keystone/defaults/main.yml
-index a8267f6..1c75f57 100644
+index 75df4f76a..9eb6a0836 100644
 --- a/ansible/roles/keystone/defaults/main.yml
 +++ b/ansible/roles/keystone/defaults/main.yml
-@@ -18,6 +18,7 @@
+@@ -16,6 +16,7 @@ keystone_services:
          tls_backend: "{{ keystone_enable_tls_backend }}"
          port: "{{ keystone_public_port }}"
          listen_port: "{{ keystone_public_listen_port }}"
@@ -188,7 +188,7 @@ index a8267f6..1c75f57 100644
        keystone_external:
          enabled: "{{ enable_keystone }}"
          mode: "http"
-@@ -25,6 +26,7 @@
+@@ -23,6 +24,7 @@ keystone_services:
          tls_backend: "{{ keystone_enable_tls_backend }}"
          port: "{{ keystone_public_port }}"
          listen_port: "{{ keystone_public_listen_port }}"
@@ -196,7 +196,7 @@ index a8267f6..1c75f57 100644
        keystone_admin:
          enabled: "{{ enable_keystone }}"
          mode: "http"
-@@ -179,3 +181,23 @@
+@@ -177,3 +179,23 @@ keystone_ks_services:
  # TLS
  ####################
  keystone_enable_tls_backend: "{{ kolla_enable_tls_backend }}"
@@ -222,7 +222,7 @@ index a8267f6..1c75f57 100644
 +keystone_federation_oidc_scopes: "openid email profile"
 diff --git a/ansible/roles/keystone/tasks/config-federation-oidc.yml b/ansible/roles/keystone/tasks/config-federation-oidc.yml
 new file mode 100644
-index 0000000..4171283
+index 000000000..417128327
 --- /dev/null
 +++ b/ansible/roles/keystone/tasks/config-federation-oidc.yml
 @@ -0,0 +1,86 @@
@@ -313,7 +313,7 @@ index 0000000..4171283
 +  when:
 +    - inventory_hostname in groups[keystone.group]
 diff --git a/ansible/roles/keystone/tasks/config.yml b/ansible/roles/keystone/tasks/config.yml
-index 06ecea3..bec1350 100644
+index 06ecea3a7..bec1350a3 100644
 --- a/ansible/roles/keystone/tasks/config.yml
 +++ b/ansible/roles/keystone/tasks/config.yml
 @@ -144,6 +144,10 @@
@@ -328,7 +328,7 @@ index 06ecea3..bec1350 100644
    vars:
      keystone: "{{ keystone_services.keystone }}"
 diff --git a/ansible/roles/keystone/tasks/deploy.yml b/ansible/roles/keystone/tasks/deploy.yml
-index 656e44e..a6ff99b 100644
+index 656e44e31..a6ff99b0e 100644
 --- a/ansible/roles/keystone/tasks/deploy.yml
 +++ b/ansible/roles/keystone/tasks/deploy.yml
 @@ -19,3 +19,7 @@
@@ -341,7 +341,7 @@ index 656e44e..a6ff99b 100644
 +    - enable_keystone_federation | bool
 diff --git a/ansible/roles/keystone/tasks/register_identity_providers.yml b/ansible/roles/keystone/tasks/register_identity_providers.yml
 new file mode 100644
-index 0000000..befcf41
+index 000000000..befcf41d3
 --- /dev/null
 +++ b/ansible/roles/keystone/tasks/register_identity_providers.yml
 @@ -0,0 +1,238 @@
@@ -584,10 +584,10 @@ index 0000000..befcf41
 +    - item.name in existing_idps
 +  with_items: "{{ keystone_identity_providers }}"
 diff --git a/ansible/roles/keystone/templates/keystone.conf.j2 b/ansible/roles/keystone/templates/keystone.conf.j2
-index 730107e..f1e787b 100644
+index 730107eac..f1e787b6f 100644
 --- a/ansible/roles/keystone/templates/keystone.conf.j2
 +++ b/ansible/roles/keystone/templates/keystone.conf.j2
-@@ -77,3 +77,18 @@
+@@ -77,3 +77,18 @@ connection_string = {{ osprofiler_backend_connection_string }}
  [cors]
  allowed_origin = {{ grafana_public_endpoint }}
  {% endif %}
@@ -607,7 +607,7 @@ index 730107e..f1e787b 100644
 +methods = password,token,openid,application_credential
 +{% endif %}
 diff --git a/ansible/roles/keystone/templates/keystone.json.j2 b/ansible/roles/keystone/templates/keystone.json.j2
-index e5c6761..2dee915 100644
+index e5c676190..2dee915eb 100644
 --- a/ansible/roles/keystone/templates/keystone.json.j2
 +++ b/ansible/roles/keystone/templates/keystone.json.j2
 @@ -1,4 +1,5 @@
@@ -639,7 +639,7 @@ index e5c6761..2dee915 100644
      ],
      "permissions": [
          {
-@@ -61,8 +78,18 @@
+@@ -61,7 +78,17 @@
          {
              "path": "/var/log/kolla/keystone/keystone.log",
              "owner": "keystone:keystone"
@@ -649,20 +649,19 @@ index e5c6761..2dee915 100644
 +            "owner": "{{ apache_user }}:{{ apache_user }}",
 +            "perm": "0700"
          },
-         {
++        {
 +            "path": "{{ keystone_container_federation_oidc_idp_certificate_folder }}",
 +            "owner": "{{ apache_user }}:{{ apache_user }}",
 +            "perm": "0700"
 +        },{% endif %}
-+        {
+         {
              "path": "/etc/keystone/fernet-keys",
              "owner": "keystone:keystone",
-             "perm": "0770"
 diff --git a/ansible/roles/keystone/templates/wsgi-keystone.conf.j2 b/ansible/roles/keystone/templates/wsgi-keystone.conf.j2
-index 1d62274..8388641 100644
+index 1d6227465..83886415b 100644
 --- a/ansible/roles/keystone/templates/wsgi-keystone.conf.j2
 +++ b/ansible/roles/keystone/templates/wsgi-keystone.conf.j2
-@@ -51,6 +51,51 @@
+@@ -51,6 +51,51 @@ LogLevel info
      SSLCertificateFile /etc/keystone/certs/keystone-cert.pem
      SSLCertificateKeyFile /etc/keystone/certs/keystone-key.pem
  {% endif %}
@@ -715,17 +714,17 @@ index 1d62274..8388641 100644
  
  <VirtualHost *:{{ keystone_admin_listen_port }}>
 diff --git a/doc/source/contributor/index.rst b/doc/source/contributor/index.rst
-index 9681dc9..fb61fcc 100644
+index 9681dc966..fb61fccfd 100644
 --- a/doc/source/contributor/index.rst
 +++ b/doc/source/contributor/index.rst
-@@ -21,3 +21,4 @@
+@@ -21,3 +21,4 @@ We welcome everyone to join our project!
     bug-triage
     ptl-guide
     release-management
 +   setup-identity-provider
 diff --git a/doc/source/contributor/setup-identity-provider.rst b/doc/source/contributor/setup-identity-provider.rst
 new file mode 100644
-index 0000000..99e5ae7
+index 000000000..99e5ae780
 --- /dev/null
 +++ b/doc/source/contributor/setup-identity-provider.rst
 @@ -0,0 +1,193 @@
@@ -923,10 +922,10 @@ index 0000000..99e5ae7
 +        }
 +    ]
 diff --git a/doc/source/reference/shared-services/keystone-guide.rst b/doc/source/reference/shared-services/keystone-guide.rst
-index 2012b86..126e53c 100644
+index 2012b868f..126e53c3d 100644
 --- a/doc/source/reference/shared-services/keystone-guide.rst
 +++ b/doc/source/reference/shared-services/keystone-guide.rst
-@@ -40,3 +40,241 @@
+@@ -40,3 +40,241 @@ be configured in Keystone as necessary.
  
  Further infomation on Fernet tokens is available in the :keystone-doc:`Keystone
  documentation <admin/fernet-token-faq.html>`.
@@ -1169,10 +1168,10 @@ index 2012b86..126e53c 100644
 +    configuration must be the Identity provider's certificate and not the
 +    Identity provider's public key.
 diff --git a/etc/kolla/passwords.yml b/etc/kolla/passwords.yml
-index 73d1765..2ed54f9 100644
+index d1319f2ae..1514b86df 100644
 --- a/etc/kolla/passwords.yml
 +++ b/etc/kolla/passwords.yml
-@@ -252,3 +252,8 @@
+@@ -256,3 +256,8 @@ redis_master_password:
  ####################
  prometheus_mysql_exporter_database_password:
  prometheus_alertmanager_password:
@@ -1183,7 +1182,7 @@ index 73d1765..2ed54f9 100644
 +keystone_federation_openid_crypto_password:
 diff --git a/releasenotes/notes/add-keystone-support-to-openid-connect-859b12492f8347fe.yaml b/releasenotes/notes/add-keystone-support-to-openid-connect-859b12492f8347fe.yaml
 new file mode 100644
-index 0000000..956c3cb
+index 000000000..956c3cb5c
 --- /dev/null
 +++ b/releasenotes/notes/add-keystone-support-to-openid-connect-859b12492f8347fe.yaml
 @@ -0,0 +1,5 @@
