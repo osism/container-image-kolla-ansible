@@ -1,3 +1,4 @@
 Jinja2==3.0.1
 PyYAML==5.4.1
+pottery==2.3.6
 yq==2.12.2
