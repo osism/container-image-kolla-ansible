@@ -161,8 +161,7 @@ RUN for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do \
         echo $patchfile; \
         ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1; \
         ( cd /repository && patch --forward --batch -p1 ) < $patchfile; \
-       done \
-    && rsync -avz /overlays/ /repository/
+       done
 
 # project specific instructions
 RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
@@ -205,7 +204,6 @@ RUN apt-get clean \
       python3-dev \
     && apt-get autoremove -y \
     && rm -rf \
-      /overlays \
       /patches \
       /release \
       /root/.cache \
