@@ -13,8 +13,10 @@ ansible=={{ ansible_version }}
 
 {% if ansible_version.startswith(('<', '>', '=')) %}
 ansible-core{{ ansible_version }}
+ansible
 {% else %}
 ansible-core=={{ ansible_version }}
+ansible
 {% endif %}
 
 {% endif %}
