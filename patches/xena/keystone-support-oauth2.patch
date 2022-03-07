@@ -1,0 +1,30 @@
+From 160b4c72d77fc9edc7380e09a9e91fe34e5d4754 Mon Sep 17 00:00:00 2001
+From: Arvid Requate <requate@univention.de>
+Date: Mon, 7 Mar 2022 19:52:30 +0100
+Subject: [PATCH] Make keystone support mod_oauth2
+
+Partial osism/issues#130
+
+Signed-off-by: Arvid Requate <requate@univention.de>
+---
+ ansible/roles/keystone/templates/keystone.conf.j2 | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/ansible/roles/keystone/templates/keystone.conf.j2 b/ansible/roles/keystone/templates/keystone.conf.j2
+index f1e787b6f..86ab355b9 100644
+--- a/ansible/roles/keystone/templates/keystone.conf.j2
++++ b/ansible/roles/keystone/templates/keystone.conf.j2
+@@ -89,6 +89,9 @@ sso_callback_template = /etc/keystone/sso_callback_template.html
+ [openid]
+ remote_id_attribute = {{ keystone_remote_id_attribute_oidc }}
+ 
++[mapped]
++remote_id_attribute = {{ keystone_remote_id_attribute_oidc }}
++
+ [auth]
+-methods = password,token,openid,application_credential
++methods = password,token,openid,mapped,application_credential
+ {% endif %}
+-- 
+2.25.1
+
