@@ -1,10 +1,12 @@
 import os
 
 import jinja2
+import requests
 import yaml
 
 # get environment parameters
 
+IS_RELEASE = os.environ.get("IS_RELEASE", "false")
 VERSION = os.environ.get("VERSION", "latest")
 OPENSTACK_VERSION = os.environ.get("OPENSTACK_VERSION", "latest")
 
@@ -25,16 +27,19 @@ template = environment.get_template("versions.yml.j2")
 with open("/release/%s/openstack.yml" % VERSION, "rb") as fp:
     versions_openstack = yaml.load(fp, Loader=yaml.FullLoader)
 
-if OPENSTACK_VERSION in ["latest", "victoria", "wallaby", "xena", "yoga"]:
-    release_versions = {}
+if IS_RELEASE == "false":
+    release_versions = {
+        "versions": {}
+    }
 else:
-    release_versions = {**versions_openstack['infrastructure_projects'], **versions_openstack['openstack_projects']}
+    SBOM_URL = "https://raw.githubusercontent.com/osism/sbom/main/%s/openstack.yml" % VERSION  # noqa E501
+    r = requests.get(SBOM_URL)
+    release_versions = yaml.full_load(r.text)
 
 result = template.render({
   'openstack_version': OPENSTACK_VERSION,
   'openstackclient_version': versions_openstack['docker_images']['openstackclient'],
-  'versions': release_versions,
-  'versions_additional': {}
+  'versions': release_versions['versions']
 })
 
 with open("/ansible/group_vars/all/versions.yml", "w+") as fp:

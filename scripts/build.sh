@@ -5,6 +5,7 @@ set -x
 #
 # BUILD_OPTS
 # DOCKER_REGISTRY
+# IS_RELEASE
 # OPENSTACK_VERSION
 # REPOSITORY
 # VERSION
@@ -14,6 +15,7 @@ set -x
 BUILD_OPTS=${BUILD_OPTS:-}
 CREATED=$(date --rfc-3339=ns)
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-quay.io}
+IS_RELEASE=${IS_RELEASE:-false}
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-master}
 REPOSITORY=${REPOSITORY:-osism/kolla-ansible}
 REVISION=$(git rev-parse --short HEAD)
@@ -33,6 +35,7 @@ fi
 
 buildah build-using-dockerfile \
     --format docker \
+    --build-arg "IS_RELEASE=$IS_RELEASE" \
     --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
     --build-arg "UBUNTU_VERSION=$UBUNTU_VERSION" \
     --build-arg "VERSION=$VERSION" \

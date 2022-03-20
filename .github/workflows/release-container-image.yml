@@ -25,6 +25,7 @@ jobs:
         env:
           DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
           GIT_SHA: ${{ github.sha }}
+          IS_RELEASE: "true"
           REPOSITORY: osism/release/kolla-ansible
           VERSION: ${{ steps.get_version.outputs.VERSION }}
 
@@ -35,5 +36,6 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          IS_RELEASE: "true"
           REPOSITORY: osism/release/kolla-ansible
           VERSION: ${{ steps.get_version.outputs.VERSION }}
