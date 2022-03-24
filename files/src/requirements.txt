@@ -1,4 +1,4 @@
-Jinja2==3.1.0
+Jinja2==3.0.3  # https://review.opendev.org/c/openstack/kolla-ansible/+/835090
 PyYAML==6.0
 pottery==3.0.0
 yq==2.14.0
