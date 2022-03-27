@@ -1,8 +1,8 @@
 {
   "extends": [
-    "config:base"
+    "github>osism/renovate-config",
+    "github>osism/renovate-config:docker"
   ],
-  "commitBody": "Signed-off-by: Renovate Bot <bot@renovateapp.com>",
   "pip_requirements": {
     "fileMatch": ["files/src/requirements.txt", "files/src/templates/requirements.txt.j2"]
   }
