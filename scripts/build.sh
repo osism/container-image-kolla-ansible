@@ -34,6 +34,7 @@ if [[ -n $DOCKER_REGISTRY ]]; then
 fi
 
 buildah build-using-dockerfile \
+    --squash \
     --format docker \
     --build-arg "IS_RELEASE=$IS_RELEASE" \
     --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
