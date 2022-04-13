@@ -4,10 +4,10 @@
   gather_facts: false
   tasks:
     - name: Group hosts based on Kolla action
-      group_by:
+      ansible.builtin.group_by:
         key: kolla_action_{{ kolla_action }}
     - name: Group hosts based on enabled services
-      group_by:
+      ansible.builtin.group_by:
         key: '{{ item }}'
       with_items:
         - enable_aodh_{{ enable_aodh | bool }}

@@ -4,13 +4,13 @@
   gather_facts: false
   tasks:
     - name: Group hosts based on OpenStack release
-      group_by:
+      ansible.builtin.group_by:
         key: openstack_release_{{ openstack_release }}
     - name: Group hosts based on Kolla action
-      group_by:
+      ansible.builtin.group_by:
         key: kolla_action_{{ kolla_action }}
     - name: Group hosts based on enabled services
-      group_by:
+      ansible.builtin.group_by:
         key: '{{ item }}'
       with_items:
         - enable_aodh_{{ enable_aodh | default('false') | bool }}
@@ -86,7 +86,7 @@
   tags: always
 
 - name: Run haproxy playbook
-  import_playbook: kolla-haproxy.yml
+  ansible.builtin.import_playbook: kolla-haproxy.yml
   tags: infrastructure
 
 - name: Apply common role
@@ -108,7 +108,7 @@
       tags: infrastructure
 
 - name: Run rabbitmq playbook
-  import_playbook: kolla-rabbitmq.yml
+  ansible.builtin.import_playbook: kolla-rabbitmq.yml
   tags: infrastructure
 
 - name: Apply base openstack roles

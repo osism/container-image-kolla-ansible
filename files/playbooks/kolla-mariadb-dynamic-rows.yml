@@ -7,7 +7,7 @@
 
   tasks:
     - name: Find tables to change row format to DYNAMIC
-      command: >-
+      ansible.builtin.command: >-
         docker exec {{ mariadb_service_container_name }}
         mysql -uroot -p{{ database_password }}
         --silent --skip-column-names
@@ -21,7 +21,7 @@
       no_log: true
 
     - name: Change row format to DYNAMIC for legacy tables
-      command: >-
+      ansible.builtin.command: >-
         docker exec {{ mariadb_service_container_name }}
         mysql -uroot -p{{ database_password }}
         --silent --skip-column-names

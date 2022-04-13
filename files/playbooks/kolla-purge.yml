@@ -15,7 +15,7 @@
 
   tasks:
     - name: Exit playbook, if user did not mean to purge the kolla environment
-      fail:
+      ansible.builtin.fail:
         msg: >
           "To purge the kolla environment, either say 'yes' and 'ireallyreallymeanit'
            on the prompt or use `-e ireallymeanit=yes` and
@@ -35,15 +35,15 @@
 
     # source: https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
     - name: Get running qemu processes
-      shell: "ps -ef | grep -v grep | grep -w qemu | awk '{print $2}'"
+      ansible.builtin.shell: "ps -ef | grep -v grep | grep -w qemu | awk '{print $2}'"
       register: running_processes
 
     - name: Kill running qemu processes
       become: true
-      shell: "kill {{ item }}"
+      ansible.builtin.shell: "kill {{ item }}"
       with_items: "{{ running_processes.stdout_lines }}"
 
-    - wait_for:
+    - ansible.builtin.wait_for:
         path: "/proc/{{ item }}/status"
         state: absent
       with_items: "{{ running_processes.stdout_lines }}"
@@ -52,15 +52,15 @@
 
     - name: Force kill stuck qemu processes
       become: true
-      shell: "kill -9 {{ item }}"
+      ansible.builtin.shell: "kill -9 {{ item }}"
       with_items: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
 
     - name: Destroying all kolla containers and volumes
-      script: cleanup-containers
+      ansible.builtin.script: cleanup-containers
 
     - name: Destroying kolla host configuration
       become: true
-      script: cleanup-host
+      ansible.builtin.script: cleanup-host
       environment:
         enable_haproxy: "{{ enable_haproxy }}"
         enable_swift: "{{ enable_swift }}"
@@ -74,6 +74,6 @@
         destroy_include_dev: "{{ destroy_include_dev }}"
 
     - name: Removing kolla images
-      script: cleanup-images --all
+      ansible.builtin.script: cleanup-images --all
       when:
         - destroy_include_images|bool
