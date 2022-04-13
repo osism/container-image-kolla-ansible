@@ -10,7 +10,7 @@
 
   tasks:
     - name: "Write {{ bifrost_private_key_file }}"
-      copy:
+      ansible.builtin.copy:
         dest: "{{ bifrost_private_key_file }}"
         mode: 0600
         content: "{{ bifrost_ssh_key.private_key }}"
@@ -18,7 +18,7 @@
         group: "{{ operator_group }}"
 
     - name: "Write {{ bifrost_public_key_file }}"
-      copy:
+      ansible.builtin.copy:
         dest: "{{ bifrost_public_key_file }}"
         mode: 0600
         content: "{{ bifrost_ssh_key.public_key }}"
