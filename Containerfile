@@ -58,6 +58,7 @@ RUN apt-get update \
         gnupg-agent \
         jq \
         libffi-dev \
+        libssh-dev \
         libssl-dev \
         libyaml-dev \
         openssh-client \
@@ -200,6 +201,7 @@ RUN apt-get clean \
       build-essential \
       git \
       libffi-dev \
+      libssh-dev \
       libssl-dev \
       libyaml-dev \
       python3-dev \
