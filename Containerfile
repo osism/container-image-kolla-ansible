@@ -92,15 +92,15 @@ RUN git clone https://github.com/osism/python-osism /python-osism \
 
 # hadolint ignore=DL3003
 RUN git clone https://github.com/osism/ansible-playbooks /playbooks \
-    && ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/$VERSION/base.yml")" )
+    && ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/$VERSION/openstack.yml")" )
 
 # hadolint ignore=DL3003
 RUN git clone https://github.com/osism/ansible-defaults /defaults \
-    && ( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/$VERSION/base.yml")" )
+    && ( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/$VERSION/openstack.yml")" )
 
 # hadolint ignore=DL3003
 RUN git clone https://github.com/osism/cfg-generics /generics  \
-    && ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/$VERSION/base.yml")" )
+    && ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/$VERSION/openstack.yml")" )
 
 # hadolint ignore=DL3003
 RUN git clone https://github.com/osism/kolla-operations /operations \
