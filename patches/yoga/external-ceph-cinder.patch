@@ -1,0 +1,19 @@
+--- a/ansible/roles/cinder/tasks/external_ceph.yml
++++ b/ansible/roles/cinder/tasks/external_ceph.yml
+@@ -1,13 +1,11 @@
+ ---
+-- name: Copying over ceph.conf for Cinder
++- name: Copying over ceph.conf file
+   vars:
+     services_need_config:
+       - "cinder-volume"
+       - "cinder-backup"
+-  merge_configs:
+-    sources:
+-      - "{{ node_custom_config }}/cinder/ceph.conf"
+-      - "{{ node_custom_config }}/cinder/{{ item.key }}/ceph.conf"
++  template:
++    src: "{{ node_custom_config }}/cinder/ceph.conf"
+     dest: "{{ node_config_directory }}/{{ item.key }}/ceph.conf"
+     mode: "0660"
+   become: true
