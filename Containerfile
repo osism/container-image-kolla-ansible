@@ -136,6 +136,7 @@ RUN mkdir -p \
         /ansible/action_plugins \
         /ansible/filter_plugins \
         /ansible/library \
+        /ansible/module_utils \
         /ansible/roles \
         /ansible/tasks
 
@@ -176,6 +177,7 @@ RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
     && python3 /split-kolla-ansible-site.py \
     && cp -r /repository/ansible/action_plugins/* /ansible/action_plugins \
     && if [ -e /repository/ansible/filter_plugins ]; then cp -r /repository/ansible/filter_plugins/* /ansible/filter_plugins; fi \
+    && if [ -e /repository/ansible/module_utils ]; then cp -r /repository/ansible/module_utils/* /ansible/module_utils; fi \
     && cp /repository/ansible/library/* /ansible/library \
     && cp -r /repository/ansible/roles/* /ansible/roles \
     && for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml" | grep -v nova.yml); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done \
