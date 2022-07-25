@@ -24,7 +24,7 @@ environment = jinja2.Environment(loader=loader)
 
 template = environment.get_template("versions.yml.j2")
 
-with open("/release/%s/openstack.yml" % VERSION, "rb") as fp:
+with open("/release/%s/openstack-%s.yml" % (VERSION, OPENSTACK_VERSION), "rb") as fp:
     versions_openstack = yaml.load(fp, Loader=yaml.FullLoader)
 
 if IS_RELEASE == "false":
@@ -38,6 +38,7 @@ else:
 
 result = template.render({
   'openstack_version': OPENSTACK_VERSION,
+  'openstack_previous_version': versions_openstack['openstack_previous_version'],
   'openstackclient_version': versions_openstack['docker_images']['openstackclient'],
   'versions': release_versions['versions']
 })
