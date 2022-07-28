@@ -1,12 +1,18 @@
 ---
 exclude_paths:
   - .github/
+  - files/playbooks/kolla-testbed-identity.yml  # excluded until we find a way to mock playbooks
+  - files/playbooks/kolla-testbed.yml  # excluded until we find a way to mock playbooks
 use_default_rules: true
 rulesdir:
   - ./.ansible-lint-rules/
+mock_modules:
+  - kolla_toolbox
+mock_roles:
+  - nova-cell
+  - service-ks-register
 skip_list:
   - parser-error  # AnsibleParserError.
   - var-spacing  # Variables should have spaces before and after: {{ var_name }}.
   - fqcn-builtins
-warn_list:
-  - internal-error  # not skipable
+  - schema
