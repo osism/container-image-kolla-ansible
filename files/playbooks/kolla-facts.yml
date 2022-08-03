@@ -3,13 +3,15 @@
   hosts: all
   gather_facts: false
   tasks:
-    - ansible.builtin.setup:
+    - name: Gather facts for all hosts
+      ansible.builtin.setup:
 
 - name: Gather facts for all hosts (if using --limit)
   hosts: all
   gather_facts: false
   tasks:
-    - ansible.builtin.setup:
+    - name: Gather facts for all hosts (if using --limit)
+      ansible.builtin.setup:
       delegate_facts: true
       delegate_to: "{{ item }}"
       with_items: "{{ groups['all'] }}"
