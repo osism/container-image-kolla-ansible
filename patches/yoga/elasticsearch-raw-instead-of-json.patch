@@ -1,0 +1,11 @@
+--- a/ansible/roles/elasticsearch/tasks/upgrade.yml
++++ b/ansible/roles/elasticsearch/tasks/upgrade.yml
+@@ -26,7 +26,7 @@
+       method: POST
+       status_code: 200
+       return_content: yes
+-      body_format: json
++      body_format: raw
+   delegate_to: "{{ groups['elasticsearch'][0] }}"
+   run_once: true
+   retries: 10
