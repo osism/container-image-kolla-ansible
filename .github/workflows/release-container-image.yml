@@ -13,9 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup docker
-        uses: docker/setup-buildx-action@v2
-
       - name: Get the version
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
@@ -28,6 +25,17 @@ jobs:
           IS_RELEASE: "true"
           REPOSITORY: osism/release/kolla-ansible
           VERSION: ${{ steps.get_version.outputs.VERSION }}
+
+      - name: Get short revision ID
+        id: revision
+        shell: bash
+        run: echo "::set-output name=short::$(git rev-parse --short HEAD)"
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          artifact-name: kolla-ansible-${{ steps.get_version.outputs.VERSION }}.spdx
+          image: "kolla-ansible:${{ steps.revision.outputs.short }}"
 
       - name: Push container image
         run: |
