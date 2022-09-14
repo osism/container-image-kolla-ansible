@@ -1,0 +1,106 @@
+From 257821a8ae321537296c385ac16b668d386ca30c Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Wed, 07 Sep 2022 09:16:39 +0200
+Subject: [PATCH] nova-cell: add external_ceph_always_copy_cinder_keyring parameter
+
+With the parameter ``external_ceph_always_copy_cinder_keyring``
+the Ceph keyring from Cinder can be made available in the Nova
+service, even if Ceph itself is not enabled as a storage backend
+via the ``cinder_backend_ceph`` parameter there.
+
+Change-Id: Ic5ec8de858960b6294e7cfbd1113e48f5dc40099
+---
+
+diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
+index e790d97..285fe4e 100644
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -1097,6 +1097,9 @@
+ ceph_manila_keyring: "ceph.client.manila.keyring"
+ ceph_nova_keyring: "{{ ceph_cinder_keyring }}"
+ 
++# Copy the Cinder keyring in Nova independent of values in nova_backend or cinder_backend_ceph
++external_ceph_always_copy_cinder_keyring: "no"
++
+ #####################
+ # VMware support
+ ######################
+diff --git a/ansible/roles/nova-cell/tasks/config.yml b/ansible/roles/nova-cell/tasks/config.yml
+index 3274eb8..31cb250 100644
+--- a/ansible/roles/nova-cell/tasks/config.yml
++++ b/ansible/roles/nova-cell/tasks/config.yml
+@@ -18,7 +18,7 @@
+ 
+ - include_tasks: external_ceph.yml
+   when:
+-    - (nova_backend == "rbd" or cinder_backend_ceph | bool)
++    - (nova_backend == "rbd" or cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool)
+     - inventory_hostname in groups[nova_cell_compute_group]
+ 
+ - name: Check if policies shall be overwritten
+diff --git a/ansible/roles/nova-cell/tasks/external_ceph.yml b/ansible/roles/nova-cell/tasks/external_ceph.yml
+index 847dec0..5fdfb71 100644
+--- a/ansible/roles/nova-cell/tasks/external_ceph.yml
++++ b/ansible/roles/nova-cell/tasks/external_ceph.yml
+@@ -18,7 +18,7 @@
+   register: cinder_cephx_keyring_file
+   failed_when: not cinder_cephx_keyring_file.stat.exists
+   when:
+-    - cinder_backend_ceph | bool
++    - cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool
+     - external_ceph_cephx_enabled | bool
+ 
+ - name: Extract nova key from file
+@@ -38,7 +38,7 @@
+   changed_when: false
+   run_once: True
+   when:
+-    - cinder_backend_ceph | bool
++    - cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool
+     - external_ceph_cephx_enabled | bool
+ 
+ - name: Copy over ceph nova keyring file
+@@ -151,7 +151,7 @@
+           enabled: "{{ nova_backend == 'rbd' }}"
+         - uuid: "{{ cinder_rbd_secret_uuid }}"
+           name: "client.cinder secret"
+-          enabled: "{{ cinder_backend_ceph }}"
++          enabled: "{{ cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool }}"
+       notify: "{{ libvirt_restart_handlers }}"
+ 
+     - name: Pushing secrets key for libvirt
+@@ -176,7 +176,7 @@
+           enabled: "{{ nova_backend == 'rbd' }}"
+         - uuid: "{{ cinder_rbd_secret_uuid }}"
+           result: "{{ cinder_cephx_raw_key | default }}"
+-          enabled: "{{ cinder_backend_ceph }}"
++          enabled: "{{ cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool }}"
+       notify: "{{ libvirt_restart_handlers }}"
+       no_log: True
+   vars:
+diff --git a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2 b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
+index d2ddc9e..94845fb 100644
+--- a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
+@@ -42,7 +42,7 @@
+             "dest": "/etc/pki/CA/cacert.pem",
+             "owner": "root",
+             "perm": "0600"
+-        }{% endif %}{% if nova_backend == "rbd" or cinder_backend_ceph | bool %},
++        }{% endif %}{% if nova_backend == "rbd" or cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool %},
+         {
+             "source": "{{ container_config_directory }}/secrets",
+             "dest": "/etc/libvirt/secrets",
+diff --git a/releasenotes/notes/external-ceph-always-copy-cinder-keyring-parameter-5c910e7b2d0fb5e1.yaml b/releasenotes/notes/external-ceph-always-copy-cinder-keyring-parameter-5c910e7b2d0fb5e1.yaml
+new file mode 100644
+index 0000000..149f15c
+--- /dev/null
++++ b/releasenotes/notes/external-ceph-always-copy-cinder-keyring-parameter-5c910e7b2d0fb5e1.yaml
+@@ -0,0 +1,7 @@
++---
++features:
++  -
++    With the parameter ``external_ceph_always_copy_cinder_keyring``
++    the Ceph keyring from Cinder can be made available in the Nova
++    service, even if Ceph itself is not enabled as a storage backend
++    via the ``cinder_backend_ceph`` parameter there.
