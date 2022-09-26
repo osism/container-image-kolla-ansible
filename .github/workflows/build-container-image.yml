@@ -19,6 +19,7 @@ jobs:
           - wallaby
           - xena
           - yoga
+          - master
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
