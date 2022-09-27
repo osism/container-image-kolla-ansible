@@ -11,6 +11,9 @@ mock_modules:
 mock_roles:
   - nova-cell
   - service-ks-register
+warn_list:
+  - name[casing]
+  - template-instead-of-copy
 skip_list:
   - parser-error  # AnsibleParserError.
   - var-spacing  # Variables should have spaces before and after: {{ var_name }}.
