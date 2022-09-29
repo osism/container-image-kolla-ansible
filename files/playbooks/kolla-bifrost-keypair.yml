@@ -10,17 +10,17 @@
 
   tasks:
     - name: "Write {{ bifrost_private_key_file }}"
-      ansible.builtin.copy:
+      ansible.builtin.template:
+        src: bifrost-private-key-config.j2
         dest: "{{ bifrost_private_key_file }}"
         mode: 0600
-        content: "{{ bifrost_ssh_key.private_key }}"
         owner: "{{ operator_user }}"
         group: "{{ operator_group }}"
 
     - name: "Write {{ bifrost_public_key_file }}"
-      ansible.builtin.copy:
+      ansible.builtin.template:
+        src: bifrost-public-key-config.j2
         dest: "{{ bifrost_public_key_file }}"
         mode: 0600
-        content: "{{ bifrost_ssh_key.public_key }}"
         owner: "{{ operator_user }}"
         group: "{{ operator_group }}"

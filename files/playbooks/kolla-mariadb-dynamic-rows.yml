@@ -1,5 +1,5 @@
 ---
-- name: mariadb - change row format to DYNAMIC
+- name: Mariadb - change row format to DYNAMIC
   hosts: mariadb
 
   vars:
