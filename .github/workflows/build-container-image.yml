@@ -18,6 +18,7 @@ jobs:
         openstack_version:
           - xena
           - yoga
+          - zed
           - master
     steps:
       - name: Checkout code
