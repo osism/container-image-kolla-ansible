@@ -12,19 +12,19 @@ import configparser
 import os
 import sys
 
-dirname = '/ansible/inventory/'
-filename = '99-overwrite'
+dirname = "/ansible/inventory/"
+filename = "99-overwrite"
 
 if not os.path.isfile(os.path.join(dirname, filename)):
-    sys.exit(0) 
+    sys.exit(0)
 
-config = configparser.ConfigParser(allow_no_value=True, delimiters='=')
+config = configparser.ConfigParser(allow_no_value=True, delimiters="=")
 config.read(os.path.join(dirname, filename))
 
 sections = []
 
 for section in config.sections():
-    if section.endswith(':children'):
+    if section.endswith(":children"):
         sections.append(section[:-9])
     else:
         sections.append("%s:children" % section)
@@ -35,13 +35,13 @@ for f in os.scandir(dirname):
     if f.is_file() and not f.path.endswith(filename):
         changed = False
 
-        config = configparser.ConfigParser(allow_no_value=True, delimiters='=')
+        config = configparser.ConfigParser(allow_no_value=True, delimiters="=")
         config.read(os.path.join(f))
 
         for section in sections:
             if config.remove_section(section):
                 changed = True
-        
+
         if changed:
-            with open(f, 'w') as fp:
+            with open(f, "w") as fp:
                 config.write(fp)
