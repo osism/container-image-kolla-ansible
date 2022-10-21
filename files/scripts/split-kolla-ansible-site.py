@@ -8,8 +8,27 @@ DSTPATH = "/ansible"
 
 UNSUPPORTED_ROLES = [
     "baremetal",
+    "blazar",
     "ceph",
-    "opendaylight"
+    "cyborg",
+    "freezer",
+    "hacluster",
+    "kafka",
+    "masakari",
+    "monasca",
+    "monasca_cleanup",
+    "murano",
+    "opendaylight",
+    "qdrouterd",
+    "sahara",
+    "solum",
+    "storm",
+    "tacker",
+    "telegraf",
+    "venus",
+    "vitrage",
+    "watcher",
+    "zookeeper",
 ]
 
 with open(SITEFILE, "r") as fp:
