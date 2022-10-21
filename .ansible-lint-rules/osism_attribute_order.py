@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, Union
 
 from ansiblelint.file_utils import Lintable
 from ansiblelint.rules import AnsibleLintRule
-from ansiblelint.testing import RunFromText
+
 
 class OsismAttributeOrderRule(AnsibleLintRule):
     """Ensure specific order of attributes in mappings."""
@@ -17,12 +17,13 @@ class OsismAttributeOrderRule(AnsibleLintRule):
     version_added = "v6.3.0"
     needs_raw_task = True
 
-
     def matchtask(
         self, task: Dict[str, Any], file: Optional[Lintable] = None
     ) -> Union[bool, str]:
 
-        with open(f"{os.getcwd()}/.ansible-lint-rules/osism_attribute_order_list.yaml", 'r') as fileStream:
+        with open(
+            f"{os.getcwd()}/.ansible-lint-rules/osism_attribute_order_list.yaml", "r"
+        ) as fileStream:
             try:
                 osism_attribute_order_list = yaml.safe_load(fileStream)
             except yaml.YAMLError as exception:
@@ -38,6 +39,6 @@ class OsismAttributeOrderRule(AnsibleLintRule):
                 counter = attribute_list.index(attribute)
                 if counter < counter_prev:
                     return f"{attribute_list[counter_prev]} is not at the right place"
-                else: 
+                else:
                     counter_prev = counter
         return False

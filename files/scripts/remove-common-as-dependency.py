@@ -2,7 +2,6 @@
 # in the meta/main.yml file from all roles.
 
 import glob
-import os
 
 from ruamel.yaml import YAML
 
@@ -17,9 +16,9 @@ for metafile in metafiles:
     with open(metafile, "r") as fp:
         meta = yaml.load(fp)
 
-    for idx, dependency in enumerate(meta['dependencies']):
-        if dependency['role'] == 'common':
-            del(meta['dependencies'][idx])
+    for idx, dependency in enumerate(meta["dependencies"]):
+        if dependency["role"] == "common":
+            del meta["dependencies"][idx]
 
     with open(metafile, "w") as fp:
         yaml.dump(meta, fp)
