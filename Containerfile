@@ -39,7 +39,6 @@ COPY files/scripts/secrets.sh /secrets.sh
 COPY files/scripts/entrypoint.sh /entrypoint.sh
 
 COPY files/ansible.cfg /etc/ansible/ansible.cfg
-COPY files/defaults-panko.yml /ansible/defaults-panko.yml
 COPY files/requirements.yml /ansible/galaxy/requirements.yml
 COPY files/refresh-containers.yml /tmp/refresh-containers.yml
 
