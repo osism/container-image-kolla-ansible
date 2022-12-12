@@ -1,0 +1,1 @@
+export UBUNTU_VERSION=22.04
