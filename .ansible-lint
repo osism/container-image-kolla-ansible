@@ -3,6 +3,7 @@ exclude_paths:
   - .github/
   - files/playbooks/kolla-testbed-identity.yml  # excluded until we find a way to mock playbooks
   - files/playbooks/kolla-testbed.yml  # excluded until we find a way to mock playbooks
+  - files/playbooks/kolla-loadbalancer-*.yml  # exclude playbooks imported from the kolla-ansible upstream
 use_default_rules: true
 rulesdir:
   - ./.ansible-lint-rules/

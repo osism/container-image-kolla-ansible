@@ -1,0 +1,30 @@
+---
+- name: Group hosts based on configuration
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Group hosts based on Kolla action
+      group_by:
+          key: kolla_action_{{ kolla_action }}
+      changed_when: false
+    - name: Group hosts based on enabled services
+      group_by:
+          key: '{{ item }}'
+      changed_when: false
+      with_items:
+        - enable_loadbalancer_{{ enable_loadbalancer | bool }}
+  tags: always
+
+- name: Apply role loadbalancer with tasks from watcher
+  gather_facts: no
+  hosts:
+    - loadbalancer
+    - '&enable_loadbalancer_True'
+  serial: '{{ kolla_serial|default("0") }}'
+  tasks:
+    - include_role:
+        name: watcher
+        tasks_from: loadbalancer
+      when:
+        - enable_watcher | bool
+        - kolla_action in ['deploy', 'reconfigure', 'upgrade', 'config']
