@@ -1,0 +1,47 @@
+From dbe16a82fc917f40008ca68831b298eb8ac1491d Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Sun, 18 Dec 2022 20:39:33 +0100
+Subject: [PATCH] Add ironic_tftp_cmdline_extras parameter
+
+With the ironic_tftp_cmdline_extras parameter it is possible
+to add additional command line arguments to the ironic tftp service.
+
+Change-Id: I4c4797dbb224b891277330cb30cd1da34b9fe809
+---
+
+diff --git a/ansible/roles/ironic/defaults/main.yml b/ansible/roles/ironic/defaults/main.yml
+index ad73593..2502be0 100644
+--- a/ansible/roles/ironic/defaults/main.yml
++++ b/ansible/roles/ironic/defaults/main.yml
+@@ -290,6 +290,7 @@
+ ironic_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
+ ironic_dev_mode: "{{ kolla_dev_mode }}"
+ ironic_source_version: "{{ kolla_source_version }}"
++ironic_tftp_cmdline_extras: ""
+ 
+ 
+ ####################
+diff --git a/ansible/roles/ironic/templates/ironic-tftp.json.j2 b/ansible/roles/ironic/templates/ironic-tftp.json.j2
+index 28b394e..f3e72c2 100644
+--- a/ansible/roles/ironic/templates/ironic-tftp.json.j2
++++ b/ansible/roles/ironic/templates/ironic-tftp.json.j2
+@@ -11,7 +11,7 @@
+ {% set pxe_cfg = 'grub.cfg' if enable_ironic_pxe_uefi | bool else 'default' %}
+ 
+ {
+-    "command": "/usr/sbin/in.tftpd --verbose --foreground --user nobody --address 0.0.0.0:69 --map-file /map-file /var/lib/ironic/tftpboot",
++    "command": "/usr/sbin/in.tftpd --verbose --foreground --user nobody --address 0.0.0.0:69 --map-file /map-file /var/lib/ironic/tftpboot {{ ironic_tftp_cmdline_extras }}",
+     "config_files": [
+ {% if not ironic_dnsmasq_serve_ipxe | bool and groups['ironic-inspector'] | length > 0 %}
+ {% if not enable_ironic_pxe_uefi | bool %}
+diff --git a/releasenotes/notes/releasenotes/notes/ironic-tftp-cmdline-extras-0ef5a6c109125be3.yaml b/releasenotes/notes/releasenotes/notes/ironic-tftp-cmdline-extras-0ef5a6c109125be3.yaml
+new file mode 100644
+index 0000000..cc44a36
+--- /dev/null
++++ b/releasenotes/notes/releasenotes/notes/ironic-tftp-cmdline-extras-0ef5a6c109125be3.yaml
+@@ -0,0 +1,5 @@
++---
++features:
++  - |
++    With the ``ironic_tftp_cmdline_extras`` parameter it is possible
++    to add additional command line arguments to the ironic tftp service.
