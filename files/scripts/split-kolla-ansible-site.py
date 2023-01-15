@@ -13,6 +13,7 @@ UNSUPPORTED_ROLES = [
     "cyborg",
     "freezer",
     "hacluster",
+    "ironic",
     "kafka",
     "masakari",
     "monasca",
