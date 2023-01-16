@@ -1,0 +1,27 @@
+---
+- name: Group hosts based on configuration
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Group hosts based on Kolla action
+      ansible.builtin.group_by:
+        key: kolla_action_{{ kolla_action }}
+      changed_when: false
+    - name: Group hosts based on enabled services
+      ansible.builtin.group_by:
+        key: '{{ item }}'
+      changed_when: false
+      with_items:
+        - enable_opensearch_{{ enable_opensearch | bool }}
+        - enable_opensearch_dashboards_{{ enable_opensearch_dashboards | bool }}
+  tags: always
+
+- name: Apply role opensearch
+  gather_facts: false
+  hosts:
+    - opensearch
+    - '&enable_opensearch_True'
+  serial: '{{ kolla_serial|default("0") }}'
+  roles:
+    - role: opensearch
+      tags: opensearch
