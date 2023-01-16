@@ -22,7 +22,7 @@ COPY files/library /ansible/library
 COPY files/plugins /ansible/plugins
 COPY files/tasks /ansible/tasks
 
-COPY files/playbooks/$OPENSTACK_VERSION/kolla-common.yml /ansible/kolla-common.yml
+COPY files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
 COPY files/playbooks/kolla-bifrost-keypair.yml /ansible/kolla-bifrost-keypair.yml
 COPY files/playbooks/kolla-facts.yml /ansible/kolla-facts.yml
 COPY files/playbooks/kolla-loadbalancer-*.yml /ansible/
