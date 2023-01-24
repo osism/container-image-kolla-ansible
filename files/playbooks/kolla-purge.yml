@@ -30,6 +30,7 @@
   vars:
     destroy_include_images: false
     destroy_include_dev: false
+    destroy_include_cleanup_host: false
 
   tasks:
 
@@ -81,6 +82,8 @@
         kolla_external_vip_address: "{{ kolla_external_vip_address }}"
         kolla_dev_repos_directory: "{{ kolla_dev_repos_directory|default('/opt/stack/') }}"
         destroy_include_dev: "{{ destroy_include_dev }}"
+      when:
+        - destroy_include_cleanup_host|bool
 
     - name: Removing kolla images
       ansible.builtin.script: cleanup-images --all
