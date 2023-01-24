@@ -1,0 +1,40 @@
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -392,6 +392,8 @@ mariadb_sst_port: "4444"
+ mariadb_clustercheck_port: "4569"
+ mariadb_monitor_user: "{{ 'monitor' if enable_proxysql | bool else 'haproxy' }}"
+
++mariadb_datadir_volume: "mariadb"
++
+ mariadb_default_database_shard_id: 0
+ mariadb_default_database_shard_hosts: "{% set default_shard = [] %}{% for host in groups['mariadb'] %}{% if hostvars[host]['mariadb_shard_id'] is not defined or hostvars[host]['mariadb_shard_id'] == mariadb_default_database_shard_id %}{{ default_shard.append(host) }}{% endif %}{% endfor %}{{ default_shard }}"
+ mariadb_shard_id: "{{ mariadb_default_database_shard_id }}"
+@@ -810,6 +812,7 @@ outward_rabbitmq_user: "openstack"
+ rabbitmq_enable_tls: "no"
+ # CA certificate bundle in RabbitMQ container.
+ rabbitmq_cacert: "/etc/ssl/certs/{{ 'ca-certificates.crt' if kolla_base_distro in ['debian', 'ubuntu'] else 'ca-bundle.trust.crt' }}"
++rabbitmq_datadir_volume: "rabbitmq"
+
+ ####################
+ # HAProxy options
+--- a/ansible/roles/mariadb/defaults/main.yml
++++ b/ansible/roles/mariadb/defaults/main.yml
+@@ -82,7 +82,7 @@ mariadb_default_volumes:
+   - "{{ node_config_directory }}/mariadb/:{{ container_config_directory }}/:ro"
+   - "/etc/localtime:/etc/localtime:ro"
+   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
+-  - "mariadb:/var/lib/mysql"
++  - "{{ mariadb_datadir_volume }}:/var/lib/mysql"
+   - "kolla_logs:/var/log/kolla/"
+ mariadb_clustercheck_default_volumes:
+   - "{{ node_config_directory }}/mariadb-clustercheck/:{{ container_config_directory }}/:ro"
+--- a/ansible/roles/rabbitmq/defaults/main.yml
++++ b/ansible/roles/rabbitmq/defaults/main.yml
+@@ -71,7 +71,7 @@ rabbitmq_default_volumes:
+   - "{{ node_config_directory }}/{{ project_name }}/:{{ container_config_directory }}/:ro"
+   - "/etc/localtime:/etc/localtime:ro"
+   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
+-  - "{{ project_name }}:/var/lib/rabbitmq/"
++  - "{{ rabbitmq_datadir_volume }}:/var/lib/rabbitmq/"
+   - "kolla_logs:/var/log/kolla/"
+ rabbitmq_extra_volumes: "{{ default_extra_volumes }}"
