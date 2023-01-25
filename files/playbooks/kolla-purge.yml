@@ -68,6 +68,12 @@
     - name: Destroying all kolla containers and volumes
       ansible.builtin.script: cleanup-containers
 
+    - name: Destroy /etc/kolla
+      become: true
+      ansible.builtin.file:
+        path: /etc/kolla
+        state: absent
+
     - name: Destroying kolla host configuration
       become: true
       ansible.builtin.script: cleanup-host
