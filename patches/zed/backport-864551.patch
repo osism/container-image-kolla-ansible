@@ -18,10 +18,10 @@ Change-Id: Ic10b410fc115646d96d2ce39d9618e7c46cb3fbc
 ---
 
 diff --git a/ansible/roles/aodh/defaults/main.yml b/ansible/roles/aodh/defaults/main.yml
-index 0f8a29d..19f56f0 100644
+index 0f8a29d71..19f56f09e 100644
 --- a/ansible/roles/aodh/defaults/main.yml
 +++ b/ansible/roles/aodh/defaults/main.yml
-@@ -55,6 +55,12 @@
+@@ -55,6 +55,12 @@ aodh_services:
  # change this option.
  aodh_evaluation_interval: 300
  
@@ -34,24 +34,11 @@ index 0f8a29d..19f56f0 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/aodh/tasks/config_validate.yml b/ansible/roles/aodh/tasks/config_validate.yml
-new file mode 100644
-index 0000000..887b3cf
---- /dev/null
-+++ b/ansible/roles/aodh/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ aodh_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ aodh_config_validation }}"
 diff --git a/ansible/roles/barbican/defaults/main.yml b/ansible/roles/barbican/defaults/main.yml
-index 0f77781..f8629a5 100644
+index 0f7778175..f8629a5a6 100644
 --- a/ansible/roles/barbican/defaults/main.yml
 +++ b/ansible/roles/barbican/defaults/main.yml
-@@ -40,6 +40,12 @@
+@@ -40,6 +40,12 @@ barbican_services:
      dimensions: "{{ barbican_worker_dimensions }}"
      healthcheck: "{{ barbican_worker_healthcheck }}"
  
@@ -64,62 +51,29 @@ index 0f77781..f8629a5 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/barbican/tasks/config_validate.yml b/ansible/roles/barbican/tasks/config_validate.yml
-new file mode 100644
-index 0000000..3114393
---- /dev/null
-+++ b/ansible/roles/barbican/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ barbican_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ barbican_config_validation }}"
-diff --git a/ansible/roles/bifrost/tasks/config_validate.yml b/ansible/roles/bifrost/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/bifrost/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/blazar/defaults/main.yml b/ansible/roles/blazar/defaults/main.yml
-index 36d9d24..bdcf00b 100644
+index 36d9d24a1..bdcf00bc5 100644
 --- a/ansible/roles/blazar/defaults/main.yml
 +++ b/ansible/roles/blazar/defaults/main.yml
-@@ -35,6 +35,13 @@
+@@ -34,6 +34,13 @@ blazar_services:
+ ####################
  blazar_aggregate_pool_name: "freepool"
  
- ####################
++####################
 +# Config Validate
 +####################
 +blazar_config_validation:
 +  - generator: "/blazar/etc/blazar/blazar-config-generator.conf"
 +    config: "/etc/blazar/blazar.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- blazar_database_name: "blazar"
-diff --git a/ansible/roles/blazar/tasks/config_validate.yml b/ansible/roles/blazar/tasks/config_validate.yml
-new file mode 100644
-index 0000000..9a18ef3
---- /dev/null
-+++ b/ansible/roles/blazar/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ blazar_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ blazar_config_validation }}"
 diff --git a/ansible/roles/ceilometer/defaults/main.yml b/ansible/roles/ceilometer/defaults/main.yml
-index 7cbcd56..d902492 100644
+index 7cbcd5674..d9024926e 100644
 --- a/ansible/roles/ceilometer/defaults/main.yml
 +++ b/ansible/roles/ceilometer/defaults/main.yml
-@@ -34,6 +34,12 @@
+@@ -34,6 +34,12 @@ ceilometer_services:
      dimensions: "{{ ceilometer_ipmi_dimensions }}"
      healthcheck: "{{ ceilometer_ipmi_healthcheck }}"
  
@@ -132,62 +86,29 @@ index 7cbcd56..d902492 100644
  
  ####################
  # Docker
-diff --git a/ansible/roles/ceilometer/tasks/config_validate.yml b/ansible/roles/ceilometer/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ef646be
---- /dev/null
-+++ b/ansible/roles/ceilometer/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ ceilometer_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ ceilometer_config_validation }}"
-diff --git a/ansible/roles/ceph-rgw/tasks/config_validate.yml b/ansible/roles/ceph-rgw/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/ceph-rgw/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/cinder/defaults/main.yml b/ansible/roles/cinder/defaults/main.yml
-index ab764ed..f33e517 100644
+index ab764edcc..f33e517d0 100644
 --- a/ansible/roles/cinder/defaults/main.yml
 +++ b/ansible/roles/cinder/defaults/main.yml
-@@ -53,6 +53,13 @@
+@@ -52,6 +52,13 @@ cinder_services:
+     dimensions: "{{ cinder_backup_dimensions }}"
      healthcheck: "{{ cinder_backup_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +cinder_config_validation:
 +  - generator: "/cinder/tools/config/cinder-config-generator.conf"
 +    config: "/etc/cinder/cinder.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- cinder_database_name: "cinder"
-diff --git a/ansible/roles/cinder/tasks/config_validate.yml b/ansible/roles/cinder/tasks/config_validate.yml
-new file mode 100644
-index 0000000..1c9b602
---- /dev/null
-+++ b/ansible/roles/cinder/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ cinder_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ cinder_config_validation }}"
 diff --git a/ansible/roles/cloudkitty/defaults/main.yml b/ansible/roles/cloudkitty/defaults/main.yml
-index dedf416..e108726 100644
+index dedf4161f..e10872655 100644
 --- a/ansible/roles/cloudkitty/defaults/main.yml
 +++ b/ansible/roles/cloudkitty/defaults/main.yml
-@@ -28,6 +28,12 @@
+@@ -28,6 +28,12 @@ cloudkitty_services:
      dimensions: "{{ cloudkitty_processor_dimensions }}"
      healthcheck: "{{ cloudkitty_processor_healthcheck }}"
  
@@ -200,69 +121,29 @@ index dedf416..e108726 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/cloudkitty/tasks/config_validate.yml b/ansible/roles/cloudkitty/tasks/config_validate.yml
-new file mode 100644
-index 0000000..4806fd8
---- /dev/null
-+++ b/ansible/roles/cloudkitty/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ cloudkitty_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ cloudkitty_config_validation }}"
-diff --git a/ansible/roles/collectd/tasks/config_validate.yml b/ansible/roles/collectd/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/collectd/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/common/tasks/config_validate.yml b/ansible/roles/common/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/common/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/cyborg/defaults/main.yml b/ansible/roles/cyborg/defaults/main.yml
-index eb92290..69ca507 100644
+index eb92290b8..69ca507f6 100644
 --- a/ansible/roles/cyborg/defaults/main.yml
 +++ b/ansible/roles/cyborg/defaults/main.yml
-@@ -27,6 +27,13 @@
+@@ -26,6 +26,13 @@ cyborg_services:
+     dimensions: "{{ cyborg_conductor_dimensions }}"
      healthcheck: "{{ cyborg_conductor_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +cyborg_config_validation:
 +  - generator: "/cyborg/tools/config/cyborg-config-generator.conf"
 +    config: "/etc/cyborg/cyborg.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- cyborg_database_name: "cyborg"
-diff --git a/ansible/roles/cyborg/tasks/config_validate.yml b/ansible/roles/cyborg/tasks/config_validate.yml
-new file mode 100644
-index 0000000..fd9c072
---- /dev/null
-+++ b/ansible/roles/cyborg/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ cyborg_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ cyborg_config_validation }}"
 diff --git a/ansible/roles/designate/defaults/main.yml b/ansible/roles/designate/defaults/main.yml
-index 9619a16..926a358 100644
+index 9619a1689..926a358b4 100644
 --- a/ansible/roles/designate/defaults/main.yml
 +++ b/ansible/roles/designate/defaults/main.yml
-@@ -70,6 +70,12 @@
+@@ -70,6 +70,12 @@ designate_services:
      dimensions: "{{ designate_sink_dimensions }}"
      healthcheck: "{{ designate_sink_healthcheck }}"
  
@@ -275,65 +156,33 @@ index 9619a16..926a358 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/designate/tasks/config_validate.yml b/ansible/roles/designate/tasks/config_validate.yml
-new file mode 100644
-index 0000000..febfb66
---- /dev/null
-+++ b/ansible/roles/designate/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ designate_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ designate_config_validation }}"
-diff --git a/ansible/roles/etcd/tasks/config_validate.yml b/ansible/roles/etcd/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/etcd/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/freezer/defaults/main.yml b/ansible/roles/freezer/defaults/main.yml
-index 1956c1e..716fdc4 100644
+index 1956c1e26..716fdc432 100644
 --- a/ansible/roles/freezer/defaults/main.yml
 +++ b/ansible/roles/freezer/defaults/main.yml
-@@ -27,6 +27,13 @@
+@@ -26,6 +26,13 @@ freezer_services:
+     volumes: "{{ freezer_scheduler_default_volumes + freezer_scheduler_extra_volumes }}"
      dimensions: "{{ freezer_scheduler_dimensions }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +freezer_config_validation:
 +  - generator: "/freezer/etc/config-generator.conf"
 +    config: "/etc/freezer/freezer.conf"
 +
-+####################
+ ####################
  ## Database
  #####################
- freezer_database_backend: "mariadb"
-diff --git a/ansible/roles/freezer/tasks/config_validate.yml b/ansible/roles/freezer/tasks/config_validate.yml
-new file mode 100644
-index 0000000..c734493
---- /dev/null
-+++ b/ansible/roles/freezer/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ freezer_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ freezer_config_validation }}"
 diff --git a/ansible/roles/glance/defaults/main.yml b/ansible/roles/glance/defaults/main.yml
-index 5ca70d9..114cce5 100644
+index 5ca70d9c7..114cce55e 100644
 --- a/ansible/roles/glance/defaults/main.yml
 +++ b/ansible/roles/glance/defaults/main.yml
-@@ -66,6 +66,19 @@
+@@ -65,6 +65,19 @@ glance_services:
+         custom_member_list: "{{ haproxy_tls_members.split(';') }}"
          tls_backend: "yes"
  
- ####################
++####################
 +# Config Validate
 +####################
 +glance_config_validation:
@@ -346,28 +195,14 @@ index 5ca70d9..114cce5 100644
 +  - generator: "/glance/etc/oslo-config-generator/glance-scrubber.conf"
 +    config: "/etc/glance/glance-scrubber.conf"
 +
-+####################
+ ####################
  # HAProxy
  ####################
- haproxy_members: "{% for host in glance_api_hosts %}server {{ hostvars[host].ansible_facts.hostname }} {{ 'api' | kolla_address(host) }}:{{ glance_api_listen_port }} check inter 2000 rise 2 fall 5;{% endfor %}"
-diff --git a/ansible/roles/glance/tasks/config_validate.yml b/ansible/roles/glance/tasks/config_validate.yml
-new file mode 100644
-index 0000000..f4f0a66
---- /dev/null
-+++ b/ansible/roles/glance/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ glance_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ glance_config_validation }}"
 diff --git a/ansible/roles/gnocchi/defaults/main.yml b/ansible/roles/gnocchi/defaults/main.yml
-index e15582f..dbb5ef5 100644
+index e15582f50..dbb5ef5e3 100644
 --- a/ansible/roles/gnocchi/defaults/main.yml
 +++ b/ansible/roles/gnocchi/defaults/main.yml
-@@ -36,6 +36,12 @@
+@@ -36,6 +36,12 @@ gnocchi_services:
      dimensions: "{{ gnocchi_statsd_dimensions }}"
      healthcheck: "{{ gnocchi_statsd_healthcheck }}"
  
@@ -380,83 +215,29 @@ index e15582f..dbb5ef5 100644
  
  ####################
  # Swift
-diff --git a/ansible/roles/gnocchi/tasks/config_validate.yml b/ansible/roles/gnocchi/tasks/config_validate.yml
-new file mode 100644
-index 0000000..a8fa5f5
---- /dev/null
-+++ b/ansible/roles/gnocchi/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ gnocchi_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ gnocchi_config_validation }}"
-diff --git a/ansible/roles/grafana/tasks/config_validate.yml b/ansible/roles/grafana/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/grafana/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/hacluster/tasks/config_validate.yml b/ansible/roles/hacluster/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/hacluster/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/heat/defaults/main.yml b/ansible/roles/heat/defaults/main.yml
-index 37a4622..d4b630d 100644
+index 37a4622f6..d4b630df1 100644
 --- a/ansible/roles/heat/defaults/main.yml
 +++ b/ansible/roles/heat/defaults/main.yml
-@@ -56,6 +56,13 @@
+@@ -55,6 +55,13 @@ heat_services:
+     dimensions: "{{ heat_engine_dimensions }}"
      healthcheck: "{{ heat_engine_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +heat_config_validation:
 +  - generator: "/heat/config-generator.conf"
 +    config: "/etc/heat/heat.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- heat_database_name: "heat"
-diff --git a/ansible/roles/heat/tasks/config_validate.yml b/ansible/roles/heat/tasks/config_validate.yml
-new file mode 100644
-index 0000000..e1931df
---- /dev/null
-+++ b/ansible/roles/heat/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ heat_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ heat_config_validation }}"
-diff --git a/ansible/roles/horizon/tasks/config_validate.yml b/ansible/roles/horizon/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/horizon/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/influxdb/tasks/config_validate.yml b/ansible/roles/influxdb/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/influxdb/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/ironic/defaults/main.yml b/ansible/roles/ironic/defaults/main.yml
-index ad73593..7684cf9 100644
+index ad735938b..7684cf97a 100644
 --- a/ansible/roles/ironic/defaults/main.yml
 +++ b/ansible/roles/ironic/defaults/main.yml
-@@ -84,6 +84,12 @@
+@@ -84,6 +84,12 @@ ironic_services:
      volumes: "{{ ironic_dnsmasq_default_volumes + ironic_dnsmasq_extra_volumes }}"
      dimensions: "{{ ironic_dnsmasq_dimensions }}"
  
@@ -469,69 +250,29 @@ index ad73593..7684cf9 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/ironic/tasks/config_validate.yml b/ansible/roles/ironic/tasks/config_validate.yml
-new file mode 100644
-index 0000000..7b1806f
---- /dev/null
-+++ b/ansible/roles/ironic/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ ironic_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ ironic_config_validation }}"
-diff --git a/ansible/roles/iscsi/tasks/config_validate.yml b/ansible/roles/iscsi/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/iscsi/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/kafka/tasks/config_validate.yml b/ansible/roles/kafka/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/kafka/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/keystone/defaults/main.yml b/ansible/roles/keystone/defaults/main.yml
-index d0710e3..94de04d 100644
+index d0710e308..94de04d97 100644
 --- a/ansible/roles/keystone/defaults/main.yml
 +++ b/ansible/roles/keystone/defaults/main.yml
-@@ -62,6 +62,13 @@
+@@ -61,6 +61,13 @@ keystone_services:
+     dimensions: "{{ keystone_fernet_dimensions }}"
      healthcheck: "{{ keystone_fernet_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +keystone_config_validation:
 +  - generator: "/keystone/config-generator/keystone.conf"
 +    config: "/etc/keystone/keystone.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- keystone_database_name: "keystone"
-diff --git a/ansible/roles/keystone/tasks/config_validate.yml b/ansible/roles/keystone/tasks/config_validate.yml
-new file mode 100644
-index 0000000..400463d
---- /dev/null
-+++ b/ansible/roles/keystone/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ keystone_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ keystone_config_validation }}"
 diff --git a/ansible/roles/kuryr/defaults/main.yml b/ansible/roles/kuryr/defaults/main.yml
-index 92c60fc..0a2cbfa 100644
+index 92c60fc5b..0a2cbfa62 100644
 --- a/ansible/roles/kuryr/defaults/main.yml
 +++ b/ansible/roles/kuryr/defaults/main.yml
-@@ -20,6 +20,12 @@
+@@ -20,6 +20,12 @@ kuryr_services:
      dimensions: "{{ kuryr_dimensions }}"
      healthcheck: "{{ kuryr_healthcheck }}"
  
@@ -544,31 +285,11 @@ index 92c60fc..0a2cbfa 100644
  
  ####################
  # Docker
-diff --git a/ansible/roles/kuryr/tasks/config_validate.yml b/ansible/roles/kuryr/tasks/config_validate.yml
-new file mode 100644
-index 0000000..9ed33e0
---- /dev/null
-+++ b/ansible/roles/kuryr/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ kuryr_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ kuryr_config_validation }}"
-diff --git a/ansible/roles/loadbalancer/tasks/config_validate.yml b/ansible/roles/loadbalancer/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/loadbalancer/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/magnum/defaults/main.yml b/ansible/roles/magnum/defaults/main.yml
-index 1a05109..c929842 100644
+index 1a051095d..c929842e5 100644
 --- a/ansible/roles/magnum/defaults/main.yml
 +++ b/ansible/roles/magnum/defaults/main.yml
-@@ -31,6 +31,12 @@
+@@ -31,6 +31,12 @@ magnum_services:
      dimensions: "{{ magnum_conductor_dimensions }}"
      healthcheck: "{{ magnum_conductor_healthcheck }}"
  
@@ -581,24 +302,11 @@ index 1a05109..c929842 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/magnum/tasks/config_validate.yml b/ansible/roles/magnum/tasks/config_validate.yml
-new file mode 100644
-index 0000000..fae91de
---- /dev/null
-+++ b/ansible/roles/magnum/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ magnum_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ magnum_config_validation }}"
 diff --git a/ansible/roles/manila/defaults/main.yml b/ansible/roles/manila/defaults/main.yml
-index 895290a..8f5a13f 100644
+index 895290a32..8f5a13f1d 100644
 --- a/ansible/roles/manila/defaults/main.yml
 +++ b/ansible/roles/manila/defaults/main.yml
-@@ -46,6 +46,12 @@
+@@ -46,6 +46,12 @@ manila_services:
      dimensions: "{{ manila_data_dimensions }}"
      healthcheck: "{{ manila_data_healthcheck }}"
  
@@ -611,31 +319,11 @@ index 895290a..8f5a13f 100644
  
  #####################
  ## Database
-diff --git a/ansible/roles/manila/tasks/config_validate.yml b/ansible/roles/manila/tasks/config_validate.yml
-new file mode 100644
-index 0000000..6f14e38
---- /dev/null
-+++ b/ansible/roles/manila/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ manila_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ manila_config_validation }}"
-diff --git a/ansible/roles/mariadb/tasks/config_validate.yml b/ansible/roles/mariadb/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/mariadb/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/masakari/defaults/main.yml b/ansible/roles/masakari/defaults/main.yml
-index d9bc87a..e581e2a 100644
+index d9bc87a6f..e581e2ac4 100644
 --- a/ansible/roles/masakari/defaults/main.yml
 +++ b/ansible/roles/masakari/defaults/main.yml
-@@ -42,6 +42,12 @@
+@@ -42,6 +42,12 @@ masakari_services:
      volumes: "{{ masakari_hostmonitor_default_volumes + masakari_hostmonitor_extra_volumes }}"
      dimensions: "{{ masakari_hostmonitor_dimensions }}"
  
@@ -648,31 +336,11 @@ index d9bc87a..e581e2a 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/masakari/tasks/config_validate.yml b/ansible/roles/masakari/tasks/config_validate.yml
-new file mode 100644
-index 0000000..de3be4b
---- /dev/null
-+++ b/ansible/roles/masakari/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ masakari_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ masakari_config_validation }}"
-diff --git a/ansible/roles/memcached/tasks/config_validate.yml b/ansible/roles/memcached/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/memcached/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/mistral/defaults/main.yml b/ansible/roles/mistral/defaults/main.yml
-index b00acd8..3d1e2c6 100644
+index b00acd8da..3d1e2c64d 100644
 --- a/ansible/roles/mistral/defaults/main.yml
 +++ b/ansible/roles/mistral/defaults/main.yml
-@@ -44,6 +44,12 @@
+@@ -44,6 +44,12 @@ mistral_services:
      dimensions: "{{ mistral_executor_dimensions }}"
      healthcheck: "{{ mistral_executor_healthcheck }}"
  
@@ -685,31 +353,11 @@ index b00acd8..3d1e2c6 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/mistral/tasks/config_validate.yml b/ansible/roles/mistral/tasks/config_validate.yml
-new file mode 100644
-index 0000000..91fad6d
---- /dev/null
-+++ b/ansible/roles/mistral/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ mistral_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ mistral_config_validation }}"
-diff --git a/ansible/roles/multipathd/tasks/config_validate.yml b/ansible/roles/multipathd/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/multipathd/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/murano/defaults/main.yml b/ansible/roles/murano/defaults/main.yml
-index e97ce75..473a3d1 100644
+index e97ce75db..473a3d189 100644
 --- a/ansible/roles/murano/defaults/main.yml
 +++ b/ansible/roles/murano/defaults/main.yml
-@@ -26,6 +26,12 @@
+@@ -26,6 +26,12 @@ murano_services:
      volumes: "{{ murano_engine_default_volumes + murano_engine_extra_volumes }}"
      dimensions: "{{ murano_engine_dimensions }}"
  
@@ -722,27 +370,15 @@ index e97ce75..473a3d1 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/murano/tasks/config_validate.yml b/ansible/roles/murano/tasks/config_validate.yml
-new file mode 100644
-index 0000000..03f5fac
---- /dev/null
-+++ b/ansible/roles/murano/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ murano_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ murano_config_validation }}"
 diff --git a/ansible/roles/neutron/defaults/main.yml b/ansible/roles/neutron/defaults/main.yml
-index 6960112..09f6f91 100644
+index 696011202..09f6f91bf 100644
 --- a/ansible/roles/neutron/defaults/main.yml
 +++ b/ansible/roles/neutron/defaults/main.yml
-@@ -199,6 +199,33 @@
+@@ -198,6 +198,33 @@ neutron_services:
+         listen_port: "{{ neutron_server_listen_port }}"
          tls_backend: "yes"
  
- ####################
++####################
 +# Config Validate
 +####################
 +neutron_config_validation:
@@ -769,90 +405,50 @@ index 6960112..09f6f91 100644
 +  - generator: "/neutron/etc/oslo-config-generator/linuxbridge_agent.ini"
 +    config: "/etc/neutron/plugins/ml2/linuxbridge_agent.ini"
 +
-+####################
+ ####################
  # Database
  ####################
- neutron_database_name: "neutron"
-diff --git a/ansible/roles/neutron/tasks/config_validate.yml b/ansible/roles/neutron/tasks/config_validate.yml
-new file mode 100644
-index 0000000..5459c7b
---- /dev/null
-+++ b/ansible/roles/neutron/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ neutron_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ neutron_config_validation }}"
 diff --git a/ansible/roles/nova-cell/defaults/main.yml b/ansible/roles/nova-cell/defaults/main.yml
-index a976c76..0eead7f 100644
+index a976c769e..0eead7ffb 100644
 --- a/ansible/roles/nova-cell/defaults/main.yml
 +++ b/ansible/roles/nova-cell/defaults/main.yml
-@@ -72,6 +72,13 @@
+@@ -71,6 +71,13 @@ nova_cell_services:
+     dimensions: "{{ nova_compute_ironic_dimensions }}"
      healthcheck: "{{ nova_compute_ironic_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +nova_cell_config_validation:
 +  - generator: "/nova/etc/nova/nova-config-generator.conf"
 +    config: "/etc/nova/nova.conf"
 +
-+####################
+ ####################
  # Ceph options
  ####################
- # Discard option for nova managed disks. Requires libvirt (1, 0, 6) or later and
-diff --git a/ansible/roles/nova-cell/tasks/config_validate.yml b/ansible/roles/nova-cell/tasks/config_validate.yml
-new file mode 100644
-index 0000000..70ed89f
---- /dev/null
-+++ b/ansible/roles/nova-cell/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ nova_cell_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ nova_cell_config_validation }}"
 diff --git a/ansible/roles/nova/defaults/main.yml b/ansible/roles/nova/defaults/main.yml
-index b6a23e2..dad4ab6 100644
+index b6a23e2f9..dad4ab678 100644
 --- a/ansible/roles/nova/defaults/main.yml
 +++ b/ansible/roles/nova/defaults/main.yml
-@@ -56,6 +56,13 @@
+@@ -55,6 +55,13 @@ nova_services:
+     dimensions: "{{ nova_super_conductor_dimensions }}"
      healthcheck: "{{ nova_super_conductor_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +nova_config_validation:
 +  - generator: "/nova/etc/nova/nova-config-generator.conf"
 +    config: "/etc/nova/nova.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- # These are kept for backwards compatibility, as cell0 references them.
-diff --git a/ansible/roles/nova/tasks/config_validate.yml b/ansible/roles/nova/tasks/config_validate.yml
-new file mode 100644
-index 0000000..8f011d3
---- /dev/null
-+++ b/ansible/roles/nova/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ nova_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ nova_config_validation }}"
 diff --git a/ansible/roles/octavia/defaults/main.yml b/ansible/roles/octavia/defaults/main.yml
-index ae428d4..49c502b 100644
+index ae428d4c7..49c502b43 100644
 --- a/ansible/roles/octavia/defaults/main.yml
 +++ b/ansible/roles/octavia/defaults/main.yml
-@@ -62,6 +62,12 @@
+@@ -62,6 +62,12 @@ octavia_required_roles:
    - load-balancer_admin
    - load-balancer_quota_admin
  
@@ -865,111 +461,29 @@ index ae428d4..49c502b 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/octavia/tasks/config_validate.yml b/ansible/roles/octavia/tasks/config_validate.yml
-new file mode 100644
-index 0000000..e9069eb
---- /dev/null
-+++ b/ansible/roles/octavia/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ octavia_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ octavia_config_validation }}"
-diff --git a/ansible/roles/opensearch/tasks/config_validate.yml b/ansible/roles/opensearch/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/opensearch/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/openvswitch/tasks/config_validate.yml b/ansible/roles/openvswitch/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/openvswitch/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/ovn-controller/tasks/config_validate.yml b/ansible/roles/ovn-controller/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/ovn-controller/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/ovn-db/tasks/config_validate.yml b/ansible/roles/ovn-db/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/ovn-db/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/ovs-dpdk/tasks/config_validate.yml b/ansible/roles/ovs-dpdk/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/ovs-dpdk/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/placement/defaults/main.yml b/ansible/roles/placement/defaults/main.yml
-index a287454..51c7873 100644
+index a287454e6..51c78739b 100644
 --- a/ansible/roles/placement/defaults/main.yml
 +++ b/ansible/roles/placement/defaults/main.yml
-@@ -25,6 +25,13 @@
+@@ -24,6 +24,13 @@ placement_services:
+         listen_port: "{{ placement_api_listen_port }}"
          tls_backend: "{{ placement_enable_tls_backend }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +placement_config_validation:
 +  - generator: "/placement/etc/placement/config-generator.conf"
 +    config: "/etc/placement/placement.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- placement_database_name: "placement"
-diff --git a/ansible/roles/placement/tasks/config_validate.yml b/ansible/roles/placement/tasks/config_validate.yml
-new file mode 100644
-index 0000000..9411eb4
---- /dev/null
-+++ b/ansible/roles/placement/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ placement_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ placement_config_validation }}"
-diff --git a/ansible/roles/prometheus/tasks/config_validate.yml b/ansible/roles/prometheus/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/prometheus/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/rabbitmq/tasks/config_validate.yml b/ansible/roles/rabbitmq/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/rabbitmq/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/redis/tasks/config_validate.yml b/ansible/roles/redis/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/redis/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/sahara/defaults/main.yml b/ansible/roles/sahara/defaults/main.yml
-index 7d746c2..dadea0f 100644
+index 7d746c23b..dadea0f29 100644
 --- a/ansible/roles/sahara/defaults/main.yml
 +++ b/ansible/roles/sahara/defaults/main.yml
-@@ -29,6 +29,12 @@
+@@ -29,6 +29,12 @@ sahara_services:
      dimensions: "{{ sahara_engine_dimensions }}"
      healthcheck: "{{ sahara_engine_healthcheck }}"
  
@@ -982,231 +496,65 @@ index 7d746c2..dadea0f 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/sahara/tasks/config_validate.yml b/ansible/roles/sahara/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ea503b9
---- /dev/null
-+++ b/ansible/roles/sahara/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ sahara_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ sahara_config_validation }}"
 diff --git a/ansible/roles/senlin/defaults/main.yml b/ansible/roles/senlin/defaults/main.yml
-index ded678f..b1bfa11 100644
+index ded678fb3..b1bfa1108 100644
 --- a/ansible/roles/senlin/defaults/main.yml
 +++ b/ansible/roles/senlin/defaults/main.yml
-@@ -47,6 +47,13 @@
+@@ -46,6 +46,13 @@ senlin_services:
+     dimensions: "{{ senlin_health_manager_dimensions }}"
      healthcheck: "{{ senlin_health_manager_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +senlin_config_validation:
 +  - generator: "/senlin/tools/config-generator.conf"
 +    config: "/etc/senlin/senlin.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- senlin_database_name: "senlin"
-diff --git a/ansible/roles/senlin/tasks/config_validate.yml b/ansible/roles/senlin/tasks/config_validate.yml
-new file mode 100644
-index 0000000..f8019a5
---- /dev/null
-+++ b/ansible/roles/senlin/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ senlin_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ senlin_config_validation }}"
-diff --git a/ansible/roles/service-config-validate/defaults/main.yml b/ansible/roles/service-config-validate/defaults/main.yml
-new file mode 100644
-index 0000000..933689f
---- /dev/null
-+++ b/ansible/roles/service-config-validate/defaults/main.yml
-@@ -0,0 +1,6 @@
-+---
-+# Common role for config-validates.
-+
-+# Dict of services.
-+service_config_validate_output_dir: "/var/log/kolla/config-validate"
-+service_config_validate_services: {}
-diff --git a/ansible/roles/service-config-validate/tasks/main.yml b/ansible/roles/service-config-validate/tasks/main.yml
-new file mode 100644
-index 0000000..ae2cbe2
---- /dev/null
-+++ b/ansible/roles/service-config-validate/tasks/main.yml
-@@ -0,0 +1,13 @@
-+---
-+- name: "{{ project_name }} | Validate configurations for each service"
-+  vars:
-+    service_name: "{{ outer_item.key }}"
-+    service: "{{ outer_item.value }}"
-+    output_dir: "{{ service_config_validate_output_dir }}/{{ inventory_hostname }}/{{ project_name }}/{{ service_name }}"
-+  include_tasks: validate.yml
-+  loop: "{{ query('dict', service_config_validate_services | select_services_enabled_and_mapped_to_host) }}"
-+  loop_control:
-+    label: "{{ service_name }}"
-+    loop_var: outer_item
-+  when:
-+    - service_config_validation is defined
-diff --git a/ansible/roles/service-config-validate/tasks/validate.yml b/ansible/roles/service-config-validate/tasks/validate.yml
-new file mode 100644
-index 0000000..a327277
---- /dev/null
-+++ b/ansible/roles/service-config-validate/tasks/validate.yml
-@@ -0,0 +1,49 @@
-+---
-+- name: "{{ project_name }} : {{ service.container_name }} | Get info on container"
-+  become: True
-+  kolla_container_facts:
-+    container_engine: "{{ kolla_container_engine }}"
-+    name:
-+      - "{{ service.container_name }}"
-+  register: container_info
-+
-+- name: "{{ project_name }} : {{ service.container_name }} | Validate configurations"
-+  become: True
-+  command: >
-+    {{ kolla_container_engine }} exec {{ service.container_name }}
-+    bash -c "[[ -f {{ inner_item['config'] }} ]] && oslo-config-validator --config-file {{ inner_item['generator'] }} --input-file {{ inner_item['config'] }}"
-+  when:
-+    - container_info._containers | length > 0
-+  register: result
-+  failed_when: result.rc not in [0, 1]  # rc 1 is expected when errors are found in the config file, or when the config file doesn't exist
-+  with_items: "{{ service_config_validation }}"
-+  loop_control:
-+    label: "{{ inner_item['config'] | basename }}"
-+    loop_var: inner_item
-+  changed_when: False
-+
-+- name: "{{ project_name }} : {{ service.container_name }} | Ensure log directory exists"
-+  become: True
-+  file:
-+    path: "{{ output_dir }}"
-+    state: directory
-+  when:
-+    - result.results | map(attribute='rc', default=0) | select('equalto', 1) | list | length > 0
-+    - result.results | map(attribute='stderr', default="") | select('ne', "") | list | length > 0
-+  delegate_to: localhost
-+
-+- name: "{{ project_name }} : {{ service.container_name }} | Log configuration errors"
-+  become: True
-+  copy:
-+    content: "{{ inner_item.stderr }}"
-+    dest: "{{ output_dir }}/{{ inner_item.inner_item.config | basename }}.err"
-+  when:
-+    - container_info._containers | length > 0
-+    - inner_item.rc is defined
-+    - inner_item.rc == 1
-+    - inner_item.stderr != ""
-+  loop: "{{ result.results }}"
-+  loop_control:
-+    label: "{{ inner_item.inner_item.config | basename }}"
-+    loop_var: inner_item
-+  delegate_to: localhost
-diff --git a/ansible/roles/skydive/tasks/config_validate.yml b/ansible/roles/skydive/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/skydive/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/solum/defaults/main.yml b/ansible/roles/solum/defaults/main.yml
-index 766dea8..4af0633 100644
+index 766dea8ec..4af0633a6 100644
 --- a/ansible/roles/solum/defaults/main.yml
 +++ b/ansible/roles/solum/defaults/main.yml
-@@ -59,6 +59,13 @@
+@@ -58,6 +58,13 @@ solum_services:
+     dimensions: "{{ solum_conductor_dimensions }}"
      healthcheck: "{{ solum_conductor_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +solum_config_validation:
 +  - generator: "/solum/etc/solum/config-generator.conf"
 +    config: "/etc/solum/solum.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- solum_database_name: "solum"
-diff --git a/ansible/roles/solum/tasks/config_validate.yml b/ansible/roles/solum/tasks/config_validate.yml
-new file mode 100644
-index 0000000..05ecc13
---- /dev/null
-+++ b/ansible/roles/solum/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ solum_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ solum_config_validation }}"
-diff --git a/ansible/roles/storm/tasks/config_validate.yml b/ansible/roles/storm/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/storm/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
-diff --git a/ansible/roles/swift/tasks/config_validate.yml b/ansible/roles/swift/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/swift/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/tacker/defaults/main.yml b/ansible/roles/tacker/defaults/main.yml
-index 8ec8233..daa9980 100644
+index 8ec823378..daa9980b0 100644
 --- a/ansible/roles/tacker/defaults/main.yml
 +++ b/ansible/roles/tacker/defaults/main.yml
-@@ -33,6 +33,13 @@
+@@ -32,6 +32,13 @@ tacker_services:
+     dimensions: "{{ tacker_conductor_dimensions }}"
      healthcheck: "{{ tacker_conductor_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +tacker_config_validation:
 +  - generator: "/tacker/etc/config-generator.conf"
 +    config: "/etc/tacker/tacker.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- tacker_database_name: "tacker"
-diff --git a/ansible/roles/tacker/tasks/config_validate.yml b/ansible/roles/tacker/tasks/config_validate.yml
-new file mode 100644
-index 0000000..cc200fd
---- /dev/null
-+++ b/ansible/roles/tacker/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ tacker_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ tacker_config_validation }}"
-diff --git a/ansible/roles/telegraf/tasks/config_validate.yml b/ansible/roles/telegraf/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/telegraf/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/trove/defaults/main.yml b/ansible/roles/trove/defaults/main.yml
-index 1971f4a..455849f 100644
+index 1971f4a36..455849ff3 100644
 --- a/ansible/roles/trove/defaults/main.yml
 +++ b/ansible/roles/trove/defaults/main.yml
-@@ -36,6 +36,12 @@
+@@ -36,6 +36,12 @@ trove_services:
      dimensions: "{{ trove_taskmanager_dimensions }}"
      healthcheck: "{{ trove_taskmanager_healthcheck }}"
  
@@ -1219,86 +567,47 @@ index 1971f4a..455849f 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/trove/tasks/config_validate.yml b/ansible/roles/trove/tasks/config_validate.yml
-new file mode 100644
-index 0000000..b8c4c01
---- /dev/null
-+++ b/ansible/roles/trove/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ trove_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ trove_config_validation }}"
 diff --git a/ansible/roles/venus/defaults/main.yml b/ansible/roles/venus/defaults/main.yml
-index a1a7021..d2d044f 100644
+index a1a7021a1..d2d044f59 100644
 --- a/ansible/roles/venus/defaults/main.yml
 +++ b/ansible/roles/venus/defaults/main.yml
-@@ -28,6 +28,13 @@
+@@ -27,6 +27,13 @@ venus_services:
+     volumes: "{{ venus_manager_default_volumes + venus_manager_extra_volumes }}"
      dimensions: "{{ venus_manager_dimensions }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +venus_config_validation:
 +  - generator: "/venus/tools/config/venus-config-generator.conf"
 +    config: "/etc/venus/venus.conf"
 +
-+####################
+ ####################
  # Database
  ####################
- venus_database_name: "venus"
-diff --git a/ansible/roles/venus/tasks/config_validate.yml b/ansible/roles/venus/tasks/config_validate.yml
-new file mode 100644
-index 0000000..57ab862
---- /dev/null
-+++ b/ansible/roles/venus/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ venus_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ venus_config_validation }}"
 diff --git a/ansible/roles/vitrage/defaults/main.yml b/ansible/roles/vitrage/defaults/main.yml
-index bbe74eb..8e192d7 100644
+index bbe74ebf5..8e192d784 100644
 --- a/ansible/roles/vitrage/defaults/main.yml
 +++ b/ansible/roles/vitrage/defaults/main.yml
-@@ -53,6 +53,13 @@
+@@ -52,6 +52,13 @@ vitrage_services:
+     dimensions: "{{ vitrage_persistor_dimensions }}"
      healthcheck: "{{ vitrage_persistor_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +vitrage_config_validation:
 +  - generator: "/vitrage/etc/vitrage/vitrage-config-generator.conf"
 +    config: "/etc/vitrage/vitrage.conf"
 +
-+####################
+ ####################
  ## Database
  #####################
- vitrage_database_name: "vitrage"
-diff --git a/ansible/roles/vitrage/tasks/config_validate.yml b/ansible/roles/vitrage/tasks/config_validate.yml
-new file mode 100644
-index 0000000..307e5b0
---- /dev/null
-+++ b/ansible/roles/vitrage/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ vitrage_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ vitrage_config_validation }}"
 diff --git a/ansible/roles/watcher/defaults/main.yml b/ansible/roles/watcher/defaults/main.yml
-index 35df766..03f3445 100644
+index 35df766ec..03f344553 100644
 --- a/ansible/roles/watcher/defaults/main.yml
 +++ b/ansible/roles/watcher/defaults/main.yml
-@@ -36,6 +36,12 @@
+@@ -36,6 +36,12 @@ watcher_services:
      dimensions: "{{ watcher_engine_dimensions }}"
      healthcheck: "{{ watcher_engine_healthcheck }}"
  
@@ -1311,75 +620,29 @@ index 35df766..03f3445 100644
  
  ####################
  # Database
-diff --git a/ansible/roles/watcher/tasks/config_validate.yml b/ansible/roles/watcher/tasks/config_validate.yml
-new file mode 100644
-index 0000000..1e74980
---- /dev/null
-+++ b/ansible/roles/watcher/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ watcher_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ watcher_config_validation }}"
-diff --git a/ansible/roles/zookeeper/tasks/config_validate.yml b/ansible/roles/zookeeper/tasks/config_validate.yml
-new file mode 100644
-index 0000000..ed97d53
---- /dev/null
-+++ b/ansible/roles/zookeeper/tasks/config_validate.yml
-@@ -0,0 +1 @@
-+---
 diff --git a/ansible/roles/zun/defaults/main.yml b/ansible/roles/zun/defaults/main.yml
-index edb727c..61719a1 100644
+index edb727c9c..61719a179 100644
 --- a/ansible/roles/zun/defaults/main.yml
 +++ b/ansible/roles/zun/defaults/main.yml
-@@ -58,6 +58,13 @@
+@@ -57,6 +57,13 @@ zun_services:
+     dimensions: "{{ zun_cni_daemon_dimensions }}"
      healthcheck: "{{ zun_cni_daemon_healthcheck }}"
  
- ####################
++####################
 +# Config Validate
 +####################
 +zun_config_validation:
 +  - generator: "/zun/etc/zun/zun-config-generator.conf"
 +    config: "/etc/zun/zun.conf"
 +
-+####################
+ ####################
  ## Database
  ####################
- zun_database_name: "zun"
-diff --git a/ansible/roles/zun/tasks/config_validate.yml b/ansible/roles/zun/tasks/config_validate.yml
-new file mode 100644
-index 0000000..9803248
---- /dev/null
-+++ b/ansible/roles/zun/tasks/config_validate.yml
-@@ -0,0 +1,7 @@
-+---
-+- import_role:
-+    name: service-config-validate
-+  vars:
-+    service_config_validate_services: "{{ zun_services }}"
-+    service_name: "{{ project_name }}"
-+    service_config_validation: "{{ zun_config_validation }}"
-diff --git a/releasenotes/notes/integrate-oslo-config-validator-4dc26b8753984917.yaml b/releasenotes/notes/integrate-oslo-config-validator-4dc26b8753984917.yaml
-new file mode 100644
-index 0000000..4380930
---- /dev/null
-+++ b/releasenotes/notes/integrate-oslo-config-validator-4dc26b8753984917.yaml
-@@ -0,0 +1,7 @@
-+---
-+features:
-+  - |
-+    Adds the command ``kolla-ansible validate-config``. This runs
-+    ``oslo-config-validator`` against the configurgation files present in the
-+    deployed OpenStack services. By default, results are saved to
-+    ``/var/log/kolla/config-validate``
 diff --git a/tools/kolla-ansible b/tools/kolla-ansible
-index 861faec..3766db6 100755
+index 861faec74..3766db617 100755
 --- a/tools/kolla-ansible
 +++ b/tools/kolla-ansible
-@@ -200,6 +200,7 @@
+@@ -200,6 +200,7 @@ Commands:
      upgrade              Upgrades existing OpenStack Environment
      upgrade-bifrost      Upgrades an existing bifrost container
      genconfig            Generate configuration files for enabled OpenStack services
@@ -1387,7 +650,7 @@ index 861faec..3766db6 100755
      prune-images         Prune orphaned Kolla images
      nova-libvirt-cleanup Clean up disabled nova_libvirt containers
  EOF
-@@ -246,6 +247,7 @@
+@@ -246,6 +247,7 @@ octavia-certificates
  upgrade
  upgrade-bifrost
  genconfig
@@ -1395,7 +658,7 @@ index 861faec..3766db6 100755
  prune-images
  nova-libvirt-cleanup
  EOF
-@@ -535,6 +537,10 @@
+@@ -535,6 +537,10 @@ EOF
          ACTION="Generate configuration files for enabled OpenStack services"
          EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=config"
          ;;
