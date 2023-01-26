@@ -1,8 +1,0 @@
----
-- name: Apply role common
-  hosts: all
-  serial: '{{ serial|default("0") }}'
-  roles:
-    - {role: common, tags: common}
-
-  gather_facts: false
