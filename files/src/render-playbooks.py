@@ -7,6 +7,7 @@ import yaml
 PREFIX = "kolla"
 
 KEEP_PREFIX = [
+    "ceph-rgw",
     "destroy",
     "facts",
     "gather-facts",
