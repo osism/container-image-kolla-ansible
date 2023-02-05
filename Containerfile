@@ -203,6 +203,9 @@ RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
 # copy ara configuration
 RUN python3 -m ara.setup.env > /ansible/ara.env
 
+# prepare list of playbooks
+RUN python3 /src/render-playbooks.py
+
 # set correct permssions
 RUN chown -R dragon: /ansible /share /interface
 
