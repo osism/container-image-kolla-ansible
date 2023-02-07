@@ -33,6 +33,7 @@ COPY files/playbooks/kolla-rgw-endpoint.yml /ansible/kolla-rgw-endpoint.yml
 COPY files/playbooks/kolla-testbed-identity.yml /ansible/kolla-testbed-identity.yml
 COPY files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
 
+COPY files/scripts/change.sh /change.sh
 COPY files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
 COPY files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
 COPY files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
