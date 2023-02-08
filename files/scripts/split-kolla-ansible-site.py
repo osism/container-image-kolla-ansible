@@ -41,7 +41,10 @@ for play in site:
 
     if play["name"] == "Group hosts based on configuration":
         group_hosts_based_on_configuration = play
-        dump_group_hosts_based_on_configuration = ruamel.yaml.dump([group_hosts_based_on_configuration], Dumper=ruamel.yaml.RoundTripDumper, indent=4, block_seq_indent=2)
+
+        for task in play["tasks"]:
+            if task["name"] == "Group hosts based on enabled services":
+                task["with_items"] = []
 
 for play in site:
     if "name" not in play:
@@ -56,18 +59,36 @@ for play in site:
 
         else:
             play["gather_facts"] = "no"
-            dump = ruamel.yaml.dump([play], Dumper=ruamel.yaml.RoundTripDumper, indent=4, block_seq_indent=2)
+            dump = ruamel.yaml.dump(
+                [play], Dumper=ruamel.yaml.RoundTripDumper, indent=4, block_seq_indent=2
+            )
             if name == "rabbitmq(outward)":
                 name = "rabbitmq-outward"
 
             with open(os.path.join(DSTPATH, "kolla-%s.yml" % name), "w+") as fp:
                 fp.write("---\n")
 
-                if group_hosts_based_on_configuration:
-                    for line in dump_group_hosts_based_on_configuration.splitlines():
-                        fp.write(line[2:])
-                        fp.write("\n")
+                for key, value in group_hosts_based_on_configuration.items():
+                    if key == "tasks" and type(value) == list:
+                        for task in [
+                            x
+                            for x in value
+                            if x["name"] == "Group hosts based on enabled services"
+                        ]:
+                            task[
+                                "with_items"
+                            ] = f"enable_{name.replace('-', '_')}_{{{{ enable_{name.replace('-', '_')} | bool }}}}"
+
+                dump_group_hosts_based_on_configuration = ruamel.yaml.dump(
+                    [group_hosts_based_on_configuration],
+                    Dumper=ruamel.yaml.RoundTripDumper,
+                    indent=4,
+                    block_seq_indent=2,
+                )
+                for line in dump_group_hosts_based_on_configuration.splitlines():
+                    fp.write(line[2:])
                     fp.write("\n")
+                fp.write("\n")
 
                 for line in dump.splitlines():
                     fp.write(line[2:])
