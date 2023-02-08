@@ -8,3 +8,4 @@ rules:
 # ignore playbooks imported from kolla-ansible upstream
 ignore: |
   kolla-loadbalancer-*.yml
+  kolla-ovn.yml
