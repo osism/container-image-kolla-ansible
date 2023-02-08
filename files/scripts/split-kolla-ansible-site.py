@@ -75,9 +75,11 @@ for play in site:
                             for x in value
                             if x["name"] == "Group hosts based on enabled services"
                         ]:
-                            task[
-                                "with_items"
-                            ] = f"enable_{name.replace('-', '_')}_{{{{ enable_{name.replace('-', '_')} | bool }}}}"
+                            if name == "openvswitch":
+                                v = "enable_openvswitch_{{ enable_openvswitch | bool }}_enable_ovs_dpdk_{{ enable_ovs_dpdk | bool }}"
+                            else:
+                                v = f"enable_{name.replace('-', '_')}_{{{{ enable_{name.replace('-', '_')} | bool }}}}"
+                            task["with_items"] = v
 
                 dump_group_hosts_based_on_configuration = ruamel.yaml.dump(
                     [group_hosts_based_on_configuration],
