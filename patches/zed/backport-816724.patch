@@ -237,7 +237,7 @@ index 000000000..875b3500b
 +        try:
 +            restart_duration = (restart_timeout // restart_retries) - 1
 +        except ZeroDivisionError:
-+            restart_duretion = (restart_timeout // 10) -1
++            restart_duration = (restart_timeout // 10) -1
 +
 +        # container info
 +        self.container_dict = dict(
