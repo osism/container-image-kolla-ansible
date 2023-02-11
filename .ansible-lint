@@ -10,6 +10,7 @@ rulesdir:
 mock_modules:
   - kolla_toolbox
 mock_roles:
+  - ironic
   - nova-cell
   - service-ks-register
 warn_list:

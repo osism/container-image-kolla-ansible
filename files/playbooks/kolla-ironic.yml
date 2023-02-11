@@ -1,0 +1,73 @@
+---
+- name: Download images
+  hosts: manager
+  gather_facts: false
+  run_once: true
+  tags: download-images
+
+  vars:
+    # NOTE: Since this section adds files to the configuration repository,
+    #       it is disabled by default.
+    enable_ironic_agent_download_images: false
+    # NOTE: This is a parameter of kolla-ansible. It is set here by default
+    #       so that the playbook is functional independently of osism/ansible-defaults.
+    ironic_agent_files_directory: /share/ironic
+    ironic_agent_distribution: centos9
+    ironic_agent_initramfs_checksum: "sha256:https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.initramfs.sha256"
+    ironic_agent_initramfs_url: "https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.initramfs"
+    ironic_agent_kernel_checksum: "sha256:https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.kernel.sha256"
+    ironic_agent_kernel_url: "https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.kernel"
+
+  tasks:
+    - name: Ensure the destination directory exists
+      ansible.builtin.file:
+        path: "{{ ironic_agent_files_directory }}"
+        state: directory
+        mode: 0755
+      when: enable_ironic_agent_download_images|bool
+
+    - name: Download ironic-agent initramfs
+      ansible.builtin.get_url:
+        url: "{{ ironic_agent_initramfs_url }}"
+        dest: "{{ ironic_agent_files_directory }}/ironic-agent.initramfs"
+        checksum: "{{ ironic_agent_initramfs_checksum }}"
+        mode: 0644
+      when: enable_ironic_agent_download_images|bool
+
+    - name: Download ironic-agent kernel
+      ansible.builtin.get_url:
+        url: "{{ ironic_agent_kernel_url }}"
+        dest: "{{ ironic_agent_files_directory }}/ironic-agent.kernel"
+        checksum: "{{ ironic_agent_kernel_checksum }}"
+        mode: 0644
+      when: enable_ironic_agent_download_images|bool
+
+- name: Group hosts based on configuration
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Group hosts based on Kolla action
+      ansible.builtin.group_by:
+        key: kolla_action_{{ kolla_action }}
+      changed_when: false
+    - name: Group hosts based on enabled services
+      ansible.builtin.group_by:
+        key: '{{ item }}'
+      changed_when: false
+      with_items:
+        - enable_ironic_{{ enable_ironic | bool }}
+  tags: always
+
+- name: Apply role ironic
+  gather_facts: false
+  hosts:
+    - ironic-api
+    - ironic-conductor
+    - ironic-inspector
+    - ironic-tftp
+    - ironic-http
+    - '&enable_ironic_True'
+  serial: '{{ kolla_serial|default("0") }}'
+  roles:
+    - role: ironic
+      tags: ironic
