@@ -12,7 +12,7 @@ Signed-off-by: Martin Hiner <m.hiner@partner.samsung.com>
 ---
 
 diff --git a/ansible/gather-facts.yml b/ansible/gather-facts.yml
-index f5247a6..b503896 100644
+index f5247a6ab..b50389660 100644
 --- a/ansible/gather-facts.yml
 +++ b/ansible/gather-facts.yml
 @@ -15,6 +15,13 @@
@@ -45,10 +45,10 @@ index f5247a6..b503896 100644
 +        - "kolla_action == 'precheck'"
    tags: always
 diff --git a/ansible/module_utils/kolla_docker_worker.py b/ansible/module_utils/kolla_docker_worker.py
-index ebff465..8c365ca 100644
+index b00eff0e5..9ac6cff85 100644
 --- a/ansible/module_utils/kolla_docker_worker.py
 +++ b/ansible/module_utils/kolla_docker_worker.py
-@@ -19,6 +19,7 @@
+@@ -19,6 +19,7 @@ import json
  import os
  import shlex
  
@@ -56,16 +56,16 @@ index ebff465..8c365ca 100644
  from distutils.version import StrictVersion
  
  COMPARE_CONFIG_CMD = ['/usr/local/bin/kolla_set_configs', '--check']
-@@ -50,6 +51,8 @@
-         self._cgroupns_mode_supported = (
-             StrictVersion(self.dc._version) >= StrictVersion('1.41'))
+@@ -52,6 +53,8 @@ class DockerWorker(object):
+         self._dimensions_kernel_memory_removed = (
+             StrictVersion(self.dc._version) >= StrictVersion('1.42'))
  
 +        self.systemd = SystemdWorker(self.params)
 +
      def generate_tls(self):
          tls = {'verify': self.params.get('tls_verify')}
          tls_cert = self.params.get('tls_cert'),
-@@ -110,7 +113,8 @@
+@@ -112,7 +115,8 @@ class DockerWorker(object):
          container = self.check_container()
          if (not container or
                  self.check_container_differs() or
@@ -75,7 +75,7 @@ index ebff465..8c365ca 100644
              self.changed = True
          return self.changed
  
-@@ -469,6 +473,7 @@
+@@ -474,6 +478,7 @@ class DockerWorker(object):
          self.changed = old_image_id != new_image_id
  
      def remove_container(self):
@@ -83,7 +83,7 @@ index ebff465..8c365ca 100644
          if self.check_container():
              self.changed = True
              # NOTE(jeffrey4l): in some case, docker failed to remove container
-@@ -575,18 +580,6 @@
+@@ -580,18 +585,6 @@ class DockerWorker(object):
              dimensions = self.parse_dimensions(dimensions)
              options.update(dimensions)
  
@@ -102,7 +102,7 @@ index ebff465..8c365ca 100644
          if binds:
              options['binds'] = binds
  
-@@ -599,6 +592,11 @@
+@@ -604,6 +597,11 @@ class DockerWorker(object):
              if cgroupns_mode is not None:
                  host_config['CgroupnsMode'] = cgroupns_mode
  
@@ -114,7 +114,7 @@ index ebff465..8c365ca 100644
          return host_config
  
      def _inject_env_var(self, environment_info):
-@@ -637,6 +635,8 @@
+@@ -642,6 +640,8 @@ class DockerWorker(object):
          self.changed = True
          options = self.build_container_options()
          self.dc.create_container(**options)
@@ -123,7 +123,7 @@ index ebff465..8c365ca 100644
  
      def recreate_or_restart_container(self):
          self.changed = True
-@@ -678,7 +678,15 @@
+@@ -683,7 +683,15 @@ class DockerWorker(object):
  
          if not container['Status'].startswith('Up '):
              self.changed = True
@@ -140,7 +140,7 @@ index ebff465..8c365ca 100644
  
          # We do not want to detach so we wait around for container to exit
          if not self.params.get('detach'):
-@@ -806,7 +814,11 @@
+@@ -811,7 +819,11 @@ class DockerWorker(object):
                      msg="No such container: {} to stop".format(name))
          elif not container['Status'].startswith('Exited '):
              self.changed = True
@@ -153,7 +153,7 @@ index ebff465..8c365ca 100644
  
      def stop_and_remove_container(self):
          container = self.check_container()
-@@ -825,8 +837,13 @@
+@@ -830,8 +842,13 @@ class DockerWorker(object):
                  msg="No such container: {}".format(name))
          else:
              self.changed = True
@@ -171,10 +171,10 @@ index ebff465..8c365ca 100644
          if not self.check_volume():
 diff --git a/ansible/module_utils/kolla_systemd_worker.py b/ansible/module_utils/kolla_systemd_worker.py
 new file mode 100644
-index 0000000..2d8a59d
+index 000000000..875b3500b
 --- /dev/null
 +++ b/ansible/module_utils/kolla_systemd_worker.py
-@@ -0,0 +1,204 @@
+@@ -0,0 +1,208 @@
 +# Licensed under the Apache License, Version 2.0 (the "License");
 +# you may not use this file except in compliance with the License.
 +# You may obtain a copy of the License at
@@ -233,7 +233,11 @@ index 0000000..2d8a59d
 +        # checked at the module level inside kolla_docker.py
 +        restart_timeout = params.get('client_timeout', 120)
 +        restart_retries = params.get('restart_retries', 10)
-+        restart_duration = (restart_timeout // restart_retries) - 1
++
++        try:
++            restart_duration = (restart_timeout // restart_retries) - 1
++        except ZeroDivisionError:
++            restart_duretion = (restart_timeout // 10) -1
 +
 +        # container info
 +        self.container_dict = dict(
@@ -380,7 +384,7 @@ index 0000000..2d8a59d
 +                sleep(delay)
 +                elapsed += delay
 diff --git a/ansible/roles/prechecks/tasks/package_checks.yml b/ansible/roles/prechecks/tasks/package_checks.yml
-index 617dba5..ccaa529 100644
+index 617dba5ca..ccaa52932 100644
 --- a/ansible/roles/prechecks/tasks/package_checks.yml
 +++ b/ansible/roles/prechecks/tasks/package_checks.yml
 @@ -9,6 +9,13 @@
@@ -398,7 +402,7 @@ index 617dba5..ccaa529 100644
  # to check. as ansible_version does not provide major.minor in dict, we need to
  # set it as variable.
 diff --git a/ansible/roles/prechecks/tasks/service_checks.yml b/ansible/roles/prechecks/tasks/service_checks.yml
-index f6c208b..e85cbd7 100644
+index f6c208be1..e85cbd708 100644
 --- a/ansible/roles/prechecks/tasks/service_checks.yml
 +++ b/ansible/roles/prechecks/tasks/service_checks.yml
 @@ -1,4 +1,11 @@
@@ -415,7 +419,7 @@ index f6c208b..e85cbd7 100644
    command: "{{ kolla_container_engine }} --version"
 diff --git a/releasenotes/notes/add-systemd-container-control-b85dff9ec5fae313.yaml b/releasenotes/notes/add-systemd-container-control-b85dff9ec5fae313.yaml
 new file mode 100644
-index 0000000..33833f6
+index 000000000..33833f655
 --- /dev/null
 +++ b/releasenotes/notes/add-systemd-container-control-b85dff9ec5fae313.yaml
 @@ -0,0 +1,8 @@
@@ -428,10 +432,10 @@ index 0000000..33833f6
 +    Systemd control is implemented in new file
 +    ``ansible/module_utils/kolla_systemd_worker.py``.
 diff --git a/tests/test_kolla_docker.py b/tests/test_kolla_docker.py
-index d83cd5f..727caf9 100644
+index 39fa51ad9..5c02d7891 100644
 --- a/tests/test_kolla_docker.py
 +++ b/tests/test_kolla_docker.py
-@@ -25,14 +25,19 @@
+@@ -25,14 +25,19 @@ from docker import errors as docker_error
  from docker.types import Ulimit
  from oslotest import base
  
@@ -451,7 +455,7 @@ index d83cd5f..727caf9 100644
  
  
  class ModuleArgsTest(base.BaseTestCase):
-@@ -157,6 +162,7 @@
+@@ -167,6 +172,7 @@ FAKE_DATA = {
          'remove_on_exit': True,
          'volumes': None,
          'tty': False,
@@ -459,8 +463,8 @@ index d83cd5f..727caf9 100644
      },
  
      'images': [
-@@ -213,7 +219,8 @@
-     module.params = mod_param
+@@ -286,7 +292,8 @@ def get_DockerWorker(mod_param, docker_api_version='1.40'):
+ 
      with mock.patch("docker.APIClient") as MockedDockerClientClass:
          MockedDockerClientClass.return_value._version = docker_api_version
 -        dw = kd.DockerWorker(module)
@@ -469,7 +473,7 @@ index d83cd5f..727caf9 100644
          return dw
  
  
-@@ -400,11 +407,10 @@
+@@ -538,11 +545,10 @@ class TestContainer(base.BaseTestCase):
          self.dw.dc.containers = mock.MagicMock(
              return_value=self.fake_data['containers'])
          self.dw.check_container_differs = mock.MagicMock(return_value=False)
@@ -483,7 +487,7 @@ index d83cd5f..727caf9 100644
  
      def test_start_container_no_detach(self):
          self.fake_data['params'].update({'name': 'my_container',
-@@ -425,12 +431,58 @@
+@@ -563,12 +569,58 @@ class TestContainer(base.BaseTestCase):
          self.dw.dc.logs.assert_has_calls([
              mock.call(name, stdout=True, stderr=False),
              mock.call(name, stdout=False, stderr=True)])
@@ -543,7 +547,7 @@ index d83cd5f..727caf9 100644
      def test_stop_container(self):
          self.dw = get_DockerWorker({'name': 'my_container',
                                      'action': 'stop_container'})
-@@ -439,7 +491,22 @@
+@@ -577,7 +629,22 @@ class TestContainer(base.BaseTestCase):
  
          self.assertTrue(self.dw.changed)
          self.dw.dc.containers.assert_called_once_with(all=True)
@@ -567,7 +571,7 @@ index d83cd5f..727caf9 100644
          self.dw.module.fail_json.assert_not_called()
  
      def test_stop_container_already_stopped(self):
-@@ -485,7 +552,7 @@
+@@ -623,7 +690,7 @@ class TestContainer(base.BaseTestCase):
  
          self.assertTrue(self.dw.changed)
          self.dw.dc.containers.assert_called_with(all=True)
@@ -576,7 +580,7 @@ index d83cd5f..727caf9 100644
          self.dw.dc.remove_container.assert_called_once_with(
              container='my_container', force=True)
  
-@@ -497,7 +564,7 @@
+@@ -635,7 +702,7 @@ class TestContainer(base.BaseTestCase):
  
          self.assertFalse(self.dw.changed)
          self.dw.dc.containers.assert_called_with(all=True)
@@ -585,7 +589,7 @@ index d83cd5f..727caf9 100644
          self.assertFalse(self.dw.dc.remove_container.called)
  
      def test_restart_container(self):
-@@ -512,9 +579,7 @@
+@@ -650,9 +717,7 @@ class TestContainer(base.BaseTestCase):
  
          self.assertTrue(self.dw.changed)
          self.dw.dc.containers.assert_called_once_with(all=True)
@@ -596,7 +600,7 @@ index d83cd5f..727caf9 100644
  
      def test_restart_container_not_exists(self):
          self.dw = get_DockerWorker({'name': 'fake-container',
-@@ -527,6 +592,24 @@
+@@ -665,6 +730,24 @@ class TestContainer(base.BaseTestCase):
          self.dw.module.fail_json.assert_called_once_with(
              msg="No such container: fake-container")
  
@@ -621,7 +625,7 @@ index d83cd5f..727caf9 100644
      def test_remove_container(self):
          self.dw = get_DockerWorker({'name': 'my_container',
                                      'action': 'remove_container'})
-@@ -1576,3 +1659,213 @@
+@@ -1736,3 +1819,213 @@ class TestAttrComp(base.BaseTestCase):
          self.dw = get_DockerWorker(self.fake_data['params'])
          self.assertIsNone(self.dw.parse_healthcheck(
                            self.fake_data['params']['healthcheck']))
@@ -836,10 +840,10 @@ index d83cd5f..727caf9 100644
 +
 +        self.assertFalse(result)
 diff --git a/tools/cleanup-containers b/tools/cleanup-containers
-index 16f7ccf..493bdca 100755
+index 16f7ccf44..493bdcac6 100755
 --- a/tools/cleanup-containers
 +++ b/tools/cleanup-containers
-@@ -30,7 +30,9 @@
+@@ -30,7 +30,9 @@ echo "Removing ovs bridge..."
  fi
  
  echo "Stopping containers..."
@@ -850,7 +854,7 @@ index 16f7ccf..493bdca 100755
  
  echo "Removing containers..."
  (sudo docker rm -v -f ${containers_to_kill} 2>&1) > /dev/null
-@@ -46,4 +48,8 @@
+@@ -46,4 +48,8 @@ echo "Removing volumes..."
  echo "Removing link of kolla_log volume..."
  (sudo rm -f /var/log/kolla 2>&1) > /dev/null
  
@@ -860,10 +864,10 @@ index 16f7ccf..493bdca 100755
 +
  echo "All cleaned up!"
 diff --git a/tox.ini b/tox.ini
-index 8e0f225..6906314 100644
+index 19ed5df8d..694f4beb1 100644
 --- a/tox.ini
 +++ b/tox.ini
-@@ -30,7 +30,7 @@
+@@ -30,7 +30,7 @@ setenv = VIRTUAL_ENV={envdir}
           NOSE_COVER_BRANCHES=1
           NOSE_COVER_HTML=1
           NOSE_COVER_HTML_DIR={toxinidir}/cover
