@@ -22,6 +22,16 @@
     - opensearch
     - '&enable_opensearch_True'
   serial: '{{ kolla_serial|default("0") }}'
+
+  tasks:
+    - name: Elasticsearch is no longer available
+      ansible.builtin.debug:
+        msg: |
+          Due to the switch to Opensearch, the Elasticsearch service and role is
+          no longer available. This playbook is a wrapper and deploys out Opensearch
+          instead of Elasticsearch. In the future please use the opensearch playbook
+          directly and do not use the elasticsearch playbook.
+
   roles:
     - role: opensearch
       tags: opensearch
