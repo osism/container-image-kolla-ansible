@@ -5,6 +5,12 @@
     check:
       jobs:
         - ansible-lint
+        - flake8
+        - hadolint
+        - yamllint
     gate:
       jobs:
         - ansible-lint
+        - flake8
+        - hadolint
+        - yamllint
