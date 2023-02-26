@@ -24,7 +24,7 @@
         role: "admin"
 
   tasks:
-    - name: Import the service-ks-register role
+    - name: Import the service-ks-register role  # noqa run-once[task]
       ansible.builtin.import_role:
         name: service-ks-register
       vars:
@@ -33,7 +33,7 @@
         service_ks_register_users: "{{ swift_ks_users }}"
       run_once: true
 
-    - name: Creating the ResellerAdmin role
+    - name: Creating the ResellerAdmin role  # noqa run-once[task] osism-fqcn
       become: true
       kolla_toolbox:
         module_name: "os_keystone_role"
