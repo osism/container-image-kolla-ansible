@@ -6,7 +6,7 @@
     mariadb_service_container_name: "mariadb"
 
   tasks:
-    - name: Find tables to change row format to DYNAMIC
+    - name: Find tables to change row format to DYNAMIC  # noqa run-once[task]
       ansible.builtin.command: >-
         docker exec {{ mariadb_service_container_name }}
         mysql -uroot -p{{ database_password }}
@@ -20,7 +20,7 @@
       run_once: true
       no_log: true
 
-    - name: Change row format to DYNAMIC for legacy tables
+    - name: Change row format to DYNAMIC for legacy tables  # noqa run-once[task]
       ansible.builtin.command: >-
         docker exec {{ mariadb_service_container_name }}
         mysql -uroot -p{{ database_password }}
