@@ -10,8 +10,12 @@ rulesdir:
 mock_modules:
   - kolla_toolbox
 mock_roles:
+  - common
   - ironic
   - nova-cell
+  - opensearch
+  - ovn-controller
+  - ovn-db
   - service-ks-register
 warn_list:
   - name[casing]
