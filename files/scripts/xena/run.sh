@@ -3,6 +3,7 @@
 source /secrets.sh
 
 ENVIRONMENT=${ENVIRONMENT:-kolla}
+SUB=${SUB:-kolla}
 
 if [[ $# -lt 2 ]]; then
     echo usage: osism-$ENVIRONMENT ACTION SERVICE [...]
@@ -26,8 +27,8 @@ fi
 export ANSIBLE_INVENTORY=$ANSIBLE_DIRECTORY/inventory
 
 export ANSIBLE_CONFIG=$ENVIRONMENTS_DIRECTORY/ansible.cfg
-if [[ -e $ENVIRONMENTS_DIRECTORY/$ENVIRONMENT/ansible.cfg ]]; then
-    export ANSIBLE_CONFIG=$ENVIRONMENTS_DIRECTORY/$ENVIRONMENT/ansible.cfg
+if [[ -e $ENVIRONMENTS_DIRECTORY/$SUB/ansible.cfg ]]; then
+    export ANSIBLE_CONFIG=$ENVIRONMENTS_DIRECTORY/$SUB/ansible.cfg
 fi
 
 if [[ -w $ANSIBLE_INVENTORY ]]; then
@@ -39,7 +40,7 @@ if [[ -w $ANSIBLE_INVENTORY ]]; then
     rm /ansible/inventory/[0-9]*
 fi
 
-cd $ENVIRONMENTS_DIRECTORY/$ENVIRONMENT
+cd $ENVIRONMENTS_DIRECTORY/$SUB
 
 export IFS=","
 for service in $services; do
@@ -48,7 +49,7 @@ for service in $services; do
   else
     ansible-playbook \
       --vault-password-file $ENVIRONMENTS_DIRECTORY/.vault_pass \
-      -e CONFIG_DIR=$ENVIRONMENTS_DIRECTORY/$ENVIRONMENT \
+      -e CONFIG_DIR=$ENVIRONMENTS_DIRECTORY/$SUB \
       -e @$ENVIRONMENTS_DIRECTORY/configuration.yml \
       -e @$ENVIRONMENTS_DIRECTORY/secrets.yml \
       -e @secrets.yml \
