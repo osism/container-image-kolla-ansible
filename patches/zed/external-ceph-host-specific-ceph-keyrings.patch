@@ -104,3 +104,21 @@
    changed_when: false
    run_once: True
    when:
+@@ -43,7 +49,7 @@
+ 
+ - name: Copy over ceph nova keyring file
+   template:
+-    src: "{{ nova_cephx_keyring_file.stat.path }}"
++    src: "{{ nova_cephx_keyring_file.results.0.stat.path }}"
+     dest: "{{ node_config_directory }}/{{ item }}/"
+     owner: "{{ config_owner_user }}"
+     group: "{{ config_owner_group }}"
+@@ -60,7 +66,7 @@
+ 
+ - name: Copy over ceph cinder keyring file
+   template:
+-    src: "{{ cinder_cephx_keyring_file.stat.path }}"
++    src: "{{ cinder_cephx_keyring_file.results.0.stat.path }}"
+     dest: "{{ node_config_directory }}/{{ item }}/"
+     owner: "{{ config_owner_user }}"
+     group: "{{ config_owner_group }}"
