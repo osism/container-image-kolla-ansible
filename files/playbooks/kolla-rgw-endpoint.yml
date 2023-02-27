@@ -13,7 +13,6 @@
         type: "object-store"
         description: "Openstack Object Storage"
         endpoints:
-          - {'interface': 'admin', 'url': '{{ swift_admin_endpoint }}'}
           - {'interface': 'internal', 'url': '{{ swift_internal_endpoint }}'}
           - {'interface': 'public', 'url': '{{ swift_public_endpoint }}'}
 
