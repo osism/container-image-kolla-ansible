@@ -1,0 +1,41 @@
+--- a/ansible/roles/cinder/tasks/external_ceph.yml
++++ b/ansible/roles/cinder/tasks/external_ceph.yml
+@@ -8,6 +8,7 @@
+     sources:
+       - "{{ node_custom_config }}/cinder/ceph.conf"
+       - "{{ node_custom_config }}/cinder/{{ item.key }}/ceph.conf"
++      - "{{ node_custom_config }}/cinder/{{ inventory_hostname }}/ceph.conf"
+     dest: "{{ node_config_directory }}/{{ item.key }}/ceph.conf"
+     mode: "0660"
+   become: true
+--- a/ansible/roles/nova-cell/tasks/external_ceph.yml
++++ b/ansible/roles/nova-cell/tasks/external_ceph.yml
+@@ -78,11 +78,11 @@
+ - name: Copy over ceph.conf
+   vars:
+     service: "{{ nova_cell_services[item] }}"
+-  template:
+-    src: "{{ node_custom_config }}/nova/ceph.conf"
++  merge_configs:
++    sources:
++      - "{{ node_custom_config }}/nova/ceph.conf"
++      - "{{ node_custom_config }}/nova/{{ inventory_hostname }}/ceph.conf"
+     dest: "{{ node_config_directory }}/{{ item }}/"
+-    owner: "{{ config_owner_user }}"
+-    group: "{{ config_owner_group }}"
+     mode: "0660"
+   become: true
+   with_items:
+@@ -106,8 +106,10 @@
+       become: true
+
+     - name: Copy over ceph.conf (host libvirt)
+-      template:
+-        src: "{{ node_custom_config }}/nova/ceph.conf"
++      merge_configs:
++        sources:
++          - "{{ node_custom_config }}/nova/ceph.conf"
++          - "{{ node_custom_config }}/nova/{{ inventory_hostname }}/ceph.conf"
+         dest: "/etc/ceph/ceph.conf"
+         owner: "root"
+         group: "root"
