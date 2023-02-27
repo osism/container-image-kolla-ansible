@@ -1,0 +1,91 @@
+--- a/ansible/roles/cinder/tasks/external_ceph.yml
++++ b/ansible/roles/cinder/tasks/external_ceph.yml
+@@ -21,7 +21,7 @@
+ 
+ - name: Copy over Ceph keyring files for cinder-volume
+   template:
+-    src: "{{ node_custom_config }}/cinder/cinder-volume/{{ ceph_cinder_keyring }}"
++    src: "{{ item }}"
+     dest: "{{ node_config_directory }}/cinder-volume/"
+     mode: "0660"
+   become: true
+@@ -31,23 +31,43 @@
+     - cinder_services['cinder-volume'].enabled | bool
+   notify:
+     - Restart cinder-volume container
++  with_first_found:
++    - "{{ node_custom_config }}/cinder/{{ inventory_hostname }}/{{ ceph_cinder_keyring }}"
++    - "{{ node_custom_config }}/cinder/cinder-volume/{{ ceph_cinder_keyring }}"
+ 
+-- name: Copy over Ceph keyring files for cinder-backup
++- name: Copy over Ceph keyring files for cinder-backup (pt. 1)
+   template:
+-    src: "{{ node_custom_config }}/cinder/{{ item }}"
++    src: "{{ item }}"
++    dest: "{{ node_config_directory }}/cinder-backup/"
++    mode: "0660"
++  become: true
++  register: cinder_backup_ceph_keyring
++  when:
++    - external_ceph_cephx_enabled | bool
++    - inventory_hostname in groups['cinder-backup']
++    - cinder_services['cinder-backup'].enabled | bool
++  notify:
++    - Restart cinder-backup container
++  with_first_found:
++    - "{{ node_custom_config }}/cinder/{{ inventory_hostname }}/{{ ceph_cinder_keyring }}"
++    - "{{ node_custom_config }}/cinder/cinder-backup/{{ ceph_cinder_keyring }}"
++
++- name: Copy over Ceph keyring files for cinder-backup (pt. 2)
++  template:
++    src: "{{ item  }}"
+     dest: "{{ node_config_directory }}/cinder-backup/"
+     mode: "0660"
+   become: true
+   register: cinder_backup_ceph_keyring
+-  with_items:
+-    - "cinder-backup/{{ ceph_cinder_keyring }}"
+-    - "cinder-backup/{{ ceph_cinder_backup_keyring }}"
+   when:
+     - external_ceph_cephx_enabled | bool
+     - inventory_hostname in groups['cinder-backup']
+     - cinder_services['cinder-backup'].enabled | bool
+   notify:
+     - Restart cinder-backup container
++  with_first_found:
++    - "{{ node_custom_config }}/cinder/{{ inventory_hostname }}/{{ ceph_cinder_backup_keyring }}"
++    - "{{ node_custom_config }}/cinder/cinder-backup/{{ ceph_cinder_backup_keyring }}"
+ 
+ - name: Ensuring config directory has correct owner and permission
+   become: true
+--- a/ansible/roles/nova-cell/tasks/external_ceph.yml
++++ b/ansible/roles/nova-cell/tasks/external_ceph.yml
+@@ -1,7 +1,7 @@
+ ---
+ - name: Check nova keyring file
+   stat:
+-    path: "{{ node_custom_config }}/nova/{{ ceph_nova_keyring }}"
++    path: "{{ item }}"
+   delegate_to: localhost
+   run_once: True
+   register: nova_cephx_keyring_file
+@@ -9,6 +9,9 @@
+   when:
+     - nova_backend == "rbd"
+     - external_ceph_cephx_enabled | bool
++  with_first_found:
++    - "{{ node_custom_config }}/nova/{{ inventory_hostname }}/{{ ceph_nova_keyring }}"
++    - "{{ node_custom_config }}/nova/{{ ceph_nova_keyring }}"
+ 
+ - name: Check cinder keyring file
+   stat:
+@@ -20,6 +23,9 @@
+   when:
+     - cinder_backend_ceph | bool
+     - external_ceph_cephx_enabled | bool
++  with_first_found:
++    - "{{ node_custom_config }}/nova/{{ inventory_hostname }}/{{ ceph_cinder_keyring }}"
++    - "{{ node_custom_config }}/nova/{{ ceph_cinder_keyring }}"
+ 
+ - name: Extract nova key from file
+   set_fact:
