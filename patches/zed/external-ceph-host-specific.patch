@@ -1,8 +1,6 @@
-diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
-index 88cb92b36..17d2a42fe 100644
 --- a/ansible/group_vars/all.yml
 +++ b/ansible/group_vars/all.yml
-@@ -1081,6 +1081,9 @@ ceph_gnocchi_keyring: "ceph.client.gnocchi.keyring"
+@@ -1087,6 +1087,9 @@ ceph_gnocchi_keyring: "ceph.client.gnocchi.keyring"
  ceph_manila_keyring: "ceph.client.manila.keyring"
  ceph_nova_keyring: "{{ ceph_cinder_keyring }}"
  
@@ -12,8 +10,6 @@ index 88cb92b36..17d2a42fe 100644
  #####################
  # VMware support
  ######################
-diff --git a/ansible/roles/cinder/tasks/external_ceph.yml b/ansible/roles/cinder/tasks/external_ceph.yml
-index c4da309d2..7346278ac 100644
 --- a/ansible/roles/cinder/tasks/external_ceph.yml
 +++ b/ansible/roles/cinder/tasks/external_ceph.yml
 @@ -8,6 +8,7 @@
@@ -82,8 +78,6 @@ index c4da309d2..7346278ac 100644
  
  - name: Ensuring config directory has correct owner and permission
    become: true
-diff --git a/ansible/roles/nova-cell/tasks/config.yml b/ansible/roles/nova-cell/tasks/config.yml
-index ed7b495db..cef8a7320 100644
 --- a/ansible/roles/nova-cell/tasks/config.yml
 +++ b/ansible/roles/nova-cell/tasks/config.yml
 @@ -18,7 +18,7 @@
@@ -95,11 +89,9 @@ index ed7b495db..cef8a7320 100644
      - inventory_hostname in groups[nova_cell_compute_group]
  
  - name: Check if policies shall be overwritten
-diff --git a/ansible/roles/nova-cell/tasks/external_ceph.yml b/ansible/roles/nova-cell/tasks/external_ceph.yml
-index 07324e99c..e1ac460aa 100644
 --- a/ansible/roles/nova-cell/tasks/external_ceph.yml
 +++ b/ansible/roles/nova-cell/tasks/external_ceph.yml
-@@ -1,32 +1,35 @@
+@@ -1,49 +1,33 @@
  ---
  - name: Check nova keyring file
    stat:
@@ -118,41 +110,39 @@ index 07324e99c..e1ac460aa 100644
  
  - name: Check cinder keyring file
    stat:
-     path: "{{ node_custom_config }}/nova/{{ ceph_cinder_keyring }}"
+-    path: "{{ node_custom_config }}/nova/{{ ceph_cinder_keyring }}"
++    path: "{{ item }}"
    delegate_to: localhost
 -  run_once: True
    register: cinder_cephx_keyring_file
    failed_when: not cinder_cephx_keyring_file.stat.exists
    when:
 -    - cinder_backend_ceph | bool
+-    - external_ceph_cephx_enabled | bool
+-
+-- name: Extract nova key from file
+-  set_fact:
+-    nova_cephx_raw_key:
+-      "{{ lookup('template', nova_cephx_keyring_file.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') }}"
+-  changed_when: false
+-  run_once: True
+-  when:
+-    - nova_backend == "rbd"
+-    - external_ceph_cephx_enabled | bool
+-
+-- name: Extract cinder key from file
+-  set_fact:
+-    cinder_cephx_raw_key:
+-      "{{ lookup('file', cinder_cephx_keyring_file.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') }}"
+-  changed_when: false
+-  run_once: True
+-  when:
+-    - cinder_backend_ceph | bool
 +    - cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool
      - external_ceph_cephx_enabled | bool
 +  with_first_found:
 +    - "{{ node_custom_config }}/nova/{{ inventory_hostname }}/{{ ceph_cinder_keyring }}"
 +    - "{{ node_custom_config }}/nova/{{ ceph_cinder_keyring }}"
- 
- - name: Extract nova key from file
-   set_fact:
-     nova_cephx_raw_key:
--      "{{ lookup('template', nova_cephx_keyring_file.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') }}"
-+      "{{ lookup('template', nova_cephx_keyring_file.results.0.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') }}"
-   changed_when: false
--  run_once: True
-   when:
-     - nova_backend == "rbd"
-     - external_ceph_cephx_enabled | bool
-@@ -34,16 +37,15 @@
- - name: Extract cinder key from file
-   set_fact:
-     cinder_cephx_raw_key:
--      "{{ lookup('file', cinder_cephx_keyring_file.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') }}"
-+      "{{ lookup('file', cinder_cephx_keyring_file.results.0.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') }}"
-   changed_when: false
--  run_once: True
-   when:
--    - cinder_backend_ceph | bool
-+    - cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool
-     - external_ceph_cephx_enabled | bool
  
  - name: Copy over ceph nova keyring file
    template:
@@ -161,7 +151,7 @@ index 07324e99c..e1ac460aa 100644
      dest: "{{ node_config_directory }}/{{ item }}/"
      owner: "{{ config_owner_user }}"
      group: "{{ config_owner_group }}"
-@@ -60,7 +62,7 @@
+@@ -60,7 +44,7 @@
  
  - name: Copy over ceph cinder keyring file
    template:
@@ -170,7 +160,7 @@ index 07324e99c..e1ac460aa 100644
      dest: "{{ node_config_directory }}/{{ item }}/"
      owner: "{{ config_owner_user }}"
      group: "{{ config_owner_group }}"
-@@ -78,11 +80,11 @@
+@@ -78,11 +62,11 @@
  - name: Copy over ceph.conf
    vars:
      service: "{{ nova_cell_services[item] }}"
@@ -187,7 +177,7 @@ index 07324e99c..e1ac460aa 100644
      mode: "0660"
    become: true
    with_items:
-@@ -106,8 +108,10 @@
+@@ -106,8 +90,10 @@
        become: true
  
      - name: Copy over ceph.conf (host libvirt)
@@ -200,7 +190,7 @@ index 07324e99c..e1ac460aa 100644
          dest: "/etc/ceph/ceph.conf"
          owner: "root"
          group: "root"
-@@ -151,7 +155,7 @@
+@@ -151,7 +137,7 @@
            enabled: "{{ nova_backend == 'rbd' }}"
          - uuid: "{{ cinder_rbd_secret_uuid }}"
            name: "client.cinder secret"
@@ -209,17 +199,21 @@ index 07324e99c..e1ac460aa 100644
        notify: "{{ libvirt_restart_handlers }}"
  
      - name: Pushing secrets key for libvirt
-@@ -176,7 +180,7 @@
+@@ -172,11 +158,11 @@
+         # NOTE(yoctozepto): 'default' filter required due to eager evaluation of item content
+         # which will be undefined if the applicable condition is False
+         - uuid: "{{ rbd_secret_uuid }}"
+-          result: "{{ nova_cephx_raw_key | default }}"
++          result:  "{{ lookup('template', nova_cephx_keyring_file.results.0.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') }} | default"
            enabled: "{{ nova_backend == 'rbd' }}"
          - uuid: "{{ cinder_rbd_secret_uuid }}"
-           result: "{{ cinder_cephx_raw_key | default }}"
+-          result: "{{ cinder_cephx_raw_key | default }}"
 -          enabled: "{{ cinder_backend_ceph }}"
++          result: "{{ lookup('file', cinder_cephx_keyring_file.results.0.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') | default }}"
 +          enabled: "{{ cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool }}"
        notify: "{{ libvirt_restart_handlers }}"
        no_log: True
    vars:
-diff --git a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2 b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
-index d2ddc9e6f..94845fb86 100644
 --- a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
 +++ b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
 @@ -42,7 +42,7 @@
