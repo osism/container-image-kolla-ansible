@@ -1,0 +1,10 @@
+diff --git a/ansible/roles/horizon/templates/horizon.conf.j2 b/ansible/roles/horizon/templates/horizon.conf.j2
+index 3d7aa08ec..ec1910423 100644
+--- a/ansible/roles/horizon/templates/horizon.conf.j2
++++ b/ansible/roles/horizon/templates/horizon.conf.j2
+@@ -1,4 +1,4 @@
+-{% set python_path = '/var/lib/kolla/venv/lib/python' + distro_python_version + '/site-packages' %}
++{% set python_path = '/var/lib/kolla/venv/lib/python3.10/site-packages' %}
+
+ {% if horizon_enable_tls_backend | bool %}
+ {% if kolla_base_distro in ['centos', 'rocky']  %}
