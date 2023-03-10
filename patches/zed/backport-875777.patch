@@ -1,0 +1,53 @@
+From 6768b760ab77d1642329a86f595ef33b26e6eb42 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Tue, 28 Feb 2023 19:09:40 +0100
+Subject: [PATCH] Add neutron_ovn_availability_zones parameter
+
+With the new ``neutron_ovn_availability_zones`` parameter it is possible
+to define network availability zones for OVN. Further details can be found
+in the Neutron OVN documentation:
+https://docs.openstack.org/neutron/latest/admin/ovn/availability_zones.html#how-to-configure-it
+
+Change-Id: I203e0d400a3218d0b4a41f2a948207032c4febec
+---
+
+diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
+index 8ddb843..ca57306 100644
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -1012,6 +1012,9 @@
+   sriovnet1: "{{ tunnel_interface }}"
+ neutron_enable_tls_backend: "{{ kolla_enable_tls_backend }}"
+ 
++# Set OVN network availability zones
++neutron_ovn_availability_zones: []
++
+ #######################
+ # Nova options
+ #######################
+diff --git a/ansible/roles/ovn-controller/tasks/setup-ovs.yml b/ansible/roles/ovn-controller/tasks/setup-ovs.yml
+index 82f7829..5ac61a1 100644
+--- a/ansible/roles/ovn-controller/tasks/setup-ovs.yml
++++ b/ansible/roles/ovn-controller/tasks/setup-ovs.yml
+@@ -14,7 +14,7 @@
+   vars:
+     ovn_mappings: "{% for bridge in neutron_bridge_name.split(',') %}physnet{{ loop.index0 + 1 }}:{{ bridge }}{% if not loop.last %},{% endif %}{% endfor %}"
+     ovn_macs: "{% for bridge in neutron_bridge_name.split(',') %}physnet{{ loop.index0 + 1 }}:{{ ovn_base_mac | random_mac(seed=inventory_hostname + bridge) }}{% if not loop.last %},{% endif %}{% endfor %}"
+-    ovn_cms_opts: "{{ 'enable-chassis-as-gw' if inventory_hostname in groups['ovn-controller-network'] else '' }}"
++    ovn_cms_opts: "{{ 'enable-chassis-as-gw' if inventory_hostname in groups['ovn-controller-network'] else '' }}{{ ',availability-zones=' + neutron_ovn_availability_zones | join(',') if inventory_hostname in groups['ovn-controller-network'] and neutron_ovn_availability_zones }}"
+   become: true
+   kolla_toolbox:
+     container_engine: "{{ kolla_container_engine }}"
+diff --git a/releasenotes/notes/neutron_ovn_availability_zones-0271d74dbc4f957e.yaml b/releasenotes/notes/neutron_ovn_availability_zones-0271d74dbc4f957e.yaml
+new file mode 100644
+index 0000000..b03fee5
+--- /dev/null
++++ b/releasenotes/notes/neutron_ovn_availability_zones-0271d74dbc4f957e.yaml
+@@ -0,0 +1,7 @@
++---
++features:
++  - |
++    With the new ``neutron_ovn_availability_zones`` parameter it is possible
++    to define network availability zones for OVN. Further details can be found
++    in the Neutron OVN documentation:
++    https://docs.openstack.org/neutron/latest/admin/ovn/availability_zones.html#how-to-configure-it
