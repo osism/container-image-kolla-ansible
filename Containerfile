@@ -203,7 +203,8 @@ RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
     && rm /tmp/refresh-containers.yml
 
 # copy ara configuration
-RUN python3 -m ara.setup.env > /ansible/ara.env
+COPY files/ara.env /ansible/ara.env
+RUN python3 -m ara.setup.env >> /ansible/ara.env
 
 # prepare list of playbooks
 RUN python3 /src/render-playbooks.py
