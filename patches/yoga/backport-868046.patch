@@ -13,10 +13,10 @@ diff --git a/ansible/roles/ironic/defaults/main.yml b/ansible/roles/ironic/defau
 index ad73593..2502be0 100644
 --- a/ansible/roles/ironic/defaults/main.yml
 +++ b/ansible/roles/ironic/defaults/main.yml
-@@ -290,6 +290,7 @@
- ironic_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
- ironic_dev_mode: "{{ kolla_dev_mode }}"
+@@ -277,6 +277,7 @@ ironic_dev_mode: "{{ kolla_dev_mode }}"
+ ironic_inspector_dev_mode: "{{ ironic_dev_mode }}"
  ironic_source_version: "{{ kolla_source_version }}"
+ ironic_inspector_source_version: "{{ ironic_source_version }}"
 +ironic_tftp_cmdline_extras: ""
  
  
