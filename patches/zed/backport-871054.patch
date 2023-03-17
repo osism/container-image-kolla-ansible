@@ -15,11 +15,14 @@ diff --git a/ansible/roles/ironic/defaults/main.yml b/ansible/roles/ironic/defau
 index 7684cf9..54078c1 100644
 --- a/ansible/roles/ironic/defaults/main.yml
 +++ b/ansible/roles/ironic/defaults/main.yml
-@@ -296,6 +296,7 @@
- ironic_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
- ironic_dev_mode: "{{ kolla_dev_mode }}"
- ironic_source_version: "{{ kolla_source_version }}"
+@@ -291,6 +291,7 @@ ironic_inspector_pxe_filter: "{% if enable_neutron | bool %}dnsmasq{% else %}noo
+ ####################
+ ## Kolla
+ #####################
 +ironic_agent_files_directory: "{{ node_custom_config }}"
+ ironic_inspector_git_repository: "{{ kolla_dev_repos_git }}/ironic-inspector"
+ ironic_git_repository: "{{ kolla_dev_repos_git }}/{{ project_name }}"
+ ironic_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
  
  
  ####################
