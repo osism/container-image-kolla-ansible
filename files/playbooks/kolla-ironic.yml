@@ -1,6 +1,7 @@
 ---
 - name: Download images
-  hosts: manager
+  hosts: localhost
+  connection: local
   gather_facts: false
   run_once: true
   tags: download-images
@@ -11,7 +12,7 @@
     enable_ironic_agent_download_images: false
     # NOTE: This is a parameter of kolla-ansible. It is set here by default
     #       so that the playbook is functional independently of osism/ansible-defaults.
-    ironic_agent_files_directory: /share/ironic
+    ironic_agent_files_directory: /share
     ironic_agent_distribution: centos9
     ironic_agent_initramfs_checksum: "sha256:https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.initramfs.sha256"
     ironic_agent_initramfs_url: "https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.initramfs"
@@ -21,7 +22,7 @@
   tasks:
     - name: Ensure the destination directory exists
       ansible.builtin.file:
-        path: "{{ ironic_agent_files_directory }}"
+        path: "{{ ironic_agent_files_directory }}/ironic/"
         state: directory
         mode: 0755
       when: enable_ironic_agent_download_images|bool
@@ -29,7 +30,7 @@
     - name: Download ironic-agent initramfs
       ansible.builtin.get_url:
         url: "{{ ironic_agent_initramfs_url }}"
-        dest: "{{ ironic_agent_files_directory }}/ironic-agent.initramfs"
+        dest: "{{ ironic_agent_files_directory }}/ironic/ironic-agent.initramfs"
         checksum: "{{ ironic_agent_initramfs_checksum }}"
         mode: 0644
       when: enable_ironic_agent_download_images|bool
@@ -37,7 +38,7 @@
     - name: Download ironic-agent kernel
       ansible.builtin.get_url:
         url: "{{ ironic_agent_kernel_url }}"
-        dest: "{{ ironic_agent_files_directory }}/ironic-agent.kernel"
+        dest: "{{ ironic_agent_files_directory }}/ironic/ironic-agent.kernel"
         checksum: "{{ ironic_agent_kernel_checksum }}"
         mode: 0644
       when: enable_ironic_agent_download_images|bool
