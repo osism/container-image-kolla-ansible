@@ -306,7 +306,7 @@ new file mode 100644
 index 000000000..7043bb265
 --- /dev/null
 +++ b/ansible/roles/dcap/tasks/precheck.yml
-@@ -0,0 +1,24 @@
+@@ -0,0 +1,25 @@
 +---
 +- name: Get container facts
 +  vars:
@@ -314,6 +314,7 @@ index 000000000..7043bb265
 +    service: "{{ dcap_services[service_name] }}"
 +  become: true
 +  kolla_container_facts:
++    container_engine: "{{ kolla_container_engine }}"
 +    name:
 +      - "{{ service.container_name }}"
 +  register: container_facts
