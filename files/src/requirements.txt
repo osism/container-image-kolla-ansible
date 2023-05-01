@@ -1,6 +1,5 @@
 Jinja2==3.1.2
 PyYAML==6.0
-osism==0.20230501.0
 pottery==3.0.0
 requests==2.29.0
 yq==3.2.2
