@@ -3,8 +3,7 @@ elasticsearch_address: "{{ kolla_internal_fqdn }}"
 enable_elasticsearch: "{{ 'yes' if enable_central_logging | bool or enable_osprofiler | bool or enable_skydive | bool or enable_monasca | bool or (enable_cloudkitty | bool and cloudkitty_storage_backend == 'elasticsearch') else 'no' }}"
 
 # NOTE: Mitigating the log4j Vulnerability (CVE-2021-44228/CVE-2021-45046)
-es_java_opts: "-Dlog4j2.formatMsgNoLookups=true {% if es_heap_size %}-Xms{{ es_heap_size }} -Xmx{{ es_
-heap_size }}{%endif%}"
+es_java_opts: "-Dlog4j2.formatMsgNoLookups=true {% if es_heap_size %}-Xms{{ es_heap_size }} -Xmx{{ es_heap_size }}{%endif%}"
 
 enable_elasticsearch_curator: "yes"
 elasticsearch_curator_soft_retention_period_days: 5
