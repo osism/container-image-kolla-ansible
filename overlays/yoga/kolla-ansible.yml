@@ -14,3 +14,6 @@ enable_kibana_external: "{{ enable_kibana | bool }}"
 
 kibana_user: "kibana"
 kibana_log_prefix: "flog"
+
+elasticsearch_connection_string: "elasticsearch://{{ elasticsearch_address | put_address_in_context('url') }}:{{ elasticsearch_port }}"
+osprofiler_backend_connection_string: "{{ redis_connection_string if osprofiler_backend == 'redis' else elasticsearch_connection_string }}"
