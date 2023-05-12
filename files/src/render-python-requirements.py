@@ -6,15 +6,15 @@ import yaml
 # get environment parameters
 
 OPENSTACK_VERSION = os.environ.get("OPENSTACK_VERSION", "master")
-OSISM_VERSION = os.environ.get("OSISM_VERSION", "latest")
+VERSION = os.environ.get("VERSION", "latest")
 
 # load versions files from release repository
 
-with open("/release/%s/base.yml" % OSISM_VERSION, "rb") as fp:
+with open("/release/%s/base.yml" % VERSION, "rb") as fp:
     versions = yaml.load(fp, Loader=yaml.FullLoader)
 
 with open(
-    "/release/%s/openstack-%s.yml" % (OSISM_VERSION, OPENSTACK_VERSION), "rb"
+    "/release/%s/openstack-%s.yml" % (VERSION, OPENSTACK_VERSION), "rb"
 ) as fp:
     openstack_versions = yaml.load(fp, Loader=yaml.FullLoader)
 
@@ -31,7 +31,7 @@ result = template.render(
         "ansible_version": openstack_versions["ansible_version"],
         "ansible_core_version": openstack_versions["ansible_core_version"],
         "osism_projects": versions["osism_projects"],
-        "version": OSISM_VERSION,
+        "version": VERSION,
     }
 )
 with open("/requirements.txt", "w+") as fp:
