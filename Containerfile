@@ -26,6 +26,7 @@ COPY files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
 COPY files/playbooks/kolla-bifrost-keypair.yml /ansible/kolla-bifrost-keypair.yml
 COPY files/playbooks/kolla-facts.yml /ansible/kolla-facts.yml
 COPY files/playbooks/kolla-ironic.yml /ansible/kolla-ironic.yml
+COPY files/playbooks/kolla-iscsi.yml /ansible/kolla-iscsi.yml
 COPY files/playbooks/kolla-loadbalancer-*.yml /ansible/
 COPY files/playbooks/kolla-mariadb-dynamic-rows.yml /ansible/kolla-mariadb-dynamic-rows.yml
 COPY files/playbooks/kolla-nova-compute.yml /ansible/kolla-nova-compute.yml
