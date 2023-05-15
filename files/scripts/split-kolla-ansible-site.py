@@ -14,6 +14,7 @@ UNSUPPORTED_ROLES = [
     "freezer",
     "hacluster",
     "ironic",
+    "iscsi",
     "kafka",
     "masakari",
     "monasca",
