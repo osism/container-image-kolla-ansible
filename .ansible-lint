@@ -21,5 +21,4 @@ mock_roles:
 warn_list:
   - name[casing]
   - template-instead-of-copy
-skip_list:
-  - schema
+skip_list: []
