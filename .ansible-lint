@@ -22,6 +22,5 @@ warn_list:
   - name[casing]
   - template-instead-of-copy
 skip_list:
-  - parser-error  # AnsibleParserError.
   - fqcn-builtins
   - schema
