@@ -20,7 +20,7 @@
   hosts:
     - ovn-controller
     - '&enable_ovn_True'
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
   roles:
     - role: ovn-controller
       tags:
@@ -34,7 +34,7 @@
     - ovn-northd
     - ovn-sb-db
     - '&enable_ovn_True'
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
   roles:
     - role: ovn-db
       tags:

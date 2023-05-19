@@ -25,7 +25,7 @@
         path: "{{ ironic_agent_files_directory }}/ironic/"
         state: directory
         mode: 0755
-      when: enable_ironic_agent_download_images|bool
+      when: enable_ironic_agent_download_images | bool
 
     - name: Download ironic-agent initramfs
       ansible.builtin.get_url:
@@ -33,7 +33,7 @@
         dest: "{{ ironic_agent_files_directory }}/ironic/ironic-agent.initramfs"
         checksum: "{{ ironic_agent_initramfs_checksum }}"
         mode: 0644
-      when: enable_ironic_agent_download_images|bool
+      when: enable_ironic_agent_download_images | bool
 
     - name: Download ironic-agent kernel
       ansible.builtin.get_url:
@@ -41,7 +41,7 @@
         dest: "{{ ironic_agent_files_directory }}/ironic/ironic-agent.kernel"
         checksum: "{{ ironic_agent_kernel_checksum }}"
         mode: 0644
-      when: enable_ironic_agent_download_images|bool
+      when: enable_ironic_agent_download_images | bool
 
 - name: Group hosts based on configuration
   hosts: all
@@ -68,7 +68,7 @@
     - ironic-tftp
     - ironic-http
     - '&enable_ironic_True'
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
   roles:
     - role: ironic
       tags: ironic

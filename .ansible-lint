@@ -23,6 +23,5 @@ warn_list:
   - template-instead-of-copy
 skip_list:
   - parser-error  # AnsibleParserError.
-  - var-spacing  # Variables should have spaces before and after: {{ var_name }}.
   - fqcn-builtins
   - schema
