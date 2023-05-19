@@ -21,7 +21,7 @@
   hosts:
     - opensearch
     - '&enable_opensearch_True'
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
 
   tasks:
     - name: Elasticsearch is no longer available

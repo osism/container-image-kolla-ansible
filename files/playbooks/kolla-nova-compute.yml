@@ -83,7 +83,7 @@
   gather_facts: false
   hosts:
     - compute
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
   roles:
     - role: nova-cell
       when: enable_nova | bool

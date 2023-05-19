@@ -20,7 +20,7 @@
   hosts:
     - loadbalancer
     - '&enable_loadbalancer_True'
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
   tags:
     - haproxy
     - keepalived

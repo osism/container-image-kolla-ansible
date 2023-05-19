@@ -92,7 +92,7 @@
 - name: Apply common role
   gather_facts: false
   hosts: all
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
   roles:
     - role: common
       tags: infrastructure
@@ -100,7 +100,7 @@
 - name: Apply infrastructure roles
   gather_facts: false
   hosts: control
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
   roles:
     - role: elasticsearch
       tags: infrastructure
@@ -118,7 +118,7 @@
       tags: infrastructure
     - role: ovn
       tags: infrastructure
-      when: neutron_plugin_agent|default('openvswitch') == 'ovn'
+      when: neutron_plugin_agent | default('openvswitch') == 'ovn'
 
 - name: Run rabbitmq playbook
   ansible.builtin.import_playbook: kolla-rabbitmq.yml
@@ -127,7 +127,7 @@
 - name: Apply base openstack roles
   gather_facts: false
   hosts: control
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
   roles:
     - role: keystone
       tags: openstack

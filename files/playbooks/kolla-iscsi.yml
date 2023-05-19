@@ -20,7 +20,7 @@
     - iscsid
     - tgtd
     - '&enable_iscsid_True'
-  serial: '{{ kolla_serial|default("0") }}'
+  serial: '{{ kolla_serial | default("0") }}'
   roles:
     - role: iscsi
       tags: iscsi
