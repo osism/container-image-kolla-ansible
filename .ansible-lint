@@ -22,5 +22,4 @@ warn_list:
   - name[casing]
   - template-instead-of-copy
 skip_list:
-  - fqcn-builtins
   - schema
