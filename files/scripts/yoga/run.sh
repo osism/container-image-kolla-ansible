@@ -19,6 +19,7 @@ shift
 ANSIBLE_DIRECTORY=/ansible
 CONFIGURATION_DIRECTORY=/opt/configuration
 ENVIRONMENTS_DIRECTORY=$CONFIGURATION_DIRECTORY/environments
+VAULT=${VAULT:-$ENVIRONMENTS_DIRECTORY/.vault_pass}
 
 if [[ -e /ansible/ara.env ]]; then
     source /ansible/ara.env
@@ -48,7 +49,7 @@ for service in $services; do
     echo "warning: playbook for service $service does not exist"
   else
     ansible-playbook \
-      --vault-password-file $ENVIRONMENTS_DIRECTORY/.vault_pass \
+      --vault-password-file $VAULT \
       -e CONFIG_DIR=$ENVIRONMENTS_DIRECTORY/$SUB \
       -e @$ENVIRONMENTS_DIRECTORY/configuration.yml \
       -e @$ENVIRONMENTS_DIRECTORY/secrets.yml \
