@@ -9,4 +9,4 @@ redis = Redis(host="redis", port="6379")
 ansible_vault_password = redis.get("ansible_vault_password")
 
 if ansible_vault_password:
-    print(ansible_vault_password)
+    print(ansible_vault_password.decode("utf-8"))
