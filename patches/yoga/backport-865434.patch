@@ -14,17 +14,17 @@ Change-Id: I5cd772f4fb80a0e200fb24d67be735ca81e3fdeb
 ---
 
 diff --git a/ansible/roles/rabbitmq/defaults/main.yml b/ansible/roles/rabbitmq/defaults/main.yml
-index 867e6cd..388369f 100644
+index 1c5b80125..caef98a83 100644
 --- a/ansible/roles/rabbitmq/defaults/main.yml
 +++ b/ansible/roles/rabbitmq/defaults/main.yml
-@@ -84,6 +84,7 @@
+@@ -84,6 +84,7 @@ rabbitmq_server_additional_erl_args: "+S 2:2 +sbwt none +sbwtdcpu none +sbwtdio
  rabbitmq_tls_options: {}
  # To avoid split-brain
  rabbitmq_cluster_partition_handling: "pause_minority"
 +rabbitmq_extra_config: {}
- 
- ####################
- # Plugins
+ # For consistency use "when-synced", for availability use "always"
+ # The rabbitmq default for ha queues is "when-synced"
+ # More details see:
 diff --git a/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2 b/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2
 index eef0db9..e610313 100644
 --- a/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2
