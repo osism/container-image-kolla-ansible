@@ -14,3 +14,9 @@
         - flake8
         - hadolint
         - yamllint
+    periodic-daily:
+      jobs:
+        - ansible-lint
+        - flake8
+        - hadolint
+        - yamllint
