@@ -23,3 +23,4 @@ warn_list:
   - template-instead-of-copy
 skip_list:
   - schema
+  - var-naming[no-role-prefix]
