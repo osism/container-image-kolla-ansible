@@ -204,6 +204,10 @@ RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
     && find /ansible/roles/ -name config.yml -print0 | xargs -0 -I{} dirname {} | xargs -I{} cp /tmp/refresh-containers.yml {}/refresh-containers.yml \
     && rm /tmp/refresh-containers.yml
 
+
+# always enable the json_stats calback plugin
+RUN ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.10/dist-packages/ansible/plugins/callback
+
 # copy ara configuration
 COPY files/ara.env /ansible/ara.env
 RUN python3 -m ara.setup.env >> /ansible/ara.env
