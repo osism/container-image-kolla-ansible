@@ -1,5 +1,4 @@
-ARG UBUNTU_VERSION=22.04
-FROM ubuntu:${UBUNTU_VERSION}
+FROM python:3.11-slim
 
 ARG IS_RELEASE
 ARG OPENSTACK_VERSION
@@ -206,7 +205,7 @@ RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
 
 
 # always enable the json_stats calback plugin
-RUN ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.10/dist-packages/ansible/plugins/callback
+RUN ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.11/site-packages/ansible/plugins/callback
 
 # copy ara configuration
 COPY files/ara.env /ansible/ara.env
