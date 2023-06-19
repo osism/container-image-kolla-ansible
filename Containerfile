@@ -68,6 +68,7 @@ RUN apt-get update \
         libyaml-dev \
         openssh-client \
         patch \
+        procps \
         python3-dev \
         python3-pip \
         python3-setuptools \
