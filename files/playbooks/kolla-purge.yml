@@ -39,8 +39,9 @@
     #       set -o pipefail is not usable (Illegal option). Therefore,
     #       we ignore the ansible-lint rule risky-shell-pipe at this
     #       point.
-    - name: Get running qemu processes  # noqa risky-shell-pipe
+    - name: Get running qemu processes
       ansible.builtin.shell: |
+        set -o pipefail
         ps -ef | grep -v grep | grep -w qemu | awk '{print $2}'
       register: running_processes
       changed_when: false
