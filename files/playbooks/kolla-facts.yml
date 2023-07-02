@@ -5,6 +5,8 @@
   tasks:
     - name: Gather facts for all hosts
       ansible.builtin.setup:
+        filter: "{{ osism_setup_filter | default('') }}"
+        gather_subset: "{{ osism_setup_gather_subset | default('') }}"
 
 - name: Gather facts for all hosts (if using --limit)
   hosts: all
@@ -12,6 +14,8 @@
   tasks:
     - name: Gather facts for all hosts (if using --limit)
       ansible.builtin.setup:
+        filter: "{{ osism_setup_filter | default('') }}"
+        gather_subset: "{{ osism_setup_gather_subset | default('') }}"
       delegate_facts: true
       delegate_to: "{{ item }}"
       with_items: "{{ groups['all'] }}"
