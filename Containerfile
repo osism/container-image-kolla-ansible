@@ -48,7 +48,6 @@ COPY files/refresh-containers.yml /tmp/refresh-containers.yml
 
 COPY files/src /src
 
-# fix hadolint DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # show motd
@@ -142,7 +141,6 @@ RUN mkdir -p \
         /usr/share/ansible/plugins/mitogen
 
 # volumes
-# hadolint ignore=DL3059
 RUN mkdir -p \
         /ansible/cache \
         /ansible/logs \
@@ -160,12 +158,12 @@ RUN ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /us
 RUN if [ $OPENSTACK_VERSION = "master" ]; then git clone https://github.com/openstack/kolla-ansible /repository; fi \
     && if [ $OPENSTACK_VERSION != "master" ]; then git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository; fi
 
-# hadolint ignore=DL3059
+# hadolint ignore=DL3003
 RUN for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do \
         echo $patchfile; \
         ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1; \
         ( cd /repository && patch --forward --batch -p1 ) < $patchfile; \
-       done
+    done
 
 # install mitogen ansible plugin
 
