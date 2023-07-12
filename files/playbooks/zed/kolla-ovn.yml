@@ -1,6 +1,9 @@
 ---
 - name: Group hosts based on configuration
-  hosts: all
+  hosts:
+    - ovn-nb-db
+    - ovn-northd
+    - ovn-sb-db
   gather_facts: false
   tasks:
     - name: Group hosts based on Kolla action

@@ -72,7 +72,9 @@ for play in site:
                 group_hosts_based_on_configuration
             )
 
-            local_group_hosts_based_on_configuration["hosts"] = play["hosts"]
+            local_group_hosts_based_on_configuration["hosts"] = [
+                x for x in play["hosts"] if "&enable_" not in x and "_True" not in x
+            ]
 
             with open(os.path.join(DSTPATH, "kolla-%s.yml" % name), "w+") as fp:
                 fp.write("---\n")
