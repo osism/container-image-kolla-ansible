@@ -1,5 +1,6 @@
-import re
+import copy
 import os
+import re
 
 import ruamel.yaml
 
@@ -60,17 +61,23 @@ for play in site:
             print("ROLE %s IS NOT SUPPORTED" % name)
 
         else:
-            play["gather_facts"] = "no"
+            play["gather_facts"] = "false"
             dump = ruamel.yaml.dump(
                 [play], Dumper=ruamel.yaml.RoundTripDumper, indent=4, block_seq_indent=2
             )
             if name == "rabbitmq(outward)":
                 name = "rabbitmq-outward"
 
+            local_group_hosts_based_on_configuration = copy.deepcopy(
+                group_hosts_based_on_configuration
+            )
+
+            local_group_hosts_based_on_configuration["hosts"] = play["hosts"]
+
             with open(os.path.join(DSTPATH, "kolla-%s.yml" % name), "w+") as fp:
                 fp.write("---\n")
 
-                for key, value in group_hosts_based_on_configuration.items():
+                for key, value in local_group_hosts_based_on_configuration.items():
                     if key == "tasks" and type(value) == list:
                         for task in [
                             x
@@ -84,7 +91,7 @@ for play in site:
                             task["with_items"] = v
 
                 dump_group_hosts_based_on_configuration = ruamel.yaml.dump(
-                    [group_hosts_based_on_configuration],
+                    [local_group_hosts_based_on_configuration],
                     Dumper=ruamel.yaml.RoundTripDumper,
                     indent=4,
                     block_seq_indent=2,
