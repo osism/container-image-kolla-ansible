@@ -1,6 +1,7 @@
 ---
 - name: Group hosts based on configuration
-  hosts: all
+  hosts:
+    - opensearch
   gather_facts: false
   tasks:
     - name: Group hosts based on Kolla action

@@ -44,7 +44,12 @@
       when: enable_ironic_agent_download_images | bool
 
 - name: Group hosts based on configuration
-  hosts: all
+  hosts:
+    - ironic-api
+    - ironic-conductor
+    - ironic-inspector
+    - ironic-tftp
+    - ironic-http
   gather_facts: false
   tasks:
     - name: Group hosts based on Kolla action

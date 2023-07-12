@@ -1,6 +1,8 @@
 ---
 - name: Group hosts based on configuration
-  hosts: all
+  hosts:
+    - iscsid
+    - tgtd
   gather_facts: false
   tasks:
     - name: Group hosts based on Kolla action
