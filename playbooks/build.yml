@@ -1,0 +1,59 @@
+---
+- name: Build kolla-ansible image
+  hosts: all
+
+  tasks:
+    - name: Run build script
+      ansible.builtin.shell:
+        executable: /bin/bash
+        chdir: "{{ zuul.project.src_dir }}"
+        cmd: |
+          set -e
+          set -o pipefail
+          set -x
+
+          CREATED=$(date --rfc-3339=ns)
+          REVISION=$(git rev-parse --short HEAD)
+
+          # NOTE: For builds for a specific release, the OpenStack version is taken
+          #       from the release repository.
+          if [[ $VERSION != "latest" ]]; then
+              filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/$VERSION/openstack.yml)
+              OPENSTACK_VERSION=$(curl -L https://raw.githubusercontent.com/osism/release/main/$VERSION/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }')
+          fi
+
+          . defaults/$OPENSTACK_VERSION.sh
+
+          if [[ -n $REGISTRY ]]; then
+              REPOSITORY="$REGISTRY/$REPOSITORY"
+          fi
+
+          # docker login --password $PASSWORD --username $USERNAME $REGISTRY
+          # --cache-to type=registry,ref=$REGISTRY/cache/kolla-ansible:$OPENSTACK_VERSION \
+          # --cache-from type=registry,ref=$REGISTRY/cache/kolla-ansible:$OPENSTACK_VERSION \
+          docker buildx build \
+              --build-arg "IS_RELEASE=$IS_RELEASE" \
+              --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
+              --build-arg "VERSION=$VERSION" \
+              --label "org.opencontainers.image.created=$CREATED" \
+              --label "org.opencontainers.image.documentation=https://docs.osism.tech" \
+              --label "org.opencontainers.image.licenses=ASL 2.0" \
+              --label "org.opencontainers.image.revision=$REVISION" \
+              --label "org.opencontainers.image.source=https://github.com/osism/container-image-kolla-ansible" \
+              --label "org.opencontainers.image.title=kolla-ansible" \
+              --label "org.opencontainers.image.url=https://www.osism.tech" \
+              --label "org.opencontainers.image.vendor=OSISM GmbH" \
+              --label "org.opencontainers.image.version=$VERSION" \
+              --label "de.osism.release.openstack=$OPENSTACK_VERSION" \
+              --load \
+              --tag "$(git rev-parse --short HEAD)" \
+              .  # <-- there is a dot
+      changed_when: false
+      environment:
+        IS_RELEASE: "false"  # a string, not a bool
+        OPENSTACK_VERSION: "{{ version_openstack }}"
+        # PASSWORD: "{{ secret.DOCKER_PASSWORD_CACHE }}"
+        REGISTRY: "{{ docker_registry }}"
+        REPOSITORY: "{{ docker_namespace }}/kolla-ansible"
+        # USERNAME: "{{ secret.DOCKER_USERNAME_CACHE }}"
+        VERSION: latest

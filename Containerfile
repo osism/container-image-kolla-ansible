@@ -14,39 +14,39 @@ ENV DEBIAN_FRONTEND noninteractive
 
 USER root
 
-COPY overlays/$OPENSTACK_VERSION /overlays
-COPY patches /patches
+COPY --link overlays/$OPENSTACK_VERSION /overlays
+COPY --link patches /patches
 
-COPY files/library /ansible/library
-COPY files/plugins /ansible/plugins
-COPY files/tasks /ansible/tasks
+COPY --link files/library /ansible/library
+COPY --link files/plugins /ansible/plugins
+COPY --link files/tasks /ansible/tasks
 
-COPY files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
-COPY files/playbooks/kolla-bifrost-keypair.yml /ansible/kolla-bifrost-keypair.yml
-COPY files/playbooks/kolla-facts.yml /ansible/kolla-facts.yml
-COPY files/playbooks/kolla-ironic.yml /ansible/kolla-ironic.yml
-COPY files/playbooks/kolla-iscsi.yml /ansible/kolla-iscsi.yml
-COPY files/playbooks/kolla-loadbalancer-*.yml /ansible/
-COPY files/playbooks/kolla-mariadb-dynamic-rows.yml /ansible/kolla-mariadb-dynamic-rows.yml
-COPY files/playbooks/kolla-nova-compute.yml /ansible/kolla-nova-compute.yml
-COPY files/playbooks/kolla-purge.yml /ansible/kolla-purge.yml
-COPY files/playbooks/kolla-rgw-endpoint.yml /ansible/kolla-rgw-endpoint.yml
-COPY files/playbooks/kolla-testbed-identity.yml /ansible/kolla-testbed-identity.yml
-COPY files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
+COPY --link files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
+COPY --link files/playbooks/kolla-bifrost-keypair.yml /ansible/kolla-bifrost-keypair.yml
+COPY --link files/playbooks/kolla-facts.yml /ansible/kolla-facts.yml
+COPY --link files/playbooks/kolla-ironic.yml /ansible/kolla-ironic.yml
+COPY --link files/playbooks/kolla-iscsi.yml /ansible/kolla-iscsi.yml
+COPY --link files/playbooks/kolla-loadbalancer-*.yml /ansible/
+COPY --link files/playbooks/kolla-mariadb-dynamic-rows.yml /ansible/kolla-mariadb-dynamic-rows.yml
+COPY --link files/playbooks/kolla-nova-compute.yml /ansible/kolla-nova-compute.yml
+COPY --link files/playbooks/kolla-purge.yml /ansible/kolla-purge.yml
+COPY --link files/playbooks/kolla-rgw-endpoint.yml /ansible/kolla-rgw-endpoint.yml
+COPY --link files/playbooks/kolla-testbed-identity.yml /ansible/kolla-testbed-identity.yml
+COPY --link files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
 
-COPY files/scripts/change.sh /change.sh
-COPY files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
-COPY files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
-COPY files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
-COPY files/scripts/secrets.sh /secrets.sh
-COPY files/scripts/entrypoint.sh /entrypoint.sh
-COPY files/scripts/ansible-vault.py /ansible-vault.py
+COPY --link files/scripts/change.sh /change.sh
+COPY --link files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
+COPY --link files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
+COPY --link files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
+COPY --link files/scripts/secrets.sh /secrets.sh
+COPY --link files/scripts/entrypoint.sh /entrypoint.sh
+COPY --link files/scripts/ansible-vault.py /ansible-vault.py
 
-COPY files/ansible.cfg /etc/ansible/ansible.cfg
-COPY files/requirements.yml /ansible/galaxy/requirements.yml
-COPY files/refresh-containers.yml /tmp/refresh-containers.yml
+COPY --link files/ansible.cfg /etc/ansible/ansible.cfg
+COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
+COPY --link files/refresh-containers.yml /tmp/refresh-containers.yml
 
-COPY files/src /src
+COPY --link files/src /src
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -206,7 +206,7 @@ RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
 RUN ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.11/site-packages/ansible/plugins/callback
 
 # copy ara configuration
-COPY files/ara.env /ansible/ara.env
+COPY --link files/ara.env /ansible/ara.env
 RUN python3 -m ara.setup.env >> /ansible/ara.env
 
 # prepare list of playbooks

@@ -11,6 +11,7 @@ mock_modules:
   - kolla_toolbox
 mock_roles:
   - common
+  - ensure-docker
   - ironic
   - iscsi
   - nova-cell
