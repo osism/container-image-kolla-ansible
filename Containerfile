@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11-slim as builder
 
 ARG IS_RELEASE
 ARG OPENSTACK_VERSION
@@ -235,9 +235,13 @@ RUN apt-get clean \
       /usr/share/man/* \
       /var/tmp/*
 
-VOLUME ["/ansible/cache", "/ansible/logs", "/ansible/secrets", "/share", "/interface"]
+USER dragon
 
+FROM python:3.11-slim
+
+COPY --link --from=builder / /
+
+VOLUME ["/ansible/cache", "/ansible/logs", "/ansible/secrets", "/share", "/interface"]
 USER dragon
 WORKDIR /ansible
-
 ENTRYPOINT ["/entrypoint.sh"]
