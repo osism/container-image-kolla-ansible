@@ -3,6 +3,13 @@
   hosts: all
 
   tasks:
+    - name: Log into registry
+      community.docker.docker_login:
+        registry_url: "{{ docker_registry }}"
+        username: "{{ secret.DOCKER_USERNAME }}"
+        password: "{{ secret.DOCKER_PASSWORD }}"
+      when: push_image | bool
+
     - name: Run build script
       ansible.builtin.shell:
         executable: /bin/bash
@@ -28,12 +35,15 @@
               REPOSITORY="$REGISTRY/$REPOSITORY"
           fi
 
-          # docker login --password $PASSWORD --username $USERNAME $REGISTRY
-          #     # https://docs.docker.com/build/cache/backends/registry/
-          #     --use --driver=docker-container \
-          #     --cache-to type=registry,ref=$REGISTRY/cache/kolla-ansible:$OPENSTACK_VERSION \
-          #     --cache-from type=registry,ref=$REGISTRY/cache/kolla-ansible:$OPENSTACK_VERSION \
+          if [[ "$PUSH_IMAGE" == "True" ]]; then
+              BUILD_OPTS="--cache-to type=registry,ref=$REGISTRY/cache/kolla-ansible:$OPENSTACK_VERSION"
+          else
+              BUILD_OPTS=""
+          fi
+
+          docker buildx create --use --driver=docker-container
           docker buildx build \
+              --cache-from type=registry,ref=$REGISTRY/cache/kolla-ansible:$OPENSTACK_VERSION \
               --build-arg "IS_RELEASE=$IS_RELEASE" \
               --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
               --build-arg "VERSION=$VERSION" \
@@ -49,11 +59,13 @@
               --label "de.osism.release.openstack=$OPENSTACK_VERSION" \
               --load \
               --tag "$(git rev-parse --short HEAD)" \
+              $BUILD_OPTS \
               .  # <-- there is a dot
       changed_when: false
       environment:
-        IS_RELEASE: "false"  # a string, not a bool
+        IS_RELEASE: false
         OPENSTACK_VERSION: "{{ version_openstack }}"
+        PUSH_IMAGE: "{{ push_image | bool }}"
         REGISTRY: "{{ docker_registry }}"
         REPOSITORY: "{{ docker_namespace }}/kolla-ansible"
         VERSION: latest
@@ -81,8 +93,6 @@
               REPOSITORY="$REGISTRY/$REPOSITORY"
           fi
 
-          docker login --password $PASSWORD --username $USERNAME $REGISTRY
-
           if [[ $OPENSTACK_VERSION == "master" ]]; then
               tag=$REPOSITORY:latest
 
@@ -103,8 +113,6 @@
       no_log: true
       environment:
         OPENSTACK_VERSION: "{{ version_openstack }}"
-        PASSWORD: "{{ secret.DOCKER_PASSWORD }}"
         REGISTRY: "{{ docker_registry }}"
         REPOSITORY: "{{ docker_namespace }}/kolla-ansible"
-        USERNAME: "{{ secret.DOCKER_USERNAME }}"
         VERSION: latest
