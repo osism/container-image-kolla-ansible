@@ -43,7 +43,7 @@
 
           docker buildx create --use --driver=docker-container
           docker buildx build \
-              --cache-from type=registry,ref=$REGISTRY/cache/kolla-ansible:$OPENSTACK_VERSION \
+              --cache-from type=registry,ref=$REGISTRY/cache/kolla-ansible-$OPENSTACK_VERSION \
               --build-arg "IS_RELEASE=$IS_RELEASE" \
               --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
               --build-arg "VERSION=$VERSION" \
