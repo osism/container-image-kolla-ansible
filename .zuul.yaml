@@ -49,7 +49,7 @@
 
 - job:
     name: container-image-kolla-ansible-push-yoga
-    parent: image-build
+    parent: container-image-kolla-ansible-build
     vars:
       version_openstack: yoga
       push_image: true
@@ -60,7 +60,7 @@
 
 - job:
     name: container-image-kolla-ansible-push-zed
-    parent: image-build
+    parent: container-image-kolla-ansible-build
     vars:
       version_openstack: zed
       push_image: true
