@@ -36,7 +36,7 @@
           fi
 
           if [[ "$PUSH_IMAGE" == "True" ]]; then
-              BUILD_OPTS="--cache-to type=registry,ref=$REGISTRY/cache/kolla-ansible:$OPENSTACK_VERSION"
+              BUILD_OPTS="--cache-to type=registry,ref=$REGISTRY/cache/kolla-ansible-$OPENSTACK_VERSION,oci-mediatypes=true"
           else
               BUILD_OPTS=""
           fi
