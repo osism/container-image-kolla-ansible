@@ -92,6 +92,8 @@
         - flake8
         - hadolint
         - yamllint
+        - container-image-kolla-ansible-push-yoga
+        - container-image-kolla-ansible-push-zed
     post:
       jobs:
         - container-image-kolla-ansible-push-yoga:
