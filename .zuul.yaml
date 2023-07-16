@@ -1,4 +1,24 @@
 ---
+- job:
+    name: container-image-kolla-ansible-build
+    pre-run: playbooks/pre.yml
+    run: playbooks/build.yml
+    vars:
+      docker_namespace: osism
+      docker_registry: osism.harbor.regio.digital
+
+- job:
+    name: container-image-kolla-ansible-build-yoga
+    parent: container-image-kolla-ansible-build
+    vars:
+      version_openstack: yoga
+
+- job:
+    name: container-image-kolla-ansible-build-zed
+    parent: container-image-kolla-ansible-build
+    vars:
+      version_openstack: zed
+
 - project:
     merge-mode: squash-merge
     default-branch: main
@@ -8,6 +28,8 @@
         - flake8
         - hadolint
         - yamllint
+        - container-image-kolla-ansible-build-yoga
+        - container-image-kolla-ansible-build-zed
     gate:
       jobs:
         - ansible-lint
