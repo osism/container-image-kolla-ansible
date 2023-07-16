@@ -44,7 +44,7 @@ COPY --link files/scripts/ansible-vault.py /ansible-vault.py
 
 COPY --link files/ansible.cfg /etc/ansible/ansible.cfg
 COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
-COPY --link files/refresh-containers.yml /tmp/refresh-containers.yml
+COPY --link files/refresh-containers.yml /refresh-containers.yml
 
 COPY --link files/src /src
 
@@ -199,8 +199,8 @@ RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
     && rm /split-kolla-ansible-site.py \
     && mkdir /ansible/files \
     && cp /repository/tools/cleanup-* /ansible/files \
-    && find /ansible/roles/ -name config.yml -print0 | xargs -0 -I{} dirname {} | xargs -I{} cp /tmp/refresh-containers.yml {}/refresh-containers.yml \
-    && rm /tmp/refresh-containers.yml
+    && find /ansible/roles/ -name config.yml -print0 | xargs -0 -I{} dirname {} | xargs -I{} cp /refresh-containers.yml {}/refresh-containers.yml \
+    && rm /refresh-containers.yml
 
 # always enable the json_stats calback plugin
 RUN ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.11/site-packages/ansible/plugins/callback

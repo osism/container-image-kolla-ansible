@@ -6,7 +6,7 @@ import yaml
 
 # get environment parameters
 
-IS_RELEASE = os.environ.get("IS_RELEASE", "false")
+IS_RELEASE = os.environ.get("IS_RELEASE", "False")
 VERSION = os.environ.get("VERSION", "latest")
 OPENSTACK_VERSION = os.environ.get("OPENSTACK_VERSION", "latest")
 
@@ -27,7 +27,7 @@ template = environment.get_template("versions.yml.j2")
 with open("/release/%s/openstack-%s.yml" % (VERSION, OPENSTACK_VERSION), "rb") as fp:
     versions_openstack = yaml.load(fp, Loader=yaml.FullLoader)
 
-if IS_RELEASE == "false":
+if IS_RELEASE == "False":
     release_versions = {"versions": {}}
 else:
     SBOM_URL = (
