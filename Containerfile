@@ -33,6 +33,7 @@ COPY --link files/playbooks/kolla-purge.yml /ansible/kolla-purge.yml
 COPY --link files/playbooks/kolla-rgw-endpoint.yml /ansible/kolla-rgw-endpoint.yml
 COPY --link files/playbooks/kolla-testbed-identity.yml /ansible/kolla-testbed-identity.yml
 COPY --link files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
+COPY --link files/refresh-containers.yml /refresh-containers.yml
 
 COPY --link files/scripts/change.sh /change.sh
 COPY --link files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
@@ -43,197 +44,194 @@ COPY --link files/scripts/entrypoint.sh /entrypoint.sh
 COPY --link files/scripts/ansible-vault.py /ansible-vault.py
 
 COPY --link files/ansible.cfg /etc/ansible/ansible.cfg
+COPY --link files/ara.env /ansible/ara.env
 COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
-COPY --link files/refresh-containers.yml /refresh-containers.yml
 
 COPY --link files/src /src
 
+ADD https://github.com/dw/mitogen/archive/v$MITOGEN_VERSION.tar.gz /mitogen.tar.gz
+
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+# hadolint ignore=DL3003
+RUN <<EOF
+set -e
+set -x
+
 # show motd
-RUN echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc
+echo '[ ! -z "$TERM" -a -r /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc
 
 # upgrade/install required packages
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        dumb-init \
-        git \
-        gnupg-agent \
-        jq \
-        libffi-dev \
-        libssh-dev \
-        libssl-dev \
-        libyaml-dev \
-        openssh-client \
-        patch \
-        procps \
-        python3-dev \
-        python3-pip \
-        python3-setuptools \
-        python3-wheel \
-        rsync \
-        sshpass \
-    && python3 -m pip install --no-cache-dir --upgrade 'pip==23.2' \
-    && pip3 install --no-cache-dir -r /src/requirements.txt \
-    && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
-    && rm -rf /var/lib/apt/lists/*
+apt-get update
+apt-get install -y --no-install-recommends \
+  build-essential \
+  dumb-init \
+  git \
+  gnupg-agent \
+  jq \
+  libffi-dev \
+  libssh-dev \
+  libssl-dev \
+  libyaml-dev \
+  openssh-client \
+  patch \
+  procps \
+  python3-dev \
+  python3-pip \
+  python3-setuptools \
+  python3-wheel \
+  rsync \
+  sshpass
+
+python3 -m pip install --no-cache-dir --upgrade 'pip==23.2'
+pip3 install --no-cache-dir -r /src/requirements.txt
+
+update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 # add user
-RUN groupadd -g $GROUP_ID dragon \
-    && groupadd -g $GROUP_ID_DOCKER docker \
-    && useradd -l -g dragon -G docker -u $USER_ID -m -d /ansible dragon
+groupadd -g "$GROUP_ID" dragon
+groupadd -g "$GROUP_ID_DOCKER" docker
+useradd -l -g dragon -G docker -u "$USER_ID" -m -d /ansible dragon
 
 # prepare release repository
-RUN git clone https://github.com/osism/release /release
+git clone https://github.com/osism/release /release
 
 # prepare project repository
+git clone https://github.com/osism/ansible-playbooks /playbooks
+( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/$VERSION/openstack.yml")" )
 
-# hadolint ignore=DL3003
-RUN git clone https://github.com/osism/ansible-playbooks /playbooks \
-    && ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/$VERSION/openstack.yml")" )
+git clone https://github.com/osism/ansible-defaults /defaults
+( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/$VERSION/openstack.yml")" )
 
-# hadolint ignore=DL3003
-RUN git clone https://github.com/osism/ansible-defaults /defaults \
-    && ( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/$VERSION/openstack.yml")" )
+git clone https://github.com/osism/cfg-generics /generics
+( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/$VERSION/openstack.yml")" )
 
-# hadolint ignore=DL3003
-RUN git clone https://github.com/osism/cfg-generics /generics  \
-    && ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/$VERSION/openstack.yml")" )
-
-# hadolint ignore=DL3003
-RUN git clone https://github.com/osism/kolla-operations /operations \
-    && ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/$VERSION/base.yml")" )
+git clone https://github.com/osism/kolla-operations /operations
+( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/$VERSION/base.yml")" )
 
 # add inventory files
-RUN mkdir -p /ansible/inventory.generics /ansible/inventory \
-    && cp /generics/inventory/50-ceph /ansible/inventory.generics/50-ceph \
-    && cp /generics/inventory/51-ceph /ansible/inventory.generics/51-ceph \
-    && cp /generics/inventory/50-kolla /ansible/inventory.generics/50-kolla \
-    && cp /generics/inventory/51-kolla /ansible/inventory.generics/51-kolla
+mkdir -p /ansible/inventory.generics /ansible/inventory
+cp /generics/inventory/50-ceph /ansible/inventory.generics/50-ceph
+cp /generics/inventory/51-ceph /ansible/inventory.generics/51-ceph
+cp /generics/inventory/50-kolla /ansible/inventory.generics/50-kolla
+cp /generics/inventory/51-kolla /ansible/inventory.generics/51-kolla
 
 # run preparations
-WORKDIR /src
-RUN mkdir -p /ansible/galaxy /ansible/group_vars/all \
-    && python3 /src/render-python-requirements.py \
-    && python3 /src/render-versions.py
-
-WORKDIR /
+mkdir -p /ansible/galaxy /ansible/group_vars/all
+( cd /src; python3 /src/render-python-requirements.py )
+( cd /src; python3 /src/render-versions.py )
 
 # install required python packages
-RUN pip3 install --no-cache-dir -r /requirements.txt
+pip3 install --no-cache-dir -r /requirements.txt
 
 # set ansible version in the motd
-RUN ansible_version=$(python3 -c 'import ansible; print(ansible.release.__version__)') \
-    && sed -i -e "s/ANSIBLE_VERSION/$ansible_version/" /etc/motd
+ansible_version=$(python3 -c 'import ansible; print(ansible.release.__version__)')
+sed -i -e "s/ANSIBLE_VERSION/$ansible_version/" /etc/motd
 
 # create required directories
-
-# internal use only
-RUN mkdir -p \
-        /ansible \
-        /ansible/action_plugins \
-        /ansible/filter_plugins \
-        /ansible/library \
-        /ansible/module_utils \
-        /ansible/roles \
-        /ansible/tasks \
-        /usr/share/ansible/plugins/mitogen
-
-# volumes
-RUN mkdir -p \
-        /ansible/cache \
-        /ansible/logs \
-        /ansible/secrets \
-        /share \
-        /interface
+mkdir -p \
+  /ansible \
+  /ansible/action_plugins \
+  /ansible/cache \
+  /ansible/filter_plugins \
+  /ansible/library \
+  /ansible/logs \
+  /ansible/module_utils \
+  /ansible/roles \
+  /ansible/secrets \
+  /ansible/tasks \
+  /interface \
+  /share
 
 # install required ansible collections & roles
-RUN ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/roles \
-    && ln -s /usr/share/ansible/roles /ansible/galaxy \
-    && ansible-galaxy collection install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/collections \
-    && ln -s /usr/share/ansible/collections /ansible/collections
+ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/roles
+ln -s /usr/share/ansible/roles /ansible/galaxy
+
+ansible-galaxy collection install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/collections
+ln -s /usr/share/ansible/collections /ansible/collections
 
 # prepare project repository
-RUN if [ $OPENSTACK_VERSION = "master" ]; then git clone https://github.com/openstack/kolla-ansible /repository; fi \
-    && if [ $OPENSTACK_VERSION != "master" ]; then git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository; fi
+if [ "$OPENSTACK_VERSION" = "master" ]; then git clone https://github.com/openstack/kolla-ansible /repository; fi
+if [ "$OPENSTACK_VERSION" != "master" ]; then git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository; fi
 
-# hadolint ignore=DL3003
-RUN for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do \
-        echo $patchfile; \
-        ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1; \
-        ( cd /repository && patch --forward --batch -p1 ) < $patchfile; \
-    done
+# apply patches
+for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do
+  echo $patchfile;
+  ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1
+  ( cd /repository && patch --forward --batch -p1 ) < $patchfile
+done
 
 # install mitogen ansible plugin
-
-ADD https://github.com/dw/mitogen/archive/v$MITOGEN_VERSION.tar.gz /mitogen.tar.gz
-RUN tar xzf /mitogen.tar.gz --strip-components=1 -C /usr/share/ansible/plugins/mitogen \
-    && rm -rf \
-        /usr/share/ansible/plugins/mitogen/tests \
-        /usr/share/ansible/plugins/mitogen/docs \
-        /usr/share/ansible/plugins/mitogen/.ci \
-        /usr/share/ansible/plugins/mitogen/.lgtm.yml \
-        /usr/share/ansible/plugins/mitogen/.travis.yml \
-    && rm /mitogen.tar.gz
+mkdir -p /usr/share/ansible/plugins/mitogen
+tar xzf /mitogen.tar.gz --strip-components=1 -C /usr/share/ansible/plugins/mitogen
+rm -rf \
+  /usr/share/ansible/plugins/mitogen/tests \
+  /usr/share/ansible/plugins/mitogen/docs \
+  /usr/share/ansible/plugins/mitogen/.ci \
+  /usr/share/ansible/plugins/mitogen/.lgtm.yml \
+  /usr/share/ansible/plugins/mitogen/.travis.yml
+rm /mitogen.tar.gz
 
 # project specific instructions
-RUN ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml \
-    && pip3 install --no-cache-dir -r /repository/requirements.txt \
-    && pip3 install --no-cache-dir /repository \
-    && mkdir -p /ansible/group_vars \
-    && cp -r /defaults/* /ansible/group_vars/ \
-    && rm -f /ansible/group_vars/LICENSE /ansible/group_vars/README.md \
-    && python3 /remove-common-as-dependency.py \
-    && python3 /split-kolla-ansible-site.py \
-    && cp -r /repository/ansible/action_plugins/* /ansible/action_plugins \
-    && if [ -e /repository/ansible/filter_plugins ]; then cp -r /repository/ansible/filter_plugins/* /ansible/filter_plugins; fi \
-    && if [ -e /repository/ansible/module_utils ]; then cp -r /repository/ansible/module_utils/* /ansible/module_utils; fi \
-    && cp /repository/ansible/library/* /ansible/library \
-    && cp -r /repository/ansible/roles/* /ansible/roles \
-    && for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml" | grep -v nova.yml); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done \
-    && if [ $OPENSTACK_VERSION != "rocky" ] && [ $OPENSTACK_VERSION != "stein" ]; then cp /repository/ansible/nova.yml /ansible/kolla-nova.yml; fi \
-    && if [ $OPENSTACK_VERSION == "rocky" ]; then mkdir /ansible/roles/placement; fi \
-    && rm -f /ansible/kolla-kolla-host.yml /ansible/kolla-post-deploy.yml \
-    && rm /remove-common-as-dependency.py \
-    && rm /split-kolla-ansible-site.py \
-    && mkdir /ansible/files \
-    && cp /repository/tools/cleanup-* /ansible/files \
-    && find /ansible/roles/ -name config.yml -print0 | xargs -0 -I{} dirname {} | xargs -I{} cp /refresh-containers.yml {}/refresh-containers.yml \
-    && rm /refresh-containers.yml
+ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
+pip3 install --no-cache-dir -r /repository/requirements.txt
+pip3 install --no-cache-dir /repository
+mkdir -p /ansible/group_vars
+cp -r /defaults/* /ansible/group_vars/
+rm -f /ansible/group_vars/LICENSE /ansible/group_vars/README.md
+python3 /remove-common-as-dependency.py
+python3 /split-kolla-ansible-site.py
+cp -r /repository/ansible/action_plugins/* /ansible/action_plugins
+if [ -e /repository/ansible/filter_plugins ]; then cp -r /repository/ansible/filter_plugins/* /ansible/filter_plugins; fi
+if [ -e /repository/ansible/module_utils ]; then cp -r /repository/ansible/module_utils/* /ansible/module_utils; fi
+cp /repository/ansible/library/* /ansible/library
+cp -r /repository/ansible/roles/* /ansible/roles
+for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml" | grep -v nova.yml); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done
+cp /repository/ansible/nova.yml /ansible/kolla-nova.yml
+rm -f /ansible/kolla-kolla-host.yml /ansible/kolla-post-deploy.yml
+rm /remove-common-as-dependency.py
+rm /split-kolla-ansible-site.py
+mkdir /ansible/files
+cp /repository/tools/cleanup-* /ansible/files
+
+# add refresh-containers action
+find /ansible/roles/ -name config.yml -print0 | xargs -0 -I{} dirname {} | xargs -I{} cp /refresh-containers.yml {}/refresh-containers.yml
+rm /refresh-containers.yml
 
 # always enable the json_stats calback plugin
-RUN ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.11/site-packages/ansible/plugins/callback
+ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.11/site-packages/ansible/plugins/callback
 
 # copy ara configuration
-COPY --link files/ara.env /ansible/ara.env
-RUN python3 -m ara.setup.env >> /ansible/ara.env
+python3 -m ara.setup.env >> /ansible/ara.env
 
 # prepare list of playbooks
-RUN python3 /src/render-playbooks.py
+python3 /src/render-playbooks.py
 
 # set correct permssions
-RUN chown -R dragon: /ansible /share /interface
+chown -R dragon: /ansible /share /interface
 
 # cleanup
-RUN apt-get clean \
-    && apt-get remove -y  \
-      build-essential \
-      git \
-      libffi-dev \
-      libssh-dev \
-      libssl-dev \
-      libyaml-dev \
-      python3-dev \
-    && apt-get autoremove -y \
-    && rm -rf \
-      /patches \
-      /release \
-      /root/.cache \
-      /tmp/* \
-      /usr/share/doc/* \
-      /usr/share/man/* \
-      /var/tmp/*
+apt-get clean
+apt-get remove -y \
+  build-essential \
+  git \
+  libffi-dev \
+  libssh-dev \
+  libssl-dev \
+  libyaml-dev \
+  python3-dev
+apt-get autoremove -y
+
+rm -rf \
+  /patches \
+  /release \
+  /root/.cache \
+  /tmp/* \
+  /usr/share/doc/* \
+  /usr/share/man/* \
+  /var/lib/apt/lists/* \
+  /var/tmp/*
+EOF
 
 USER dragon
 
