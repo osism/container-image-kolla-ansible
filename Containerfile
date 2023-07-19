@@ -118,8 +118,8 @@ cp /generics/inventory/51-kolla /ansible/inventory.generics/51-kolla
 
 # run preparations
 mkdir -p /ansible/galaxy /ansible/group_vars/all
-( cd /src; python3 /src/render-python-requirements.py )
-( cd /src; python3 /src/render-versions.py )
+python3 /src/render-python-requirements.py
+python3 /src/render-versions.py
 
 # install required python packages
 pip3 install --no-cache-dir -r /requirements.txt
