@@ -2,6 +2,13 @@
 - name: Build kolla-ansible image
   hosts: all
 
+  environment:
+    is_release: "False"
+    openstack_version: "{{ version_openstack }}"
+    registry: "{{ docker_registry }}"
+    repository: "{{ docker_namespace }}/kolla-ansible"
+    version: latest
+
   tasks:
     - name: Log into registry
       community.docker.docker_login:
@@ -20,49 +27,40 @@
           set -o pipefail
           set -x
 
-          CREATED=$(date --rfc-3339=ns)
-          REVISION=$(git rev-parse --short HEAD)
+          created=$(date --rfc-3339=ns)
+          revision=$(git rev-parse --short HEAD)
 
           # NOTE: For builds for a specific release, the OpenStack version is taken
           #       from the release repository.
-          if [[ $VERSION != "latest" ]]; then
-              filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/$VERSION/openstack.yml)
-              OPENSTACK_VERSION=$(curl -L https://raw.githubusercontent.com/osism/release/main/$VERSION/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }')
+          if [[ $version != "latest" ]]; then
+              filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/openstack.yml)
+              openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }')
           fi
 
-          . defaults/$OPENSTACK_VERSION.sh
+          . defaults/${openstack_version}.sh
 
-          if [[ -n $REGISTRY ]]; then
-              REPOSITORY="$REGISTRY/$REPOSITORY"
+          if [[ -n $registry ]]; then
+              repository="$registry/$repository"
           fi
 
-          docker buildx create --use --driver=docker-container
           docker buildx build \
-              --build-arg "IS_RELEASE=$IS_RELEASE" \
-              --build-arg "OPENSTACK_VERSION=$OPENSTACK_VERSION" \
-              --build-arg "VERSION=$VERSION" \
-              --label "org.opencontainers.image.created=$CREATED" \
+              --build-arg "IS_RELEASE=$is_release" \
+              --build-arg "OPENSTACK_VERSION=$openstack_version" \
+              --build-arg "VERSION=$version" \
+              --label "org.opencontainers.image.created=$created" \
               --label "org.opencontainers.image.documentation=https://docs.osism.tech" \
               --label "org.opencontainers.image.licenses=ASL 2.0" \
-              --label "org.opencontainers.image.revision=$REVISION" \
+              --label "org.opencontainers.image.revision=$revision" \
               --label "org.opencontainers.image.source=https://github.com/osism/container-image-kolla-ansible" \
               --label "org.opencontainers.image.title=kolla-ansible" \
               --label "org.opencontainers.image.url=https://www.osism.tech" \
               --label "org.opencontainers.image.vendor=OSISM GmbH" \
-              --label "org.opencontainers.image.version=$VERSION" \
-              --label "de.osism.release.openstack=$OPENSTACK_VERSION" \
+              --label "org.opencontainers.image.version=$version" \
+              --label "de.osism.release.openstack=$openstack_version" \
               --load \
-              --tag "$(git rev-parse --short HEAD)" \
-              $BUILD_OPTS \
+              --tag "$revision" \
               .  # <-- there is a dot
-      changed_when: false
-      environment:
-        IS_RELEASE: false
-        OPENSTACK_VERSION: "{{ version_openstack }}"
-        PUSH_IMAGE: "{{ push_image | bool }}"
-        REGISTRY: "{{ docker_registry }}"
-        REPOSITORY: "{{ docker_namespace }}/kolla-ansible"
-        VERSION: latest
+      changed_when: true
 
     - name: Run push script
       ansible.builtin.shell:
@@ -73,33 +71,33 @@
           set -o pipefail
           set -x
 
-          COMMIT=$(git rev-parse --short HEAD)
+          revision=$(git rev-parse --short HEAD)
 
           # NOTE: For builds for a specific release, the OpenStack version is taken from the release repository.
-          if [[ $VERSION != "latest" ]]; then
-              filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/$VERSION/openstack.yml)
-              OPENSTACK_VERSION=$(curl -L https://raw.githubusercontent.com/osism/release/main/$VERSION/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }')
+          if [[ $version != "latest" ]]; then
+              filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/openstack.yml)
+              openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }')
           fi
 
-          . defaults/$OPENSTACK_VERSION.sh
+          . defaults/${openstack_version}.sh
 
-          if [[ -n $REGISTRY ]]; then
-              REPOSITORY="$REGISTRY/$REPOSITORY"
+          if [[ -n $registry ]]; then
+              repository="$registry/$repository"
           fi
 
-          if [[ $OPENSTACK_VERSION == "master" ]]; then
-              tag=$REPOSITORY:latest
+          if [[ $openstack_version == "master" ]]; then
+              tag=$repository:latest
 
-              docker tag "$COMMIT" "$tag"
+              docker tag "$revision" "$tag"
               docker push "$tag"
           else
-              if [[ $VERSION == "latest" ]]; then
-                  tag=$REPOSITORY:$OPENSTACK_VERSION
+              if [[ $version == "latest" ]]; then
+                  tag=$repository:$openstack_version
               else
-                  tag=$REPOSITORY:$VERSION
+                  tag=$repository:$version
               fi
 
-              docker tag "$COMMIT" "$tag"
+              docker tag "$revision" "$tag"
               docker push "$tag"
           fi
       when: push_image | bool
