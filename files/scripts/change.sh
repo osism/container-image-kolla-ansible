@@ -12,7 +12,7 @@ rm -rf /ansible/module_utils/*
 rm -rf /ansible/roles/*
 rm -rf /repository
 
-git clone https://github.com/openstack/kolla-ansible
+git clone https://opendev.org/openstack/kolla-ansible
 git pull https://review.opendev.org/openstack/kolla-ansible $1
 
 cp -r /repository/ansible/action_plugins/* /ansible/action_plugins
