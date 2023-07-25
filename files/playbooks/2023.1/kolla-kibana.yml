@@ -1,0 +1,10 @@
+---
+- name: Apply role kibana
+  gather_facts: false
+  hosts:
+    - kibana
+
+  tasks:
+    - name: Kibana is no longer available
+      ansible.builtin.debug:
+        msg: Due to the switch to Opensearch, the Kibana role is no longer available.
