@@ -1,0 +1,23 @@
+do-not-copy-octavia-certificates.patch
+g--- a/ansible/roles/octavia-certificates/tasks/main.yml
++++ b/ansible/roles/octavia-certificates/tasks/main.yml
+@@ -26,19 +26,3 @@
+ - import_tasks: client_ca.yml
+
+ - import_tasks: client_cert.yml
+-
+-- name: Ensure {{ node_custom_config }}/octavia directory exists
+-  file:
+-    path: "{{ node_custom_config }}/octavia"
+-    state: "directory"
+-    mode: 0770
+-
+-- name: Copy the to-be-deployed keys and certs to {{ node_custom_config }}/octavia
+-  copy:
+-    src: "{{ octavia_certs_work_dir }}/{{ item.src }}"
+-    dest: "{{ node_custom_config }}/octavia/{{ item.dest }}"
+-  with_items:
+-    - { src: "server_ca/server_ca.cert.pem", dest: "server_ca.cert.pem" }
+-    - { src: "server_ca/server_ca.key.pem", dest: "server_ca.key.pem" }
+-    - { src: "client_ca/client_ca.cert.pem", dest: "client_ca.cert.pem" }
+-    - { src: "client_ca/client.cert-and-key.pem", dest: "client.cert-and-key.pem" }
