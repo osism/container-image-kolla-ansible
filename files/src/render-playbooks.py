@@ -25,7 +25,6 @@ HIDE = [
     "freezer",
     "influxdb",
     "kafka",
-    "magnum",
     "masakari",
     "monasca",
     "monasca_cleanup",
