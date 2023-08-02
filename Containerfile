@@ -100,7 +100,7 @@ git clone https://github.com/osism/release /release
 git clone https://github.com/osism/ansible-playbooks /playbooks
 ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/$VERSION/openstack.yml")" )
 
-git clone https://github.com/osism/ansible-defaults /defaults
+git clone https://github.com/osism/defaults /defaults
 ( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/$VERSION/openstack.yml")" )
 
 git clone https://github.com/osism/cfg-generics /generics
