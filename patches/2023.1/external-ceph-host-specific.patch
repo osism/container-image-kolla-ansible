@@ -218,12 +218,12 @@ index 07324e99c..73c4c7327 100644
          # which will be undefined if the applicable condition is False
          - uuid: "{{ rbd_secret_uuid }}"
 -          result: "{{ nova_cephx_raw_key | default }}"
-+          result:  "{{ lookup('template', nova_cephx_keyring_file.results.0.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') }} | default"
++          result:  "{{ lookup('template', nova_cephx_keyring_file.results.0.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') }} | default }}"
            enabled: "{{ nova_backend == 'rbd' }}"
          - uuid: "{{ cinder_rbd_secret_uuid }}"
 -          result: "{{ cinder_cephx_raw_key | default }}"
 -          enabled: "{{ cinder_backend_ceph }}"
-+          result: "{{ lookup('file', cinder_cephx_keyring_file.results.0.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') | default }}"
++          result: "{{ lookup('template', cinder_cephx_keyring_file.results.0.stat.path) | regex_search('key\\s*=.*$', multiline=True) | regex_replace('key\\s*=\\s*(.*)\\s*', '\\1') | default }}"
 +          enabled: "{{ cinder_backend_ceph | bool or external_ceph_always_copy_cinder_keyring | bool }}"
        notify: "{{ libvirt_restart_handlers }}"
        no_log: True
