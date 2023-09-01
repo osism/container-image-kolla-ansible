@@ -1,0 +1,13 @@
+--- a/ansible/roles/loadbalancer/templates/haproxy/haproxy.json.j2
++++ b/ansible/roles/loadbalancer/templates/haproxy/haproxy.json.j2
+@@ -20,8 +20,8 @@
+             "perm": "0700"
+         },
+         {
+-            "source": "{{ container_config_directory }}/haproxy.pem",
+-            "dest": "/etc/haproxy/haproxy.pem",
++            "source": "{{ container_config_directory }}/haproxy*.pem",
++            "dest": "/etc/haproxy",
+             "owner": "root",
+             "perm": "0600",
+             "optional": {{ (not kolla_enable_tls_external | bool) | string | lower }}
