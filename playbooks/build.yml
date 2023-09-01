@@ -3,11 +3,10 @@
   hosts: all
 
   environment:
-    is_release: "False"
-    openstack_version: "{{ version_openstack }}"
+    openstack_version: "{{ version_openstack | default('master') }}"
     registry: "{{ docker_registry }}"
     repository: "{{ docker_namespace }}/kolla-ansible"
-    version: latest
+    version: "{{ zuul['tag'] | default('latest') }}"
 
   tasks:
     - name: Log into registry
@@ -44,7 +43,6 @@
           fi
 
           docker buildx build \
-              --build-arg "IS_RELEASE=$is_release" \
               --build-arg "OPENSTACK_VERSION=$openstack_version" \
               --build-arg "VERSION=$version" \
               --label "org.opencontainers.image.created=$created" \

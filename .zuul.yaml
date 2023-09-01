@@ -87,6 +87,16 @@
         secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
         pass-to-parent: true
 
+- job:
+    name: container-image-kolla-ansible-release
+    parent: container-image-kolla-ansible-build
+    vars:
+      push_image: true
+    secrets:
+      - name: secret
+        secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
+        pass-to-parent: true
+
 - project:
     merge-mode: squash-merge
     default-branch: main
@@ -122,3 +132,6 @@
             branches: main
         - container-image-kolla-ansible-push-antelope:
             branches: main
+    tag:
+      jobs:
+        - container-image-kolla-ansible-release
