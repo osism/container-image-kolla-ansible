@@ -1,6 +1,5 @@
 FROM python:3.11-slim as builder
 
-ARG IS_RELEASE
 ARG OPENSTACK_VERSION
 ARG VERSION
 
