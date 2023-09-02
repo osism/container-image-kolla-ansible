@@ -101,7 +101,7 @@
       when: push_image | bool
       changed_when: false
       environment:
-        OPENSTACK_VERSION: "{{ version_openstack }}"
+        OPENSTACK_VERSION: "{{ version_openstack | default('master') }}"
         REGISTRY: "{{ docker_registry }}"
         REPOSITORY: "{{ docker_namespace }}/kolla-ansible"
         VERSION: latest
