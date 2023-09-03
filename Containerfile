@@ -202,9 +202,6 @@ ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.11/site-pac
 # copy ara configuration
 python3 -m ara.setup.env >> /ansible/ara.env
 
-# prepare list of playbooks
-python3 /src/render-playbooks.py
-
 # set correct permssions
 chown -R dragon: /ansible /share /interface
 
@@ -231,9 +228,11 @@ rm -rf \
   /var/tmp/*
 EOF
 
-USER dragon
-
 COPY --link files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
+# prepare list of playbooks
+RUN python3 /src/render-playbooks.py
+
+USER dragon
 
 FROM python:3.11-slim
 
