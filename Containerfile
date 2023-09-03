@@ -20,7 +20,6 @@ COPY --link files/library /ansible/library
 COPY --link files/plugins /ansible/plugins
 COPY --link files/tasks /ansible/tasks
 
-COPY --link files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
 COPY --link files/playbooks/kolla-bifrost-keypair.yml /ansible/kolla-bifrost-keypair.yml
 COPY --link files/playbooks/kolla-facts.yml /ansible/kolla-facts.yml
 COPY --link files/playbooks/kolla-ironic.yml /ansible/kolla-ironic.yml
@@ -233,6 +232,8 @@ rm -rf \
 EOF
 
 USER dragon
+
+COPY --link files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
 
 FROM python:3.11-slim
 
