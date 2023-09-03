@@ -13,9 +13,7 @@ VERSION = os.environ.get("VERSION", "latest")
 with open("/release/%s/base.yml" % VERSION, "rb") as fp:
     versions = yaml.load(fp, Loader=yaml.FullLoader)
 
-with open(
-    "/release/%s/openstack-%s.yml" % (VERSION, OPENSTACK_VERSION), "rb"
-) as fp:
+with open("/release/%s/openstack-%s.yml" % (VERSION, OPENSTACK_VERSION), "rb") as fp:
     openstack_versions = yaml.load(fp, Loader=yaml.FullLoader)
 
 # prepare jinja2 environment
