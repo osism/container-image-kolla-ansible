@@ -34,13 +34,6 @@
       docker_registry: osism.harbor.regio.digital
 
 - job:
-    name: container-image-kolla-ansible-build-yoga
-    parent: container-image-kolla-ansible-build
-    vars:
-      version_openstack: yoga
-      push_image: false
-
-- job:
     name: container-image-kolla-ansible-build-zed
     parent: container-image-kolla-ansible-build
     vars:
@@ -53,17 +46,6 @@
     vars:
       version_openstack: "2023.1"
       push_image: false
-
-- job:
-    name: container-image-kolla-ansible-push-yoga
-    parent: container-image-kolla-ansible-build
-    vars:
-      version_openstack: yoga
-      push_image: true
-    secrets:
-      - name: secret
-        secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
-        pass-to-parent: true
 
 - job:
     name: container-image-kolla-ansible-push-zed
@@ -106,7 +88,6 @@
         - flake8
         - hadolint
         - yamllint
-        - container-image-kolla-ansible-build-yoga
         - container-image-kolla-ansible-build-zed
         - container-image-kolla-ansible-build-antelope
     gate:
@@ -121,13 +102,10 @@
         - flake8
         - hadolint
         - yamllint
-        - container-image-kolla-ansible-push-yoga
         - container-image-kolla-ansible-push-zed
         - container-image-kolla-ansible-push-antelope
     post:
       jobs:
-        - container-image-kolla-ansible-push-yoga:
-            branches: main
         - container-image-kolla-ansible-push-zed:
             branches: main
         - container-image-kolla-ansible-push-antelope:
