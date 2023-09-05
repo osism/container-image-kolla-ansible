@@ -1,6 +1,7 @@
 ---
 - name: Group hosts based on configuration
   hosts:
+    - ovn-controller
     - ovn-nb-db
     - ovn-northd
     - ovn-sb-db
