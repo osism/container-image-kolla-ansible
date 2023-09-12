@@ -1,21 +1,39 @@
-From 0faaf9025c5505e8c9ad702fa029d9f7ba3efd41 Mon Sep 17 00:00:00 2001
+From 1831c6229bc4e82b9d0020ba17826a503dc832e6 Mon Sep 17 00:00:00 2001
 From: Christian Berendt <berendt@osism.tech>
 Date: Thu, 07 Sep 2023 14:40:13 +0200
-Subject: [PATCH] ceilometer: handle custom event_pipeline.yaml as template
+Subject: [PATCH] ceilometer: process custom event_pipeline.yaml with merge_yaml
 
 Change-Id: I41a3226679c622e5e98df074cee195e8436ea45b
 ---
 
 diff --git a/ansible/roles/ceilometer/tasks/config.yml b/ansible/roles/ceilometer/tasks/config.yml
-index a4b46e9..1408f21 100644
+index a4b46e9..02495e2 100644
 --- a/ansible/roles/ceilometer/tasks/config.yml
 +++ b/ansible/roles/ceilometer/tasks/config.yml
-@@ -261,7 +261,7 @@
+@@ -261,10 +261,11 @@
  - name: Copying over event_pipeline.yaml
    vars:
      service: "{{ ceilometer_services['ceilometer-notification'] }}"
 -  copy:
-+  template:
-     src: "{{ node_custom_config }}/ceilometer/event_pipeline.yaml"
+-    src: "{{ node_custom_config }}/ceilometer/event_pipeline.yaml"
++  merge_yaml:
++    sources:
++      - "{{ node_custom_config }}/ceilometer/event_pipeline.yaml"
++      - "{{ node_custom_config }}/ceilometer/{{ inventory_hostname }}/event_pipeline.yaml"
      dest: "{{ node_config_directory }}/ceilometer-notification/event_pipeline.yaml"
-     force: True
+-    force: True
+     mode: "0660"
+   become: true
+   register: ceilometer_event_pipeline_overwriting
+diff --git a/releasenotes/notes/ceilometer-merge-yaml-event-pipeline-bee198be62ebd6a9.yaml b/releasenotes/notes/ceilometer-merge-yaml-event-pipeline-bee198be62ebd6a9.yaml
+new file mode 100644
+index 0000000..f70cb5b
+--- /dev/null
++++ b/releasenotes/notes/ceilometer-merge-yaml-event-pipeline-bee198be62ebd6a9.yaml
+@@ -0,0 +1,6 @@
++---
++features:
++  - |
++    A custom `event_pipeline.yaml` file is now processed with `merge_yaml`.
++    This allows Jinja2 to be used. Furthermore, it is possible to have a
++    global `event_pipeline.yaml` and host-specific `event_pipeline.yaml` files.
