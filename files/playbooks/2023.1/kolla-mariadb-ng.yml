@@ -1,0 +1,136 @@
+---
+- name: Set kolla_action_mariadb
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Inform the user about the following task
+      debug:
+        msg:
+          The task 'Check MariaDB service' fails if the Mariadb service has
+          not yet been deployed. This is fine.
+      when:
+        - kolla_action_ng == "deploy"
+
+    - name: Check MariaDB service
+      ansible.builtin.wait_for:
+        host: "{{ kolla_internal_vip_address }}"
+        port: "{{ mariadb_port }}"
+        connect_timeout: 1
+        timeout: 1
+        search_regex: "MariaDB"
+      register: check_mariadb_port
+      ignore_errors: true
+      when:
+        - kolla_action_ng == "deploy"
+
+    - name: Set kolla_action_mariadb = upgrade if MariaDB is already running
+      ansible.builtin.set_fact:
+        kolla_action_mariadb: upgrade
+      when:
+        - kolla_action_ng == "deploy"
+        - check_mariadb_port is success
+
+    - name: Set kolla_action_mariadb = kolla_action_ng
+      ansible.builtin.set_fact:
+        kolla_action_mariadb: "{{ kolla_action_ng }}"
+      when:
+        - kolla_action_ng == "deploy" and check_mariadb_port is not success
+        - kolla_action_ng != "deploy"
+
+- name: Group hosts based on configuration
+  hosts:
+    - mariadb
+  gather_facts: false
+  tasks:
+    - name: Group hosts based on Kolla action
+      group_by:
+          key: kolla_action_{{ hostvars['localhost']['kolla_action_mariadb'] }}
+      changed_when: false
+
+    - name: Group hosts based on enabled services
+      group_by:
+          key: '{{ item }}'
+      changed_when: false
+      with_items: enable_mariadb_{{ enable_mariadb | bool }}
+  tags: always
+
+# For MariaDB we need to be careful about restarting services, to avoid losing quorum.
+- name: Apply role mariadb
+  gather_facts: false
+  hosts:
+    - mariadb
+    - '&enable_mariadb_True'
+  tags:
+    - mariadb
+  tasks:
+    - import_role:
+        name: mariadb
+      vars:
+        kolla_action: "{{ hostvars['localhost']['kolla_action_mariadb'] }}"
+
+- name: Restart mariadb services
+  gather_facts: false
+  hosts:
+    - mariadb_restart
+    - '&enable_mariadb_True'
+  # Restart in batches
+  serial: "33%"
+  tags:
+    - mariadb
+  tasks:
+    - import_role:
+        name: mariadb
+        tasks_from: restart_services.yml
+      vars:
+        kolla_action: "{{ hostvars['localhost']['kolla_action_mariadb'] }}"
+
+- name: Start mariadb services
+  gather_facts: false
+  hosts:
+    - mariadb_start
+    - '&enable_mariadb_True'
+  # Start in batches
+  serial: "33%"
+  tags:
+    - mariadb
+  tasks:
+    - import_role:
+        name: mariadb
+        tasks_from: restart_services.yml
+      vars:
+        kolla_action: "{{ hostvars['localhost']['kolla_action_mariadb'] }}"
+
+- name: Restart bootstrap mariadb service
+  gather_facts: false
+  hosts:
+    - mariadb_bootstrap_restart
+    - '&enable_mariadb_True'
+  tags:
+    - mariadb
+  tasks:
+    - import_role:
+        name: mariadb
+        tasks_from: restart_services.yml
+      vars:
+        kolla_action: "{{ hostvars['localhost']['kolla_action_mariadb'] }}"
+
+- name: Apply mariadb post-configuration
+  gather_facts: false
+  hosts:
+    - mariadb
+    - '&enable_mariadb_True'
+  tags:
+    - mariadb
+  tasks:
+    - name: Include mariadb post-deploy.yml
+      include_role:
+        name: mariadb
+        tasks_from: post-deploy.yml
+      when: hostvars['localhost']['kolla_action_mariadb'] in ['deploy', 'reconfigure', 'upgrade']
+
+    - name: Include mariadb post-upgrade.yml
+      include_role:
+        name: mariadb
+        tasks_from: post-upgrade.yml
+      when: hostvars['localhost']['kolla_action_mariadb'] == 'upgrade'
