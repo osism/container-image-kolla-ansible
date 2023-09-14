@@ -7,7 +7,7 @@
     - name: Inform the user about the following task
       debug:
         msg:
-          The task 'Check MariaDB service' fails if the Mariadb service has
+          The task 'Check MariaDB service' fails if the MariaDB service has
           not yet been deployed. This is fine.
       when:
         - kolla_action_ng == "deploy"
