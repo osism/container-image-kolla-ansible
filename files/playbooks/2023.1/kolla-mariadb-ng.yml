@@ -34,9 +34,8 @@
     - name: Set kolla_action_mariadb = kolla_action_ng
       ansible.builtin.set_fact:
         kolla_action_mariadb: "{{ kolla_action_ng }}"
-      when:
-        - kolla_action_ng == "deploy" and check_mariadb_port is not success
-        - kolla_action_ng != "deploy"
+      when: (kolla_action_ng == "deploy" and check_mariadb_port is not success) or
+            (kolla_action_ng != "deploy")
 
 - name: Group hosts based on configuration
   hosts:
