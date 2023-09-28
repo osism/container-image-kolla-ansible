@@ -3,8 +3,6 @@ FROM python:3.11-slim as builder
 ARG OPENSTACK_VERSION
 ARG VERSION
 
-ARG MITOGEN_VERSION=0.3.4
-
 ARG USER_ID=45000
 ARG GROUP_ID=45000
 ARG GROUP_ID_DOCKER=999
@@ -46,8 +44,6 @@ COPY --link files/ara.env /ansible/ara.env
 COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
 
 COPY --link files/src /src
-
-ADD https://github.com/dw/mitogen/archive/v$MITOGEN_VERSION.tar.gz /mitogen.tar.gz
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -158,17 +154,6 @@ for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do
   ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1
   ( cd /repository && patch --forward --batch -p1 ) < $patchfile
 done
-
-# install mitogen ansible plugin
-mkdir -p /usr/share/ansible/plugins/mitogen
-tar xzf /mitogen.tar.gz --strip-components=1 -C /usr/share/ansible/plugins/mitogen
-rm -rf \
-  /usr/share/ansible/plugins/mitogen/tests \
-  /usr/share/ansible/plugins/mitogen/docs \
-  /usr/share/ansible/plugins/mitogen/.ci \
-  /usr/share/ansible/plugins/mitogen/.lgtm.yml \
-  /usr/share/ansible/plugins/mitogen/.travis.yml
-rm /mitogen.tar.gz
 
 # project specific instructions
 ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
