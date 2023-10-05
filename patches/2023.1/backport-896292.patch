@@ -1,0 +1,102 @@
+From 6c799441f1855dfed9301548397057ed221ce8af Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Fri, 22 Sep 2023 21:36:57 +0200
+Subject: [PATCH] magnum: support kubeconfig configuration file
+
+If a file {{ node_custom_config }}/magnum/kubeconfig exists, it is
+copied to /var/lib/magnum/.kube/config in all Magnum Service Containers.
+At this location, the vexxhost/magnum-cluster-api will loo for the Kubeconfig
+configuration file to control the Cluster API Control Plane. If the
+vexxhost/magnum-cluster-api is installed in the Magnum container images,
+control of a cluster API control plane can then take place via the Magnum API.
+
+Change-Id: I986c5192fe96b9c480a2d8fa87d719a50ce78186
+---
+
+diff --git a/ansible/roles/magnum/tasks/config.yml b/ansible/roles/magnum/tasks/config.yml
+index c299631..0ab77a9 100644
+--- a/ansible/roles/magnum/tasks/config.yml
++++ b/ansible/roles/magnum/tasks/config.yml
+@@ -31,6 +31,27 @@
+   when:
+     - magnum_policy.results
+ 
++- name: Check if kubeconfig file is supplied
++  stat:
++    path: "{{ node_custom_config }}/magnum/kubeconfig"
++  delegate_to: localhost
++  run_once: True
++  register: magnum_kubeconfig_file
++
++- name: Copying over kubeconfig file
++  template:
++    src: "{{ node_custom_config }}/magnum/kubeconfig"
++    dest: "{{ node_config_directory }}/{{ item.key }}/kubeconfig"
++    mode: "0660"
++  become: true
++  when:
++    - inventory_hostname in groups[item.value.group]
++    - item.value.enabled | bool
++    - magnum_kubeconfig_file.stat.exists
++  with_dict: "{{ magnum_services }}"
++  notify:
++    - Restart {{ item.key }} container
++
+ - include_tasks: copy-certs.yml
+   when:
+     - kolla_copy_ca_into_containers | bool
+diff --git a/ansible/roles/magnum/templates/magnum-api.json.j2 b/ansible/roles/magnum/templates/magnum-api.json.j2
+index 9737ad8..9dae121 100644
+--- a/ansible/roles/magnum/templates/magnum-api.json.j2
++++ b/ansible/roles/magnum/templates/magnum-api.json.j2
+@@ -6,7 +6,14 @@
+             "dest": "/etc/magnum/magnum.conf",
+             "owner": "magnum",
+             "perm": "0600"
+-        }{% if magnum_policy_file is defined %},
++        }{% if magnum_kubeconfig_file.stat.exists %},
++        {
++            "source": "{{ container_config_directory }}/kubeconfig",
++            "dest": "/var/lib/magnum/.kube/config",
++            "owner": "magnum",
++            "perm": "0600"
++        }{% endif %}
++        {% if magnum_policy_file is defined %},
+         {
+             "source": "{{ container_config_directory }}/{{ magnum_policy_file }}",
+             "dest": "/etc/magnum/{{ magnum_policy_file }}",
+diff --git a/ansible/roles/magnum/templates/magnum-conductor.json.j2 b/ansible/roles/magnum/templates/magnum-conductor.json.j2
+index f77b160..d6a36e7 100644
+--- a/ansible/roles/magnum/templates/magnum-conductor.json.j2
++++ b/ansible/roles/magnum/templates/magnum-conductor.json.j2
+@@ -6,7 +6,14 @@
+             "dest": "/etc/magnum/magnum.conf",
+             "owner": "magnum",
+             "perm": "0600"
+-        }{% if magnum_policy_file is defined %},
++        }{% if magnum_kubeconfig_file.stat.exists %},
++        {
++            "source": "{{ container_config_directory }}/kubeconfig",
++            "dest": "/var/lib/magnum/.kube/config",
++            "owner": "magnum",
++            "perm": "0600"
++        }{% endif %}
++        {% if magnum_policy_file is defined %},
+         {
+             "source": "{{ container_config_directory }}/{{ magnum_policy_file }}",
+             "dest": "/etc/magnum/{{ magnum_policy_file }}",
+diff --git a/releasenotes/notes/magnum-kubeconfig-71934a2980c7e74f.yaml b/releasenotes/notes/magnum-kubeconfig-71934a2980c7e74f.yaml
+new file mode 100644
+index 0000000..173f5ad
+--- /dev/null
++++ b/releasenotes/notes/magnum-kubeconfig-71934a2980c7e74f.yaml
+@@ -0,0 +1,9 @@
++---
++features:
++  - |
++    If a file `{{ node_custom_config }}/magnum/kubeconfig` exists, it is
++    copied to `/var/lib/magnum/.kube/config` in all Magnum Service Containers.
++    At this location, the `vexxhost/magnum-cluster-api` will loo for the Kubeconfig
++    configuration file to control the Cluster API Control Plane. If the
++    `vexxhost/magnum-cluster-api` is installed in the Magnum container images,
++    control of a cluster API control plane can then take place via the Magnum API.
