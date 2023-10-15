@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 USER root
 
-COPY --link overlays/$OPENSTACK_VERSION /overlays
+COPY --link overlays /overlays
 COPY --link patches /patches
 
 COPY --link files/library /ansible/library
@@ -183,6 +183,11 @@ rm /refresh-containers.yml
 
 # always enable the json_stats calback plugin
 ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.11/site-packages/ansible/plugins/callback
+
+# prepare overlays
+mv /overlays/$OPENSTACK_VERSION/kolla-ansible.yml /overlays
+if [ -e /overlays/$VERSION ]; then mv /overlays/$VERSION/release-kolla-ansible.yml /overlays; fi
+for d in $(find /overlays -mindepth 1 -type d); do rm -rf $d; done
 
 # copy ara configuration
 python3 -m ara.setup.env >> /ansible/ara.env
