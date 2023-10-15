@@ -25,8 +25,6 @@ if [[ -e /ansible/ara.env ]]; then
     source /ansible/ara.env
 fi
 
-export ANSIBLE_STRATEGY_PLUGINS=/usr/share/ansible/plugins/mitogen/ansible_mitogen/plugins/strategy
-
 # https://docs.openstack.org/kolla-ansible/latest/user/ansible-tuning.html#fact-variable-injection
 export ANSIBLE_INJECT_FACT_VARS=False
 
