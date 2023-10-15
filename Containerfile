@@ -186,7 +186,7 @@ ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.11/site-pac
 
 # prepare overlays
 mv /overlays/$OPENSTACK_VERSION/kolla-ansible.yml /overlays
-if [ -e /overlays/$VERSION ]; then mv /overlays/$VERSION/release-kolla-ansible.yml /overlays; fi
+if [ -e /overlays/release/$VERSION ]; then mv /overlays/release/$VERSION/release-kolla-ansible.yml /overlays; fi
 for d in $(find /overlays -mindepth 1 -type d); do rm -rf $d; done
 
 # copy ara configuration
