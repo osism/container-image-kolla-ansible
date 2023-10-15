@@ -3,6 +3,12 @@
 # (c) 2023 Christian Berendt <berendt@osism.tech>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+import json
+
+from ansible.parsing.ajson import AnsibleJSONEncoder
+from ansible.plugins.callback import CallbackBase
+
+
 __metaclass__ = type
 
 DOCUMENTATION = """
@@ -24,11 +30,6 @@ DOCUMENTATION = """
             section: defaults
         type: integer
 """
-
-import json
-
-from ansible.parsing.ajson import AnsibleJSONEncoder
-from ansible.plugins.callback import CallbackBase
 
 
 LOCKSTEP_CALLBACKS = frozenset(("linear", "debug"))
