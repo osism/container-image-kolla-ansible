@@ -4,8 +4,8 @@
 
   environment:
     openstack_version: "{{ version_openstack | default('master') }}"
-    registry: "{{ docker_registry }}"
-    repository: "{{ docker_namespace }}/kolla-ansible"
+    registry: "{{ docker_registry | default('osism.harbor.regio.digital') }}"
+    repository: "{{ docker_namespace | default('osism') }}/kolla-ansible"
     version: "{{ zuul['tag'] | default('latest') }}"
 
   tasks:
@@ -14,19 +14,19 @@
         registry_url: "{{ docker_registry }}"
         username: "{{ secret.DOCKER_USERNAME }}"
         password: "{{ secret.DOCKER_PASSWORD }}"
-      when: push_image | bool
+      when: push_image | default(false) | bool
       no_log: true
 
     - name: Run build script
       ansible.builtin.shell:
         executable: /bin/bash
-        chdir: "{{ zuul.project.src_dir }}"
+        chdir: "{{ zuul.project.src_dir | default('.') }}"
         cmd: |
           set -e
           set -o pipefail
           set -x
 
-          created=$(date --rfc-3339=ns)
+          created=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           revision=$(git rev-parse --short HEAD)
 
           # NOTE: For builds for a specific release, the OpenStack version is taken
@@ -63,7 +63,7 @@
     - name: Run push script
       ansible.builtin.shell:
         executable: /bin/bash
-        chdir: "{{ zuul.project.src_dir }}"
+        chdir: "{{ zuul.project.src_dir | default('.') }}"
         cmd: |
           set -e
           set -o pipefail
@@ -98,7 +98,7 @@
               docker tag "$revision" "$tag"
               docker push "$tag"
           fi
-      when: push_image | bool
+      when: push_image | default(false) | bool
       changed_when: false
       environment:
         OPENSTACK_VERSION: "{{ version_openstack | default('master') }}"
