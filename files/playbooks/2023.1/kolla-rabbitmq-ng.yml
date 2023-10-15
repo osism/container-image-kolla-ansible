@@ -45,12 +45,12 @@
   tasks:
     - name: Group hosts based on Kolla action
       group_by:
-          key: kolla_action_{{ hostvars['localhost']['kolla_action_rabbitmq'] }}
+        key: kolla_action_{{ hostvars['localhost']['kolla_action_rabbitmq'] }}
       changed_when: false
 
     - name: Group hosts based on enabled services
       group_by:
-          key: '{{ item }}'
+        key: '{{ item }}'
       changed_when: false
       with_items: enable_rabbitmq_{{ enable_rabbitmq | bool }}
   tags: always

@@ -80,7 +80,7 @@ for play in site:
                 fp.write("---\n")
 
                 for key, value in local_group_hosts_based_on_configuration.items():
-                    if key == "tasks" and type(value) == list:
+                    if key == "tasks" and type(value) == list:  # noqa E721
                         for task in [
                             x
                             for x in value
