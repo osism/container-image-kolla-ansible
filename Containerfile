@@ -18,17 +18,7 @@ COPY --link files/library /ansible/library
 COPY --link files/plugins /ansible/plugins
 COPY --link files/tasks /ansible/tasks
 
-COPY --link files/playbooks/kolla-bifrost-keypair.yml /ansible/kolla-bifrost-keypair.yml
-COPY --link files/playbooks/kolla-facts.yml /ansible/kolla-facts.yml
-COPY --link files/playbooks/kolla-ironic.yml /ansible/kolla-ironic.yml
-COPY --link files/playbooks/kolla-iscsi.yml /ansible/kolla-iscsi.yml
-COPY --link files/playbooks/kolla-loadbalancer-*.yml /ansible/
-COPY --link files/playbooks/kolla-mariadb-dynamic-rows.yml /ansible/kolla-mariadb-dynamic-rows.yml
-COPY --link files/playbooks/kolla-nova-compute.yml /ansible/kolla-nova-compute.yml
-COPY --link files/playbooks/kolla-purge.yml /ansible/kolla-purge.yml
-COPY --link files/playbooks/kolla-rgw-endpoint.yml /ansible/kolla-rgw-endpoint.yml
-COPY --link files/playbooks/kolla-testbed-identity.yml /ansible/kolla-testbed-identity.yml
-COPY --link files/playbooks/kolla-testbed.yml /ansible/kolla-testbed.yml
+COPY --link files/playbooks/kolla-*.yml /ansible/
 COPY --link files/refresh-containers.yml /refresh-containers.yml
 
 COPY --link files/scripts/change.sh /change.sh
