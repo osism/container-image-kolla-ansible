@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    In `split-kolla-ansible-site.py`, PyYAML is now used instead of ruamel.yaml. In
+    ruamel.yaml as of version 0.18, various things were deprecated which relativised
+    the added value of ruamel.yaml. Using PyYAML does not change the content of the
+    modified files. Only the formatting of the syntax is now different.
