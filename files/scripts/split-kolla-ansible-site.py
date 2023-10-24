@@ -1,11 +1,10 @@
 import copy
 import os
 import re
+import yaml
 
-import ruamel.yaml
-
-SITEFILE = "/repository/ansible/site.yml"
-DSTPATH = "/ansible"
+SITEFILE = os.environ.get("SITEFILE", "/repository/ansible/site.yml")
+DSTPATH = os.environ.get("DSTPATH", "/ansible")
 
 UNSUPPORTED_ROLES = [
     "baremetal",
@@ -35,7 +34,7 @@ UNSUPPORTED_ROLES = [
 ]
 
 with open(SITEFILE, "r") as fp:
-    site = ruamel.yaml.safe_load(fp)
+    site = yaml.load(fp, Loader=yaml.Loader)
 
 group_hosts_based_on_configuration = None
 for play in site:
@@ -62,9 +61,8 @@ for play in site:
 
         else:
             play["gather_facts"] = "false"
-            dump = ruamel.yaml.dump(
-                [play], Dumper=ruamel.yaml.RoundTripDumper, indent=4, block_seq_indent=2
-            )
+            dump = yaml.dump([[play]], Dumper=yaml.Dumper)
+
             if name == "rabbitmq(outward)":
                 name = "rabbitmq-outward"
 
@@ -92,11 +90,8 @@ for play in site:
                                 v = f"enable_{name.replace('-', '_')}_{{{{ enable_{name.replace('-', '_')} | bool }}}}"
                             task["with_items"] = v
 
-                dump_group_hosts_based_on_configuration = ruamel.yaml.dump(
-                    [local_group_hosts_based_on_configuration],
-                    Dumper=ruamel.yaml.RoundTripDumper,
-                    indent=4,
-                    block_seq_indent=2,
+                dump_group_hosts_based_on_configuration = yaml.dump(
+                    [[local_group_hosts_based_on_configuration]], Dumper=yaml.Dumper
                 )
                 for line in dump_group_hosts_based_on_configuration.splitlines():
                     fp.write(line[2:])
