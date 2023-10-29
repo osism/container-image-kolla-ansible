@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fix use of configuration validation. Commands like `osism validate glance-config`
+    are now usable.
