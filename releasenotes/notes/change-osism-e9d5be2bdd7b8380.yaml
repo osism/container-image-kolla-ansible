@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    With the `change-osism.sh` script it is possible to install a different
+    python-osism version in a running inventory reconciler service.
