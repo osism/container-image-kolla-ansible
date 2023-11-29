@@ -172,9 +172,6 @@ cp /repository/tools/cleanup-* /ansible/files
 find /ansible/roles/ -name config.yml -print0 | xargs -0 -I{} dirname {} | xargs -I{} cp /refresh-containers.yml {}/refresh-containers.yml
 rm /refresh-containers.yml
 
-# always enable the json_stats calback plugin
-ln -s /ansible/plugins/callback/json_stats.py /usr/local/lib/python3.11/site-packages/ansible/plugins/callback
-
 # prepare overlays
 mv /overlays/$OPENSTACK_VERSION/kolla-ansible.yml /overlays
 if [ -e /overlays/release/$VERSION ]; then mv /overlays/release/$VERSION/release-kolla-ansible.yml /overlays; fi
