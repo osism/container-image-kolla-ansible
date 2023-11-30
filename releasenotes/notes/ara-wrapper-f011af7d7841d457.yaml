@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    By using a wrapper for the ARA callback plugin, the callback is executed asynchronously,
+    which significantly speeds up the execution of the playbooks. The disadvantage is that
+    you have to wait a few seconds after completing an Ansible playbook until all tasks have
+    been written.
