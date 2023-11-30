@@ -4,7 +4,10 @@
 import queue
 import threading
 
-from ara.plugins.callback.ara_default import CallbackModule as ARACallbackModule
+from ara.plugins.callback.ara_default import (
+    CallbackModule as ARACallbackModule,
+    DOCUMENTATION,
+)
 
 
 class CallbackModule(ARACallbackModule):
