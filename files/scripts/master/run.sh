@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 source /secrets.sh
 
 ENVIRONMENT=${ENVIRONMENT:-kolla}
