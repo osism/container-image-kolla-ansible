@@ -15,7 +15,6 @@ COPY --link overlays /overlays
 COPY --link patches /patches
 
 COPY --link files/library /ansible/library
-COPY --link files/plugins /ansible/plugins
 COPY --link files/tasks /ansible/tasks
 
 COPY --link files/playbooks/kolla-*.yml /ansible/
