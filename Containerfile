@@ -176,6 +176,9 @@ mv /overlays/$OPENSTACK_VERSION/kolla-ansible.yml /overlays
 if [ -e /overlays/release/$VERSION ]; then mv /overlays/release/$VERSION/release-kolla-ansible.yml /overlays; fi
 for d in $(find /overlays -mindepth 1 -type d); do rm -rf $d; done
 
+# copy ara configuration
+python3 -m ara.setup.env >> /ansible/ara.env
+
 # set correct permssions
 chown -R dragon: /ansible /share /interface
 
