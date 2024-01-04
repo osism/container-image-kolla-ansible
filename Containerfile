@@ -1,4 +1,4 @@
-FROM python:3.11-slim as builder
+FROM python:3.11-slim-bookworm as builder
 
 ARG OPENSTACK_VERSION
 ARG VERSION
@@ -211,7 +211,7 @@ RUN python3 /src/render-playbooks.py
 
 USER dragon
 
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
 COPY --link --from=builder / /
 
