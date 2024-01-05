@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Use Debian Bookworm as base image.
