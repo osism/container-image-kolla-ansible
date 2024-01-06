@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# SPDX-License-Identifier: Apache-2.0
+
 # NOTE: This is a first step to make Ansible Vault usable via OSISM workers.
 #       It's not ready in that form yet.
 
