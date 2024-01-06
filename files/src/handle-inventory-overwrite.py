@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 # NOTE: This is a quick workaround.
 #
 # This script reads the file 99-overwrite in the /ansible/inventory directory (if it exists).

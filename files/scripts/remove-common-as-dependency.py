@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 # This script removes the role 'common' in the dependencies dictionary
 # in the meta/main.yml file from all roles.
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 # This script writes a list of all existing playbooks to /ansible/playbooks.yml.
 
 from pathlib import Path
