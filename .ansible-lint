@@ -1,10 +1,14 @@
 ---
 exclude_paths:
   - .github/
-  - files/playbooks/2023.1/kolla-mariadb.yml     # exclude playbooks imported from the kolla-ansible upstream
   - files/playbooks/2023.1/kolla-mariadb-ng.yml  # exclude playbooks imported from the kolla-ansible upstream
-  - files/playbooks/2023.1/kolla-rabbitmq.yml    # exclude playbooks imported from the kolla-ansible upstream
+  - files/playbooks/2023.1/kolla-mariadb.yml     # exclude playbooks imported from the kolla-ansible upstream
   - files/playbooks/2023.1/kolla-rabbitmq-ng.yml # exclude playbooks imported from the kolla-ansible upstream
+  - files/playbooks/2023.1/kolla-rabbitmq.yml    # exclude playbooks imported from the kolla-ansible upstream
+  - files/playbooks/2023.2/kolla-mariadb-ng.yml  # exclude playbooks imported from the kolla-ansible upstream
+  - files/playbooks/2023.2/kolla-mariadb.yml     # exclude playbooks imported from the kolla-ansible upstream
+  - files/playbooks/2023.2/kolla-rabbitmq-ng.yml # exclude playbooks imported from the kolla-ansible upstream
+  - files/playbooks/2023.2/kolla-rabbitmq.yml    # exclude playbooks imported from the kolla-ansible upstream
   - files/playbooks/kolla-loadbalancer-*.yml     # exclude playbooks imported from the kolla-ansible upstream
   - files/playbooks/kolla-testbed-identity.yml   # excluded until we find a way to mock playbooks
   - files/playbooks/kolla-testbed.yml            # excluded until we find a way to mock playbooks
