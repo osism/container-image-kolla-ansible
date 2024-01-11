@@ -124,6 +124,8 @@
         - hadolint
         - python-black
         - yamllint
+    periodic-midnight:
+      jobs:
         - container-image-kolla-ansible-push-zed
         - container-image-kolla-ansible-push-antelope
         - container-image-kolla-ansible-push-bobcat
