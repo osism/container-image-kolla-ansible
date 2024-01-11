@@ -48,6 +48,13 @@
       push_image: false
 
 - job:
+    name: container-image-kolla-ansible-build-bobcat
+    parent: container-image-kolla-ansible-build
+    vars:
+      version_openstack: "2023.2"
+      push_image: false
+
+- job:
     name: container-image-kolla-ansible-push-zed
     parent: container-image-kolla-ansible-build
     vars:
@@ -63,6 +70,17 @@
     parent: container-image-kolla-ansible-build
     vars:
       version_openstack: "2023.1"
+      push_image: true
+    secrets:
+      - name: secret
+        secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
+        pass-to-parent: true
+
+- job:
+    name: container-image-kolla-ansible-push-bobcat
+    parent: container-image-kolla-ansible-build
+    vars:
+      version_openstack: "2023.2"
       push_image: true
     secrets:
       - name: secret
@@ -91,6 +109,7 @@
         - yamllint
         - container-image-kolla-ansible-build-zed
         - container-image-kolla-ansible-build-antelope
+        - container-image-kolla-ansible-build-bobcat
     gate:
       jobs:
         - ansible-lint
@@ -107,11 +126,14 @@
         - yamllint
         - container-image-kolla-ansible-push-zed
         - container-image-kolla-ansible-push-antelope
+        - container-image-kolla-ansible-push-bobcat
     post:
       jobs:
         - container-image-kolla-ansible-push-zed:
             branches: main
         - container-image-kolla-ansible-push-antelope:
+            branches: main
+        - container-image-kolla-ansible-push-bobcat:
             branches: main
     tag:
       jobs:
