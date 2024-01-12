@@ -32,6 +32,7 @@ COPY --link files/scripts/ansible-vault.py /ansible-vault.py
 COPY --link files/ansible.cfg /etc/ansible/ansible.cfg
 COPY --link files/ara.env /ansible/ara.env
 COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
+COPY --link files/defaults/$OPENSTACK_VERSION.yml /ansible/999-kolla-ansible.yml
 
 COPY --link files/src /src
 
@@ -149,9 +150,9 @@ done
 ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
 pip3 install --no-cache-dir -r /repository/requirements.txt
 pip3 install --no-cache-dir /repository
-mkdir -p /ansible/group_vars
 cp -r /defaults/* /ansible/group_vars/
 rm -f /ansible/group_vars/LICENSE /ansible/group_vars/README.md
+mv /ansible/999-kolla-ansible.yml /ansible/group_vars/all/999-kolla-ansible.yml
 python3 /remove-common-as-dependency.py
 python3 /split-kolla-ansible-site.py
 cp -r /repository/ansible/action_plugins/* /ansible/action_plugins
