@@ -1,0 +1,8 @@
+---
+# External Ceph keyrings
+ceph_cinder_keyring: "client.{{ ceph_cinder_user }}.keyring"
+ceph_cinder_backup_keyring: "client.{{ ceph_cinder_backup_user }}.keyring"
+ceph_glance_keyring: "client.{{ ceph_glance_user }}.keyring"
+ceph_gnocchi_keyring: "client.{{ ceph_gnocchi_user }}.keyring"
+ceph_manila_keyring: "client.{{ ceph_manila_user }}.keyring"
+ceph_nova_keyring: "{{ ceph_cinder_keyring }}"
