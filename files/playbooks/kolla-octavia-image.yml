@@ -1,0 +1,38 @@
+---
+- name: Manage octavia image
+  hosts: localhost
+  connection: local
+
+  vars:
+    octavia_image_url: "https://swift.services.a.regiocloud.tech/swift/v1/AUTH_b182637428444b9aa302bb8d5a5a418c/openstack-octavia-amphora-image/octavia-amphora-haproxy-{{ openstack_release }}.qcow2"
+    octavia_image_version: "{{ now(fmt='%Y%m%d') }}"
+
+  tasks:
+    - name: Download amphora image
+      ansible.builtin.get_url:
+        url: "{{ octavia_image_url }}"
+        dest: /tmp/amphora.img
+        mode: 0644
+
+    - name: Upload octavia image  # noqa args[module]
+      openstack.cloud.image:
+        auth: "{{ openstack_auth }}"
+        validate_certs: false
+        state: present
+        name: "OpenStack Octavia Amphora ({{ octavia_image_version }})"
+        container_format: bare
+        disk_format: qcow2
+        filename: /tmp/amphora.img
+        min_disk: 2
+        tags:
+          - amphora
+        properties:
+          cpu_arch: x86_64
+          distro: ubuntu
+          hw_rng_model: virtio
+      no_log: true
+
+    - name: Remove amphora image
+      ansible.builtin.file:
+        path: /tmp/amphora.img
+        state: absent
