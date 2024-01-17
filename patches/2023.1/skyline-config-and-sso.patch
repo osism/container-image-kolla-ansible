@@ -1,0 +1,62 @@
+diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
+index 89a4cdbd1..67cc16ea3 100644
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -529,6 +529,7 @@ skyline_apiserver_port: "9998"
+ skyline_apiserver_listen_port: "{{ skyline_apiserver_port }}"
+ skyline_console_port: "9999"
+ skyline_console_listen_port: "{{ skyline_console_port }}"
++skyline_sso_enabled: "no"
+ 
+ solum_application_deployment_port: "9777"
+ solum_image_builder_port: "9778"
+diff --git a/ansible/roles/skyline/defaults/main.yml b/ansible/roles/skyline/defaults/main.yml
+index 12a9ec84d..6191a7bc8 100644
+--- a/ansible/roles/skyline/defaults/main.yml
++++ b/ansible/roles/skyline/defaults/main.yml
+@@ -182,6 +182,11 @@ skyline_ks_users:
+     password: "{{ skyline_keystone_password }}"
+     role: "admin"
+ 
++####################
++# SSO
++####################
++skyline_sso_enabled: "no"
++
+ ####################
+ # TLS
+ ####################
+diff --git a/ansible/roles/skyline/tasks/config.yml b/ansible/roles/skyline/tasks/config.yml
+index 13d620d2a..40f13edb9 100644
+--- a/ansible/roles/skyline/tasks/config.yml
++++ b/ansible/roles/skyline/tasks/config.yml
+@@ -17,8 +17,12 @@
+     - kolla_copy_ca_into_containers | bool or skyline_enable_tls_backend | bool
+ 
+ - name: Copying over skyline.yaml files for services
+-  template:
+-    src: "skyline.yaml.j2"
++  merge_yaml:
++    sources:
++      - "{{ role_path }}/templates/skyline.yaml.j2"
++      - "{{ node_custom_config }}/skyline.yaml"
++      - "{{ node_custom_config }}/skyline/skyline.yaml"
++      - "{{ node_custom_config }}/skyline/{{ inventory_hostname }}/skyline.yaml"
+     dest: "{{ node_config_directory }}/{{ item.key }}/skyline.yaml"
+     mode: "0660"
+   become: true
+diff --git a/ansible/roles/skyline/templates/skyline.yaml.j2 b/ansible/roles/skyline/templates/skyline.yaml.j2
+index f99810954..344d58da7 100644
+--- a/ansible/roles/skyline/templates/skyline.yaml.j2
++++ b/ansible/roles/skyline/templates/skyline.yaml.j2
+@@ -77,6 +77,10 @@ openstack:
+ {% if enable_cinder | bool %}
+     volumev3: cinder
+ {% endif %}
++  sso_enabled: {{ skyline_sso_enabled }}
++  sso_protocols:
++    - openid
++  sso_region: {{ openstack_region_name }}
+   system_admin_roles:
+ {% for skyline_system_admin_role in skyline_system_admin_roles %}
+   - {{ skyline_system_admin_role }}
