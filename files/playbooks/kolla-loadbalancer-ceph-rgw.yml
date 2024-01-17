@@ -26,5 +26,5 @@
         name: ceph-rgw
         tasks_from: loadbalancer
       when:
-        - enable_ceph-rgw | bool
+        - enable_ceph_rgw | bool
         - kolla_action in ['deploy', 'reconfigure', 'upgrade', 'config']
