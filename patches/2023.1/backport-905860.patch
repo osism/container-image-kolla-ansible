@@ -1,0 +1,45 @@
+diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
+index 89a4cdbd1..67cc16ea3 100644
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -529,6 +529,7 @@ skyline_apiserver_port: "9998"
+ skyline_apiserver_listen_port: "{{ skyline_apiserver_port }}"
+ skyline_console_port: "9999"
+ skyline_console_listen_port: "{{ skyline_console_port }}"
++skyline_sso_enabled: "no"
+ 
+ solum_application_deployment_port: "9777"
+ solum_image_builder_port: "9778"
+diff --git a/ansible/roles/skyline/defaults/main.yml b/ansible/roles/skyline/defaults/main.yml
+index ca7851571..a895013ec 100644
+--- a/ansible/roles/skyline/defaults/main.yml
++++ b/ansible/roles/skyline/defaults/main.yml
+@@ -180,6 +180,11 @@ skyline_ks_users:
+     password: "{{ skyline_keystone_password }}"
+     role: "admin"
+ 
++####################
++# SSO
++####################
++skyline_sso_enabled: "no"
++
+ ####################
+ # TLS
+ ####################
+diff --git a/ansible/roles/skyline/templates/skyline.yaml.j2 b/ansible/roles/skyline/templates/skyline.yaml.j2
+index f99810954..903664c5d 100644
+--- a/ansible/roles/skyline/templates/skyline.yaml.j2
++++ b/ansible/roles/skyline/templates/skyline.yaml.j2
+@@ -76,6 +76,12 @@ openstack:
+ {% endif %}
+ {% if enable_cinder | bool %}
+     volumev3: cinder
++{% endif %}
++  sso_enabled: {{ skyline_sso_enabled | bool }}
++{% if skyline_sso_enabled | bool %}
++  sso_protocols:
++    - openid
++  sso_region: {{ openstack_region_name }}
+ {% endif %}
+   system_admin_roles:
+ {% for skyline_system_admin_role in skyline_system_admin_roles %}
