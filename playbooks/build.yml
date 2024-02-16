@@ -4,6 +4,7 @@
 
   environment:
     openstack_version: "{{ version_openstack | default('master') }}"
+    python_version: "{{ version_python | default('3.11') }}"
     registry: "{{ docker_registry | default('osism.harbor.regio.digital') }}"
     repository: "{{ docker_namespace | default('osism') }}/kolla-ansible"
     version: "{{ zuul['tag'] | default('latest') }}"
@@ -44,6 +45,7 @@
 
           docker buildx build \
               --build-arg "OPENSTACK_VERSION=$openstack_version" \
+              --build-arg "PYTHON_VERSION=$python_version" \
               --build-arg "VERSION=$version" \
               --label "org.opencontainers.image.created=$created" \
               --label "org.opencontainers.image.documentation=https://docs.osism.tech" \
