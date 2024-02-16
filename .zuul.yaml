@@ -25,6 +25,18 @@
           DiaRHFVyBIuQVbS38oirkVu7iOFMMnhy9z/Dy5rQjn3W1dnmMmCq2WsIioZfL5S30Sntq
           +f3U0lv4jEFlPNqCkveCOYfxS8eiTAxLd63JBRM3yb+c0Zq0ci/SfVc9D6hfdM=
 
+- semaphore:
+    name: semaphore-container-image-kolla-ansible-push-zed
+    max: 1
+
+- semaphore:
+    name: semaphore-container-image-kolla-ansible-push-antelope
+    max: 1
+
+- semaphore:
+    name: semaphore-container-image-kolla-ansible-push-bobcat
+    max: 1
+
 - job:
     name: container-image-kolla-ansible-build
     pre-run: playbooks/pre.yml
@@ -57,6 +69,8 @@
 - job:
     name: container-image-kolla-ansible-push-zed
     parent: container-image-kolla-ansible-build
+    semaphores:
+      - name: semaphore-container-image-kolla-ansible-push-zed
     vars:
       version_openstack: zed
       push_image: true
@@ -68,6 +82,8 @@
 - job:
     name: container-image-kolla-ansible-push-antelope
     parent: container-image-kolla-ansible-build
+    semaphores:
+      - name: semaphore-container-image-kolla-ansible-push-antelope
     vars:
       version_openstack: "2023.1"
       push_image: true
@@ -79,6 +95,8 @@
 - job:
     name: container-image-kolla-ansible-push-bobcat
     parent: container-image-kolla-ansible-build
+    semaphores:
+      - name: semaphore-container-image-kolla-ansible-push-bobcat
     vars:
       version_openstack: "2023.2"
       push_image: true
