@@ -203,6 +203,10 @@ rm -rf \
   /usr/share/man/* \
   /var/lib/apt/lists/* \
   /var/tmp/*
+
+pip3 install --no-cache-dir pyclean==2.7.6
+pyclean /usr
+pip3 uninstall -y pyclean
 EOF
 
 COPY --link files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
