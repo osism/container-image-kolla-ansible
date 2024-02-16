@@ -48,6 +48,7 @@
 - job:
     name: container-image-kolla-ansible-build-zed
     parent: container-image-kolla-ansible-build
+    timeout: 3600
     vars:
       version_openstack: zed
       push_image: false
