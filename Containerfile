@@ -22,7 +22,6 @@ COPY --link files/playbooks/kolla-*.yml /ansible/
 COPY --link files/refresh-containers.yml /refresh-containers.yml
 
 COPY --link files/scripts/change.sh /change.sh
-COPY --link files/scripts/change-osism.sh /change-osism.sh
 COPY --link files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
 COPY --link files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
 COPY --link files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
