@@ -34,6 +34,7 @@
         checksum: "{{ ironic_agent_initramfs_checksum }}"
         mode: 0644
       when: enable_ironic_agent_download_images | bool
+      environment: "{{ proxy_proxies | default({}) }}"
 
     - name: Download ironic-agent kernel
       ansible.builtin.get_url:
@@ -42,6 +43,7 @@
         checksum: "{{ ironic_agent_kernel_checksum }}"
         mode: 0644
       when: enable_ironic_agent_download_images | bool
+      environment: "{{ proxy_proxies | default({}) }}"
 
 - name: Group hosts based on configuration
   hosts:
