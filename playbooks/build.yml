@@ -48,12 +48,12 @@
               --build-arg "PYTHON_VERSION=$python_version" \
               --build-arg "VERSION=$version" \
               --label "org.opencontainers.image.created=$created" \
-              --label "org.opencontainers.image.documentation=https://docs.osism.tech" \
+              --label "org.opencontainers.image.documentation=https://osism.github.io/docs/intro" \
               --label "org.opencontainers.image.licenses=ASL 2.0" \
               --label "org.opencontainers.image.revision=$revision" \
               --label "org.opencontainers.image.source=https://github.com/osism/container-image-kolla-ansible" \
               --label "org.opencontainers.image.title=kolla-ansible" \
-              --label "org.opencontainers.image.url=https://www.osism.tech" \
+              --label "org.opencontainers.image.url=https://quay.io/organization/osism" \
               --label "org.opencontainers.image.vendor=OSISM GmbH" \
               --label "org.opencontainers.image.version=$version" \
               --label "de.osism.release.openstack=$openstack_version" \
