@@ -1,0 +1,22 @@
+From cdc169e44632eed2d69bb84c87716eaa72ab0533 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Fri, 15 Mar 2024 22:39:37 +0100
+Subject: [PATCH] ironic: add missing ironic_database_shard_id parameter
+
+Without this parameter, it is not possible to use ProxySQL for Ironic.
+
+Change-Id: Iee8fa9d94e5ed5bfab794db2d35d75a96d8a7600
+---
+
+diff --git a/ansible/roles/ironic/defaults/main.yml b/ansible/roles/ironic/defaults/main.yml
+index 1181cf4..4217b86 100644
+--- a/ansible/roles/ironic/defaults/main.yml
++++ b/ansible/roles/ironic/defaults/main.yml
+@@ -115,6 +115,7 @@
+ # Database sharding
+ ####################
+ ironic_database_shard_root_user: "{% if enable_proxysql | bool %}root_shard_{{ ironic_database_shard_id }}{% else %}{{ database_user }}{% endif %}"
++ironic_database_shard_id: "{{ mariadb_default_database_shard_id | int }}"
+ ironic_database_shard:
+   users:
+     - user: "{{ ironic_database_user }}"
