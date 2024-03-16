@@ -1,0 +1,35 @@
+---
+- name: Group hosts based on configuration
+  hosts:
+    - keystone
+  gather_facts: false
+  tasks:
+    - name: Group hosts based on Kolla action
+      ansible.builtin.group_by:
+        key: kolla_action_{{ kolla_action }}
+      changed_when: false
+    - name: Group hosts based on enabled services
+      ansible.builtin.group_by:
+        key: '{{ item }}'
+      changed_when: false
+      with_items:
+        - enable_keystone_{{ enable_keystone | bool }}
+  tags: always
+
+- name: Wait for the Keystone service
+  gather_facts: false
+  hosts:
+    - keystone
+    - '&enable_keystone_True'
+  serial: '{{ kolla_serial | default("0") }}'
+
+  tasks:
+    - name: Waiting for Keystone public port to be UP
+      wait_for:
+        host: "{{ api_interface_address }}"
+        port: "{{ keystone_public_listen_port }}"
+        connect_timeout: 1
+      register: check_keystone_public_port
+      until: check_keystone_public_port is success
+      retries: 60
+      delay: 10
