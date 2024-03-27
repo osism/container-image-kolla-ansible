@@ -48,7 +48,7 @@
               --build-arg "PYTHON_VERSION=$python_version" \
               --build-arg "VERSION=$version" \
               --label "org.opencontainers.image.created=$created" \
-              --label "org.opencontainers.image.documentation=https://osism.tech/docs/intro" \
+              --label "org.opencontainers.image.documentation=https://osism.tech/docs/" \
               --label "org.opencontainers.image.licenses=ASL 2.0" \
               --label "org.opencontainers.image.revision=$revision" \
               --label "org.opencontainers.image.source=https://github.com/osism/container-image-kolla-ansible" \
