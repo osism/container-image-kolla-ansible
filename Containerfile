@@ -35,6 +35,8 @@ COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
 
 COPY --link files/src /src
 
+ADD https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.7.tar.gz /mitogen.tar.gz
+
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # hadolint ignore=DL3003
@@ -144,6 +146,12 @@ for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do
   ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1
   ( cd /repository && patch --forward --batch -p1 ) < $patchfile
 done
+
+# install mitogen ansible plugin
+mkdir -p /usr/share/mitogen
+tar xzf /mitogen.tar.gz --strip-components=1 -C /usr/share/mitogen
+rm -rf /usr/share/mitogen/{tests,docs,.ci,.lgtm.yml,.travis.yml}
+rm /mitogen.tar.gz
 
 # project specific instructions
 ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
