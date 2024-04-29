@@ -26,10 +26,6 @@
           +f3U0lv4jEFlPNqCkveCOYfxS8eiTAxLd63JBRM3yb+c0Zq0ci/SfVc9D6hfdM=
 
 - semaphore:
-    name: semaphore-container-image-kolla-ansible-push-zed
-    max: 1
-
-- semaphore:
     name: semaphore-container-image-kolla-ansible-push-antelope
     max: 1
 
@@ -46,14 +42,6 @@
       docker_registry: osism.harbor.regio.digital
 
 - job:
-    name: container-image-kolla-ansible-build-zed
-    parent: container-image-kolla-ansible-build
-    timeout: 3600
-    vars:
-      version_openstack: zed
-      push_image: false
-
-- job:
     name: container-image-kolla-ansible-build-antelope
     parent: container-image-kolla-ansible-build
     vars:
@@ -67,19 +55,6 @@
       version_openstack: "2023.2"
       version_python: "3.12"
       push_image: false
-
-- job:
-    name: container-image-kolla-ansible-push-zed
-    parent: container-image-kolla-ansible-build
-    semaphores:
-      - name: semaphore-container-image-kolla-ansible-push-zed
-    vars:
-      version_openstack: zed
-      push_image: true
-    secrets:
-      - name: secret
-        secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
-        pass-to-parent: true
 
 - job:
     name: container-image-kolla-ansible-push-antelope
@@ -128,7 +103,6 @@
         - hadolint
         - python-black
         - yamllint
-        - container-image-kolla-ansible-build-zed
         - container-image-kolla-ansible-build-antelope
         - container-image-kolla-ansible-build-bobcat
     gate:
@@ -147,13 +121,10 @@
         - yamllint
     periodic-midnight:
       jobs:
-        - container-image-kolla-ansible-push-zed
         - container-image-kolla-ansible-push-antelope
         - container-image-kolla-ansible-push-bobcat
     post:
       jobs:
-        - container-image-kolla-ansible-push-zed:
-            branches: main
         - container-image-kolla-ansible-push-antelope:
             branches: main
         - container-image-kolla-ansible-push-bobcat:
