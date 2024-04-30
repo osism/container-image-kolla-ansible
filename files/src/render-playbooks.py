@@ -10,6 +10,7 @@ PREFIX = "kolla"
 
 KEEP_PREFIX = [
     "ceph-rgw",
+    "certificates",
     "destroy",
     "facts",
     "gather-facts",
