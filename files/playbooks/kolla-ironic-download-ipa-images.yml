@@ -1,0 +1,41 @@
+---
+- name: Download ironic ipa images
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  run_once: true
+
+  vars:
+    enable_ironic_agent_download_images: true
+    ironic_agent_files_directory: /share/ironic
+    ironic_agent_distribution: centos9
+    ironic_agent_initramfs_checksum: "sha256:https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.initramfs.sha256"
+    ironic_agent_initramfs_url: "https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.initramfs"
+    ironic_agent_kernel_checksum: "sha256:https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.kernel.sha256"
+    ironic_agent_kernel_url: "https://tarballs.opendev.org/openstack/ironic-python-agent/dib/files/ipa-{{ ironic_agent_distribution }}-stable-{{ openstack_version }}.kernel"
+
+  tasks:
+    - name: Ensure the destination directory exists
+      ansible.builtin.file:
+        path: "{{ ironic_agent_files_directory }}"
+        state: directory
+        mode: 0755
+      when: enable_ironic_agent_download_images | bool
+
+    - name: Download ironic-agent initramfs
+      ansible.builtin.get_url:
+        url: "{{ ironic_agent_initramfs_url }}"
+        dest: "{{ ironic_agent_files_directory }}/ironic-agent.initramfs"
+        checksum: "{{ ironic_agent_initramfs_checksum }}"
+        mode: 0644
+      when: enable_ironic_agent_download_images | bool
+      environment: "{{ proxy_proxies | default({}) }}"
+
+    - name: Download ironic-agent kernel
+      ansible.builtin.get_url:
+        url: "{{ ironic_agent_kernel_url }}"
+        dest: "{{ ironic_agent_files_directory }}/ironic-agent.kernel"
+        checksum: "{{ ironic_agent_kernel_checksum }}"
+        mode: 0644
+      when: enable_ironic_agent_download_images | bool
+      environment: "{{ proxy_proxies | default({}) }}"
