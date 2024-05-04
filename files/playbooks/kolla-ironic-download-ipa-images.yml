@@ -17,7 +17,7 @@
   tasks:
     - name: Ensure the destination directory exists
       ansible.builtin.file:
-        path: "{{ ironic_agent_files_directory }}"
+        path: "{{ ironic_agent_files_directory }}/ironic"
         state: directory
         mode: 0755
       when: enable_ironic_agent_download_images | bool
@@ -25,7 +25,7 @@
     - name: Download ironic-agent initramfs
       ansible.builtin.get_url:
         url: "{{ ironic_agent_initramfs_url }}"
-        dest: "{{ ironic_agent_files_directory }}/ironic-agent.initramfs"
+        dest: "{{ ironic_agent_files_directory }}/ironic/ironic-agent.initramfs"
         checksum: "{{ ironic_agent_initramfs_checksum }}"
         mode: 0644
       when: enable_ironic_agent_download_images | bool
@@ -34,7 +34,7 @@
     - name: Download ironic-agent kernel
       ansible.builtin.get_url:
         url: "{{ ironic_agent_kernel_url }}"
-        dest: "{{ ironic_agent_files_directory }}/ironic-agent.kernel"
+        dest: "{{ ironic_agent_files_directory }}/ironic/ironic-agent.kernel"
         checksum: "{{ ironic_agent_kernel_checksum }}"
         mode: 0644
       when: enable_ironic_agent_download_images | bool
