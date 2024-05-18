@@ -1,0 +1,50 @@
+From cc059fddee70fd8b460ff9b347a1e12fa3865a5f Mon Sep 17 00:00:00 2001
+From: Michal Nasiadka <mnasiadka@gmail.com>
+Date: Mon, 11 Mar 2024 10:07:06 +0100
+Subject: [PATCH] octavia: Use valid_interfaces instead of endpoint_type
+
+Change-Id: I145f75e13ab40b62b47469c23e34435590d2f767
+---
+
+diff --git a/ansible/roles/octavia/templates/octavia.conf.j2 b/ansible/roles/octavia/templates/octavia.conf.j2
+index 6f046bb..6357aec 100644
+--- a/ansible/roles/octavia/templates/octavia.conf.j2
++++ b/ansible/roles/octavia/templates/octavia.conf.j2
+@@ -19,7 +19,7 @@
+ ca_certificate = /etc/octavia/certs/server_ca.cert.pem
+ {% if enable_barbican | bool %}
+ region_name = {{ openstack_region_name }}
+-endpoint_type = internal
++valid_interfaces = internal
+ ca_certificates_file = {{ openstack_cacert }}
+ {% endif %}
+ 
+@@ -69,6 +69,7 @@
+ password = {{ octavia_keystone_password }}
+ cafile = {{ openstack_cacert }}
+ region_name = {{ openstack_region_name }}
++valid_interfaces = internal
+ 
+ memcache_security_strategy = ENCRYPT
+ memcache_secret_key = {{ memcache_secret_key }}
+@@ -142,17 +143,17 @@
+ 
+ [glance]
+ region_name = {{ openstack_region_name }}
+-endpoint_type = internal
++valid_interfaces = internal
+ ca_certificates_file = {{ openstack_cacert }}
+ 
+ [neutron]
+ region_name = {{ openstack_region_name }}
+-endpoint_type = internal
++valid_interfaces = internal
+ ca_certificates_file = {{ openstack_cacert }}
+ 
+ [nova]
+ region_name = {{ openstack_region_name }}
+-endpoint_type = internal
++valid_interfaces = internal
+ ca_certificates_file = {{ openstack_cacert }}
+ {% if enable_octavia_jobboard %}
+ 
