@@ -10,7 +10,6 @@ DSTPATH = os.environ.get("DSTPATH", "/ansible")
 
 UNSUPPORTED_ROLES = [
     "baremetal",
-    "blazar",
     "ceph",
     "cyborg",
     "freezer",
