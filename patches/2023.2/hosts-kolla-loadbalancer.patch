@@ -1,3 +1,41 @@
+--- a/ansible/roles/loadbalancer/defaults/main.yml
++++ b/ansible/roles/loadbalancer/defaults/main.yml
+@@ -2,7 +2,7 @@
+ loadbalancer_services:
+   haproxy:
+     container_name: haproxy
+-    group: loadbalancer
++    group: "{{ hosts_kolla_loadbalancer|default('loadbalancer') }}"
+     enabled: true
+     image: "{{ haproxy_image_full }}"
+     privileged: True
+@@ -11,7 +11,7 @@ loadbalancer_services:
+     healthcheck: "{{ haproxy_healthcheck }}"
+   proxysql:
+     container_name: proxysql
+-    group: loadbalancer
++    group: "{{ hosts_kolla_loadbalancer|default('loadbalancer') }}"
+     enabled: "{{ enable_proxysql | bool }}"
+     image: "{{ proxysql_image_full }}"
+     privileged: False
+@@ -20,7 +20,7 @@ loadbalancer_services:
+     healthcheck: "{{ proxysql_healthcheck }}"
+   keepalived:
+     container_name: keepalived
+-    group: loadbalancer
++    group: "{{ hosts_kolla_loadbalancer|default('loadbalancer') }}"
+     enabled: "{{ enable_keepalived | bool }}"
+     image: "{{ keepalived_image_full }}"
+     privileged: True
+@@ -28,7 +28,7 @@ loadbalancer_services:
+     dimensions: "{{ keepalived_dimensions }}"
+   haproxy-ssh:
+     container_name: "haproxy_ssh"
+-    group: loadbalancer
++    group: "{{ hosts_kolla_loadbalancer|default('loadbalancer') }}"
+     enabled: "{{ enable_letsencrypt | bool }}"
+     image: "{{ haproxy_ssh_image_full }}"
+     volumes: "{{ haproxy_ssh_default_volumes }}"
 --- a/ansible/roles/loadbalancer/tasks/main.yml
 +++ b/ansible/roles/loadbalancer/tasks/main.yml
 @@ -1,3 +1,3 @@
