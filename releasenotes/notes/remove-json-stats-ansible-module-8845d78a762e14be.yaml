@@ -1,4 +1,0 @@
----
-features:
-  - |
-    The json_stats Ansible module is no longer required by python-osism and has been removed.
