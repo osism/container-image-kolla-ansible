@@ -1,7 +1,0 @@
----
-upgrade:
-  - |
-    The Mitogen plugin was deprecated and has now been removed. It was no
-    longer usable with current Ansible versions and the upstream was not
-    very active. If the Mitogen plugin is used in a configuration repository
-    via the Ansible configuration, this must be removed respectively.

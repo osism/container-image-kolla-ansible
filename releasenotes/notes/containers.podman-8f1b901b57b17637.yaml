@@ -1,4 +1,0 @@
----
-features:
-  - |
-    Install `containers.podman` Ansible collection, required by OpenStack 2023.2.
