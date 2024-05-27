@@ -70,7 +70,7 @@ apt-get install -y --no-install-recommends \
   sshpass
 
 python3 -m pip install --no-cache-dir --upgrade 'pip==24.0'
-pip3 install --no-cache-dir -r /src/requirements.txt
+pip install --no-cache-dir -r /src/requirements.txt
 
 update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
@@ -108,7 +108,7 @@ python3 /src/render-python-requirements.py
 python3 /src/render-versions.py
 
 # install required python packages
-pip3 install --no-cache-dir -r /requirements.txt
+pip install --no-cache-dir -r /requirements.txt
 
 # set ansible version in the motd
 ansible_version=$(python3 -c 'import ansible; print(ansible.release.__version__)')
@@ -155,8 +155,8 @@ rm /mitogen.tar.gz
 
 # project specific instructions
 ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
-pip3 install --no-cache-dir -r /repository/requirements.txt
-pip3 install --no-cache-dir /repository
+pip install --no-cache-dir -r /repository/requirements.txt
+pip install --no-cache-dir /repository
 mkdir -p /ansible/group_vars
 cp -r /defaults/* /ansible/group_vars/
 rm -f /ansible/group_vars/LICENSE /ansible/group_vars/README.md
@@ -212,9 +212,9 @@ rm -rf \
   /var/lib/apt/lists/* \
   /var/tmp/*
 
-pip3 install --no-cache-dir pyclean==3.0.0
+pip install --no-cache-dir pyclean==3.0.0
 pyclean /usr
-pip3 uninstall -y pyclean
+pip uninstall -y pyclean
 EOF
 
 COPY --link files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
