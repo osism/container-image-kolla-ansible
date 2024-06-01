@@ -48,6 +48,11 @@ if [[ -w $ANSIBLE_INVENTORY ]]; then
     rm /ansible/inventory/[0-9]*
 fi
 
+if [[ -e $ENVIRONMENTS_DIRECTORY/$SUB/.lock ]]; then
+    echo "ERROR: The environment $SUB is locked via the configuration repository."
+    exit 1
+fi
+
 cd $ENVIRONMENTS_DIRECTORY/$SUB
 
 export IFS=","
