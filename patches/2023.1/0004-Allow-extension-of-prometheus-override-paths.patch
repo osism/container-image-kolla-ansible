@@ -1,0 +1,89 @@
+From 2665241059a080d4ad3dcd371408a0ccb3022970 Mon Sep 17 00:00:00 2001
+From: Jan Horstmann <horstmann@osism.tech>
+Date: Thu, 16 May 2024 12:51:07 +0200
+Subject: [PATCH 4/4] Allow extension of prometheus override paths
+
+Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+---
+ ansible/roles/prometheus/defaults/main.yml           |  6 ++++++
+ ansible/roles/prometheus/tasks/config.yml            | 10 +++++-----
+ ansible/roles/prometheus/templates/prometheus.yml.j2 |  4 ++--
+ 3 files changed, 13 insertions(+), 7 deletions(-)
+
+diff --git a/ansible/roles/prometheus/defaults/main.yml b/ansible/roles/prometheus/defaults/main.yml
+index a72d86783..46fb46ca0 100644
+--- a/ansible/roles/prometheus/defaults/main.yml
++++ b/ansible/roles/prometheus/defaults/main.yml
+@@ -131,6 +131,12 @@ prometheus_services:
+ ####################
+ # Prometheus Server
+ ####################
++prometheus_custom_alert_paths:
++  - "{{ node_custom_config }}/prometheus/"
++
++prometheus_common_config_overrides_paths:
++  - "{{ node_custom_config }}/prometheus/prometheus.yml.d"
++
+ prometheus_external_labels:
+ #  <labelname>: <labelvalue>
+ 
+diff --git a/ansible/roles/prometheus/tasks/config.yml b/ansible/roles/prometheus/tasks/config.yml
+index f55f6b5ba..bf83be9d7 100644
+--- a/ansible/roles/prometheus/tasks/config.yml
++++ b/ansible/roles/prometheus/tasks/config.yml
+@@ -31,7 +31,7 @@
+ 
+ - name: Find custom prometheus alert rules files
+   find:
+-    path: "{{ node_custom_config }}/prometheus/"
++    paths: "{{ prometheus_custom_alert_paths }}"
+     pattern: "*.rules"
+   run_once: True
+   delegate_to: localhost
+@@ -51,15 +51,14 @@
+     - inventory_hostname in groups[service.group]
+     - service.enabled | bool and enable_prometheus_alertmanager | bool
+     - prometheus_alert_rules is defined and prometheus_alert_rules.files | length > 0
+-  with_items: "{{ prometheus_alert_rules.files }}"
++  with_items: "{{ dict( prometheus_alert_rules.files | map(attribute='path') | map('basename') | zip(prometheus_alert_rules.files) ) | dict2items | map(attribute='value') }}"
+   notify:
+     - Restart prometheus-server container
+ 
+ - name: Find prometheus common config overrides
+   find:
+     # NOTE(wszumski): Non-existent paths don't produce a failure
+-    paths:
+-      - "{{ node_custom_config }}/prometheus/prometheus.yml.d"
++    paths: "{{ prometheus_common_config_overrides_paths }}"
+     patterns: "*.yml"
+   delegate_to: localhost
+   register: prometheus_common_config_overrides_result
+@@ -80,8 +79,9 @@
+   become: true
+   vars:
+     service: "{{ prometheus_services['prometheus-server'] }}"
+-    common_overrides: "{{ prometheus_common_config_overrides_result.files | map(attribute='path') | list }}"
++    _common_overrides: "{{ prometheus_common_config_overrides_result.files | map(attribute='path') | list }}"
+     host_overrides: "{{ prometheus_host_config_overrides_result.files | map(attribute='path') | list }}"
++    common_overrides: "{{ dict( _common_overrides | map('basename') | zip(_common_overrides) ) | dict2items | sort(attribute='key') | map(attribute='value') | list }}"
+   merge_yaml:
+     sources: "{{ [item] + common_overrides + host_overrides }}"
+     dest: "{{ node_config_directory }}/prometheus-server/prometheus.yml"
+diff --git a/ansible/roles/prometheus/templates/prometheus.yml.j2 b/ansible/roles/prometheus/templates/prometheus.yml.j2
+index f0ff6c846..d45a6284b 100644
+--- a/ansible/roles/prometheus/templates/prometheus.yml.j2
++++ b/ansible/roles/prometheus/templates/prometheus.yml.j2
+@@ -11,8 +11,8 @@ global:
+ 
+ {% if prometheus_alert_rules.files is defined and prometheus_alert_rules.files | length  > 0 %}
+ rule_files:
+-{% for rule in prometheus_alert_rules.files %}
+-  - "/etc/prometheus/{{ rule.path | basename }}"
++{% for rule in prometheus_alert_rules.files | map(attribute='path') | map('basename') | unique %}
++  - "/etc/prometheus/{{ rule }}"
+ {% endfor %}
+ {% endif %}
+ 
+-- 
+2.45.1
+

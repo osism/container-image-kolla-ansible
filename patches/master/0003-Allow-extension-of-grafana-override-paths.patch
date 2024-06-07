@@ -1,0 +1,132 @@
+From 67042501d8567c2e8228ac0e84f2423c45e54bfe Mon Sep 17 00:00:00 2001
+From: Jan Horstmann <horstmann@osism.tech>
+Date: Thu, 16 May 2024 12:31:12 +0200
+Subject: [PATCH 3/4] Allow extension of grafana override paths
+
+Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+---
+ ansible/roles/grafana/defaults/main.yml       | 16 ++++++++++++
+ ansible/roles/grafana/tasks/config.yml        | 25 +++++++------------
+ .../roles/grafana/templates/grafana.json.j2   |  2 +-
+ 3 files changed, 26 insertions(+), 17 deletions(-)
+
+diff --git a/ansible/roles/grafana/defaults/main.yml b/ansible/roles/grafana/defaults/main.yml
+index eae1f03fb..a5d0d3d61 100644
+--- a/ansible/roles/grafana/defaults/main.yml
++++ b/ansible/roles/grafana/defaults/main.yml
+@@ -93,6 +93,22 @@ grafana_start_first_node_retries: 12
+ # TODO(dawudm): make this True in the D release
+ grafana_remove_old_volume: false
+ 
++grafana_custom_extra_config_paths:
++  - "{{ node_custom_config }}/grafana/"
++
++grafana_prometheus_config_paths:
++    - "{{ node_custom_config }}/grafana/{{ inventory_hostname }}/prometheus.yaml"
++    - "{{ node_custom_config }}/grafana/prometheus.yaml"
++    - "prometheus.yaml.j2"
++
++grafana_provisioning_config_paths:
++    - "{{ node_custom_config }}/grafana/{{ inventory_hostname }}/provisioning.yaml"
++    - "{{ node_custom_config }}/grafana/provisioning.yaml"
++    - "provisioning.yaml.j2"
++
++grafana_custom_dashboards_paths:
++  - "{{ node_custom_config }}/grafana/dashboards"
++
+ ############
+ # Prometheus
+ ############
+diff --git a/ansible/roles/grafana/tasks/config.yml b/ansible/roles/grafana/tasks/config.yml
+index 82e0eec3e..2dc0b13a2 100644
+--- a/ansible/roles/grafana/tasks/config.yml
++++ b/ansible/roles/grafana/tasks/config.yml
+@@ -14,7 +14,7 @@
+ 
+ - name: Check if extra configuration file exists
+   find:
+-    path: "{{ node_custom_config }}/grafana/"
++    paths: "{{ grafana_custom_extra_config_paths }}"
+     excludes:
+       - "prometheus.yaml"
+       - "provisioning.yaml"
+@@ -66,8 +66,7 @@
+     mode: "0660"
+   when:
+     - item is defined
+-  with_items:
+-    - "{{ check_extra_conf_grafana.files }}"
++  with_items: "{{ dict( check_extra_conf_grafana.files | map(attribute='path') | map('basename') | zip(check_extra_conf_grafana.files) ) | dict2items | map(attribute='value') }}"
+   notify:
+     - Restart grafana container
+ 
+@@ -83,10 +82,7 @@
+     - inventory_hostname in groups[service.group]
+     - service.enabled | bool
+     - enable_prometheus | bool
+-  with_first_found:
+-    - "{{ node_custom_config }}/grafana/{{ inventory_hostname }}/prometheus.yaml"
+-    - "{{ node_custom_config }}/grafana/prometheus.yaml"
+-    - "prometheus.yaml.j2"
++  with_first_found: "{{ grafana_prometheus_config_paths }}"
+   notify:
+     - Restart grafana container
+ 
+@@ -101,16 +97,13 @@
+   when:
+     - inventory_hostname in groups[service.group]
+     - service.enabled | bool
+-  with_first_found:
+-    - "{{ node_custom_config }}/grafana/{{ inventory_hostname }}/provisioning.yaml"
+-    - "{{ node_custom_config }}/grafana/provisioning.yaml"
+-    - "{{ role_path }}/templates/provisioning.yaml.j2"
++  with_first_found: "{{ grafana_provisioning_config_paths }}"
+   notify:
+     - Restart grafana container
+ 
+ - name: Find custom grafana dashboards
+   find:
+-    path: "{{ node_custom_config }}/grafana/dashboards"
++    paths: "{{ grafana_custom_dashboards_paths }}"
+     recurse: true
+   delegate_to: localhost
+   register: grafana_custom_dashboards
+@@ -134,9 +127,9 @@
+   vars:
+     service: "{{ grafana_services['grafana'] }}"
+     dashboards_templated_path_regex: "^{{ node_config_directory | regex_escape }}/grafana/dashboards/(.*)$"
+-    dashboards_config_path_regex: "^{{ node_custom_config | regex_escape }}/grafana/dashboards/(.*)$"
++    dashboards_config_paths_regex: "^({{ grafana_custom_dashboards_paths | map('regex_escape') | join('|') }})/(.*)$"
+     dashboards_templated_relative_path: "{{ grafana_templated_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_templated_path_regex, '\\1') }}"
+-    dashboards_config_relative_path: "{{ grafana_custom_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_config_path_regex,'\\1') }}"
++    dashboards_config_relative_path: "{{ grafana_custom_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_config_paths_regex, '\\2') | unique }}"
+   file:
+     state: absent
+     path: "{{ node_config_directory }}/grafana/dashboards/{{ item }}"
+@@ -150,8 +143,8 @@
+ - name: Copying over custom dashboards
+   vars:
+     service: "{{ grafana_services['grafana'] }}"
+-    dashboards_config_path_regex: "^{{ node_custom_config | regex_escape }}/grafana/dashboards/(.*)$"
+-    dashboards_config_relative_path: "{{ grafana_custom_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_config_path_regex,'\\1') }}"
++    dashboards_config_paths_regex: "^({{ grafana_custom_dashboards_paths | map('regex_escape') | join('|') }})/(.*)$"
++    dashboards_config_relative_path: "{{ grafana_custom_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_config_paths_regex,'\\2') }}"
+   copy:
+     src: "{{ item.value.path }}"
+     dest: "{{ node_config_directory }}/grafana/dashboards/{{ item.key | dirname }}/"
+diff --git a/ansible/roles/grafana/templates/grafana.json.j2 b/ansible/roles/grafana/templates/grafana.json.j2
+index 1644d3380..fd113812a 100644
+--- a/ansible/roles/grafana/templates/grafana.json.j2
++++ b/ansible/roles/grafana/templates/grafana.json.j2
+@@ -7,7 +7,7 @@
+             "owner": "grafana",
+             "perm": "0600"
+         },
+-{% for extra_conf in check_extra_conf_grafana.files | map(attribute='path') | map('basename') %}
++{% for extra_conf in check_extra_conf_grafana.files | map(attribute='path') | map('basename') | unique %}
+         {
+             "source": "{{ container_config_directory }}/{{ extra_conf }}",
+ {%   if extra_conf  == 'grafana_home_dashboard.json' %}
+-- 
+2.45.1
+

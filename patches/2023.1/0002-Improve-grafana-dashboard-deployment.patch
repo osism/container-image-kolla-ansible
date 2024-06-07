@@ -1,0 +1,95 @@
+From a2e62ec9e1be0a500c10fc9fac2e58a7e47c2ae9 Mon Sep 17 00:00:00 2001
+From: Jan Horstmann <horstmann@osism.tech>
+Date: Wed, 15 May 2024 20:10:53 +0200
+Subject: [PATCH 2/4] Improve grafana dashboard deployment
+
+Unitl now grafana dashboards were always removed and redeployed leading
+to a restart of the grafana services on every deployment.
+The task is changed to find all individual dashboards that are going to
+be deployed and all which are currently deployed. Dashboards only
+appearing in the latter group wil be removed, while dashboards in the
+former group will be deployed individually, leaving it to ansible to
+figure which changes need to be made.
+This way only removal or changes to dashboards will lead to a restart of
+grafana containers.
+
+Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+---
+ ansible/roles/grafana/tasks/config.yml | 40 ++++++++++++++++++++------
+ 1 file changed, 31 insertions(+), 9 deletions(-)
+
+diff --git a/ansible/roles/grafana/tasks/config.yml b/ansible/roles/grafana/tasks/config.yml
+index e00e4b924..82e0eec3e 100644
+--- a/ansible/roles/grafana/tasks/config.yml
++++ b/ansible/roles/grafana/tasks/config.yml
+@@ -108,36 +108,58 @@
+   notify:
+     - Restart grafana container
+ 
+-- name: Check if the folder for custom grafana dashboards exists
+-  stat:
++- name: Find custom grafana dashboards
++  find:
+     path: "{{ node_custom_config }}/grafana/dashboards"
++    recurse: true
+   delegate_to: localhost
+-  register: grafana_custom_dashboards_folder
++  register: grafana_custom_dashboards
+   run_once: True
+ 
+-- name: Remove templated Grafana dashboards
++- name: Find templated grafana dashboards
+   become: true
+   vars:
+     service: "{{ grafana_services['grafana'] }}"
++  find:
++    path: "{{ node_config_directory }}/grafana/dashboards"
++    recurse: true
++    file_type: any
++  register: grafana_templated_dashboards
++  when:
++    - inventory_hostname in groups[service.group]
++    - service.enabled | bool
++
++- name: Prune templated Grafana dashboards
++  become: true
++  vars:
++    service: "{{ grafana_services['grafana'] }}"
++    dashboards_templated_path_regex: "^{{ node_config_directory | regex_escape }}/grafana/dashboards/(.*)$"
++    dashboards_config_path_regex: "^{{ node_custom_config | regex_escape }}/grafana/dashboards/(.*)$"
++    dashboards_templated_relative_path: "{{ grafana_templated_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_templated_path_regex, '\\1') }}"
++    dashboards_config_relative_path: "{{ grafana_custom_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_config_path_regex,'\\1') }}"
+   file:
+     state: absent
+-    path: "{{ node_config_directory }}/grafana/dashboards/"
++    path: "{{ node_config_directory }}/grafana/dashboards/{{ item }}"
+   when:
+     - inventory_hostname in groups[service.group]
+     - service.enabled | bool
++  with_items: "{{ dashboards_templated_relative_path | reject('in', dashboards_config_relative_path) | reject('in', dashboards_config_relative_path | map('dirname')) }}"
++  notify:
++    - Restart grafana container
+ 
+ - name: Copying over custom dashboards
+   vars:
+     service: "{{ grafana_services['grafana'] }}"
++    dashboards_config_path_regex: "^{{ node_custom_config | regex_escape }}/grafana/dashboards/(.*)$"
++    dashboards_config_relative_path: "{{ grafana_custom_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_config_path_regex,'\\1') }}"
+   copy:
+-    src: "{{ node_custom_config }}/grafana/dashboards"
+-    dest: "{{ node_config_directory }}/grafana/"
++    src: "{{ item.value.path }}"
++    dest: "{{ node_config_directory }}/grafana/dashboards/{{ item.key | dirname }}/"
+     mode: "0660"
+   become: true
+   when:
+-    - grafana_custom_dashboards_folder.stat.exists
+-    - grafana_custom_dashboards_folder.stat.isdir
+     - inventory_hostname in groups[service.group]
+     - service.enabled | bool
++  with_items: "{{ dict( dashboards_config_relative_path | zip(grafana_custom_dashboards.files) ) | dict2items }}"
+   notify:
+     - Restart grafana container
+-- 
+2.45.1
+
