@@ -17,7 +17,6 @@ UNSUPPORTED_ROLES = [
     "ironic",
     "iscsi",
     "kafka",
-    "masakari",
     "monasca",
     "monasca_cleanup",
     "murano",
