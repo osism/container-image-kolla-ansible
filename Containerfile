@@ -21,13 +21,14 @@ COPY --link files/tasks /ansible/tasks
 COPY --link files/playbooks/kolla-*.yml /ansible/
 COPY --link files/refresh-containers.yml /refresh-containers.yml
 
-COPY --link files/scripts/change.sh /change.sh
-COPY --link files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
-COPY --link files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
 COPY --link files/scripts/$OPENSTACK_VERSION/run.sh /run.sh
-COPY --link files/scripts/secrets.sh /secrets.sh
-COPY --link files/scripts/entrypoint.sh /entrypoint.sh
 COPY --link files/scripts/ansible-vault.py /ansible-vault.py
+COPY --link files/scripts/change.sh /change.sh
+COPY --link files/scripts/entrypoint.sh /entrypoint.sh
+COPY --link files/scripts/kolla-container-throttle.py /kolla-container-throttle.py
+COPY --link files/scripts/remove-common-as-dependency.py /remove-common-as-dependency.py
+COPY --link files/scripts/secrets.sh /secrets.sh
+COPY --link files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.py
 
 COPY --link files/ansible.cfg /etc/ansible/ansible.cfg
 COPY --link files/ara.env /ansible/ara.env
@@ -167,6 +168,7 @@ if [ -e /repository/ansible/filter_plugins ]; then cp -r /repository/ansible/fil
 if [ -e /repository/ansible/module_utils ]; then cp -r /repository/ansible/module_utils/* /ansible/module_utils; fi
 cp /repository/ansible/library/* /ansible/library
 cp -r /repository/ansible/roles/* /ansible/roles
+python3 /kolla-container-throttle.py
 for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml" | grep -v nova.yml); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done
 cp /repository/ansible/nova.yml /ansible/kolla-nova.yml
 rm -f /ansible/kolla-kolla-host.yml /ansible/kolla-post-deploy.yml
