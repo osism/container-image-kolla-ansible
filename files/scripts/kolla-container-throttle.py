@@ -9,9 +9,7 @@ find = "  kolla_container:"
 replace = """  throttle: "{{ kolla_handler_throttle | default(-1) }}"
   kolla_container:"""
 
-handlerfiles = glob.glob(
-    "/repository/ansible/roles/**/handlers/main.yml", recursive=True
-)
+handlerfiles = glob.glob("/ansible/roles/**/handlers/main.yml", recursive=True)
 for handlerfile in handlerfiles:
     print(f"PROCESSING {handlerfile}")
     with open(handlerfile, "r") as fp:
