@@ -27,9 +27,6 @@ if [[ -e /ansible/ara.env ]]; then
     source /ansible/ara.env
 fi
 
-# https://docs.openstack.org/kolla-ansible/latest/user/ansible-tuning.html#fact-variable-injection
-export ANSIBLE_INJECT_FACT_VARS=False
-
 export ANSIBLE_INVENTORY=$ANSIBLE_DIRECTORY/inventory/hosts.yml
 
 export ANSIBLE_CONFIG=$ENVIRONMENTS_DIRECTORY/ansible.cfg
