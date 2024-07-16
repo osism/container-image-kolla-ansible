@@ -1,0 +1,73 @@
+---
+- name: Manage loadbalancer
+  hosts: "{{ hosts_manage_loadbalancer | default('loadbalancer') }}"
+
+  vars:
+    # use all to disable all services
+    manage_loadbalancer_service: nova
+    manage_loadbalancer_host: testbed-node-0
+
+    # possible values: enable, disable
+    manage_loadbalancer_action: disable
+
+  tasks:
+    - name: Set _backends_command fact for a single service
+      ansible.builtin.set_fact:
+        _backends_command: bash -c "echo show backend | socat stdio /var/lib/kolla/haproxy/haproxy.sock | grep _back | grep {{ manage_loadbalancer_service }}"
+      when: manage_loadbalancer_service != "all"
+
+    - name: Set _backends_command fact for all services
+      ansible.builtin.set_fact:
+        _backends_command: bash -c "echo show backend | socat stdio /var/lib/kolla/haproxy/haproxy.sock | grep _back"
+      when: manage_loadbalancer_service == "all"
+
+    - name: Get all backends
+      community.docker.docker_container_exec:
+        container: haproxy
+        command: "{{ _backends_command }}"
+      register: _backends
+
+    - name: "Set weight = 0 for host {{ manage_loadbalancer_host }}"
+      community.docker.docker_container_exec:
+        container: haproxy
+        command: bash -c "echo set weight {{ item }}/{{ manage_loadbalancer_host }} 0 | socat stdio /var/lib/kolla/haproxy/haproxy.sock"
+      loop: "{{ _backends.stdout_lines }}"
+      when: manage_loadbalancer_action == "disable"
+
+    - name: "Set weight = 1 for host {{ manage_loadbalancer_host }}"
+      community.docker.docker_container_exec:
+        container: haproxy
+        command: bash -c "echo set weight {{ item }}/{{ manage_loadbalancer_host }} 1 | socat stdio /var/lib/kolla/haproxy/haproxy.sock"
+      loop: "{{ _backends.stdout_lines }}"
+      when: manage_loadbalancer_action == "enable"
+
+    - name: Wait for the connections to go away
+      ansible.builtin.shell: |
+        set -eo pipefail
+        retries=60
+        while [ $retries -gt 0 ]; do
+          if [[ $(docker exec haproxy bash -c "echo show servers conn {{ item }}| socat stdio /var/lib/kolla/haproxy/haproxy.sock" | grep {{ manage_loadbalancer_host }} | awk '{ print $7 }') -eq 0 ]]; then
+            break
+          fi
+          sleep 1
+          let retries=retries-1
+        done
+      args:
+        executable: /bin/bash
+      loop: "{{ _backends.stdout_lines }}"
+      when: manage_loadbalancer_action == "disable"
+      changed_when: false
+
+    - name: "Disable host {{ manage_loadbalancer_host }}"
+      community.docker.docker_container_exec:
+        container: haproxy
+        command: bash -c "echo disable server {{ item }}/{{ manage_loadbalancer_host }} | socat stdio /var/lib/kolla/haproxy/haproxy.sock"
+      loop: "{{ _backends.stdout_lines }}"
+      when: manage_loadbalancer_action == "disable"
+
+    - name: "Enable host {{ manage_loadbalancer_host }}"
+      community.docker.docker_container_exec:
+        container: haproxy
+        command: bash -c "echo enable server {{ item }}/{{ manage_loadbalancer_host }} | socat stdio /var/lib/kolla/haproxy/haproxy.sock"
+      loop: "{{ _backends.stdout_lines }}"
+      when: manage_loadbalancer_action == "enable"
