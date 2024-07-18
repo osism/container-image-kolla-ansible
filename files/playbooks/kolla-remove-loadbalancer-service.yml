@@ -1,0 +1,29 @@
+---
+- name: Remove loadbalancer service
+  hosts: "{{ hosts_manage_loadbalancer | default('loadbalancer') }}"
+
+  vars:
+    remove_loadbalancer_service: panko
+
+  tasks:
+    - name: "Find all haproxy configuration files related to {{ remove_loadbalancer_service }}"
+      become: true
+      ansible.builtin.find:
+        paths: /etc/kolla/haproxy/services.d
+        patterns: "{{ remove_loadbalancer_service }}*.cfg"
+      register: results
+
+    - name: "Remove all haproxy configuration files related to {{ remove_loadbalancer_service }}"
+      become: true
+      ansible.builtin.file:
+        path: "{{ item['path'] }}"
+        state: absent
+      loop: "{{ results['files'] }}"
+      notify: Reload haproxy configuration
+
+  handlers:
+    - name: Reload haproxy configuration
+      throttle: "{{ kolla_handler_throttle | default(1) }}"
+      community.docker.docker_container_exec:
+        container: haproxy
+        command: pkill -USR2 -F /run/haproxy.pid
