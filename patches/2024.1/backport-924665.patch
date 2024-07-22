@@ -1,0 +1,40 @@
+From fea539e5cbc6528240caadeb1921ea60f5828d7a Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Mon, 22 Jul 2024 19:15:21 +0200
+Subject: [PATCH] common: support custom cron-logrotate-global.conf
+
+Change-Id: Ia94cc960abff2850e64d60ac997e8a2e249e4ac4
+---
+
+diff --git a/ansible/roles/common/tasks/config.yml b/ansible/roles/common/tasks/config.yml
+index 06c2b85..79fe1f8 100644
+--- a/ansible/roles/common/tasks/config.yml
++++ b/ansible/roles/common/tasks/config.yml
+@@ -259,12 +259,16 @@
+       - { name: "watcher", enabled: "{{ enable_watcher | bool }}" }
+       - { name: "zun", enabled: "{{ enable_zun | bool }}" }
+   template:
+-    src: "cron-logrotate-global.conf.j2"
++    src: "{{ item }}"
+     dest: "{{ node_config_directory }}/cron/logrotate.conf"
+     mode: "0660"
+   become: true
+   when:
+     - common_services.cron | service_enabled_and_mapped_to_host
++  with_first_found:
++    - "{{ node_custom_config }}/cron/{{ inventory_hostname }}/cron-logrotate-global.conf"
++    - "{{ node_custom_config }}/cron/cron-logrotate-global.conf"
++    - "cron-logrotate-global.conf.j2"
+   notify:
+     - Restart cron container
+ 
+diff --git a/releasenotes/notes/custom-cron-logrotate-global-5cb26fda7d1ba85b.yaml b/releasenotes/notes/custom-cron-logrotate-global-5cb26fda7d1ba85b.yaml
+new file mode 100644
+index 0000000..4e6d078
+--- /dev/null
++++ b/releasenotes/notes/custom-cron-logrotate-global-5cb26fda7d1ba85b.yaml
+@@ -0,0 +1,4 @@
++---
++features:
++  - |
++    It is now possible to use a custom `cron-logrotate-global.conf` file.
