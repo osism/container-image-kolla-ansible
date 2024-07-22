@@ -1,0 +1,12 @@
+--- a/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
++++ b/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
+@@ -18,8 +18,8 @@ DATABASES = {
+ }
+ {% elif groups['memcached'] | length > 0 and not horizon_backend_database | bool %}
+ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+-CACHES['default']['LOCATION'] = [{% for host in groups['memcached'] %}'{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ memcached_port }}'{% if not loop.last %},{% endif %}{% endfor %}]
+ {% endif %}
++CACHES['default']['LOCATION'] = [{% for host in groups['memcached'] %}'{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ memcached_port }}'{% if not loop.last %},{% endif %}{% endfor %}]
+
+ {% if kolla_enable_tls_external | bool or kolla_enable_tls_internal | bool %}
+ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
