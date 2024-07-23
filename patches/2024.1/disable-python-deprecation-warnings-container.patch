@@ -1,0 +1,30 @@
+--- a/ansible/library/kolla_container.py
++++ b/ansible/library/kolla_container.py
+@@ -18,6 +18,8 @@
+
+ # FIXME(yoctozepto): restart_policy is *not* checked in the container
+
++import yaml
++
+ from ansible.module_utils.basic import AnsibleModule
+ import traceback
+
+@@ -375,6 +377,18 @@ def generate_module():
+     new_args = module.params.pop('common_options', dict()) or dict()
+     env_module_environment = module.params.pop('environment', dict()) or dict()
+
++    if not "PYTHONWARNINGS" in env_module_environment:
++        with open("/opt/configuration/environments/kolla/configuration.yml", "r") as fp:
++            kolla_configuration = yaml.safe_load(fp)
++            if (
++                "kolla_disable_python_deprecation_warnings" in kolla_configuration
++                and str(
++                    kolla_configuration["kolla_disable_python_deprecation_warnings"]
++                ).lower
++                in ["true", "yes"]
++            ):
++                env_module_environment["PYTHONWARNINGS"] = "ignore::DeprecationWarning"
++
+     for k, v in module.params.items():
+         if v is None:
+             if k in common_options_defaults:
