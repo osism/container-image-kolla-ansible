@@ -27,3 +27,13 @@
      image: "{{ barbican_worker_image_full }}"
      volumes: "{{ barbican_worker_default_volumes + barbican_worker_extra_volumes }}"
      dimensions: "{{ barbican_worker_dimensions }}"
+--- a/ansible/roles/barbican/tasks/check-containers.yml
++++ b/ansible/roles/barbican/tasks/check-containers.yml
+@@ -9,6 +9,7 @@
+     volumes: "{{ item.value.volumes | reject('equalto', '') | list }}"
+     dimensions: "{{ item.value.dimensions }}"
+     healthcheck: "{{ item.value.healthcheck | default(omit) }}"
++    environment: "{{ item.value.environment | default(omit) }}"
+   when:
+     - inventory_hostname in groups[item.value.group]
+     - item.value.enabled | bool
