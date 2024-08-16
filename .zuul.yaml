@@ -2,6 +2,17 @@
 - secret:
     name: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
     data:
+      DTRACK_API_KEY: !encrypted/pkcs1-oaep
+        - EEvz7G5rCESb+kMdyorXaAxcN33nt66zKcByqzXXjWpoxWKAvw1JX7k9ZSH8ArgA+OTKa
+          2lRW3YIpJbPXkE5BScKWyQR03WmNONPVurTdPlKKjIBOyq4hZmuG2XdmM2jb3le74wboV
+          xjdVQpE+M09ou857EL+A4Z8/6MHx6Eg2j1h2N+186zPzhVl+IOQWL/zeM6/WZy2RMT6ho
+          +N4IoKWyTl9ZZ3nB7JzFftco+CqW8sLwbw5496aaftZWJSANIMy1TgoUUazV5Rpy7CV1t
+          K1CjNewyMGiHNQTa99PyV6cKype53ZBbqbOGgsNtqkuRvWo5gI4ZTIO6rmFCcSotcQ9BB
+          miCZBic4j2HwsdN7HNIwGIwKzrjsGQWVYwaI8ukLd4rpPLJ7/S7QP362+jDnHOczvdMM+
+          TfIfsNx2t8h+M1E4w4l9NL/KgqfZmDtvrPwAubVCJ4GZKKBNOyfktiGlMNx1jDt+UYeHr
+          PFvzzT0GjNoqrmQxZ0SsTrsvqlwx5zUDEzq/+7xzIOGzVWtCpZInLgZSfDjF94e+sKvY9
+          cq8eEnfl8XmBkcnC8kiB7rl7jqtKNUccBqGI9Izg6C9mZkNvB+UicQy4syPHPp0gZWqmL
+          dehmVuy8V3kxVrqu2WgvO/KoXOgCXNbnGK9CMyFGyJb4bPH/pwX7QdwrFUf3SU=
       DOCKER_USERNAME: !encrypted/pkcs1-oaep
         - B6MwhYI5TvYv/R3q7DOkWpDHvAwaAUy0ySFSsc2cmkqv6ZYmwmOF1URxh4l8QUL2XSyV3
           BZ389udy7gE1CrJAtt2MJ4AzCP4k+9qMs0PT1lOcK4/LIZkAIgYo6C3KctTvx4IYEA6jP
@@ -50,21 +61,18 @@
     parent: container-image-kolla-ansible-build
     vars:
       version_openstack: "2023.1"
-      push_image: false
 
 - job:
     name: container-image-kolla-ansible-build-bobcat
     parent: container-image-kolla-ansible-build
     vars:
       version_openstack: "2023.2"
-      push_image: false
 
 - job:
     name: container-image-kolla-ansible-build-caracal
     parent: container-image-kolla-ansible-build
     vars:
       version_openstack: "2024.1"
-      push_image: false
 
 - job:
     name: container-image-kolla-ansible-push-antelope
@@ -74,6 +82,7 @@
     vars:
       version_openstack: "2023.1"
       push_image: true
+      push_sbom: true
     secrets:
       - name: secret
         secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
@@ -87,6 +96,7 @@
     vars:
       version_openstack: "2023.2"
       push_image: true
+      push_sbom: true
     secrets:
       - name: secret
         secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
@@ -100,6 +110,7 @@
     vars:
       version_openstack: "2024.1"
       push_image: true
+      push_sbom: true
     secrets:
       - name: secret
         secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
@@ -110,6 +121,7 @@
     parent: container-image-kolla-ansible-build
     vars:
       push_image: true
+      push_sbom: true
     secrets:
       - name: secret
         secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE

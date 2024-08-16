@@ -2,12 +2,17 @@
 - name: Build kolla-ansible image
   hosts: all
 
+  vars:
+    python_venv_dir: /tmp/venv
+
   environment:
     openstack_version: "{{ version_openstack | default('master') }}"
     python_version: "{{ version_python | default('3.11') }}"
     registry: "{{ docker_registry | default('osism.harbor.regio.digital') }}"
     repository: "{{ docker_namespace | default('osism') }}/kolla-ansible"
     version: "{{ zuul['tag'] | default('latest') }}"
+    DTRACK_SERVER: "https://osism.dtrack.regio.digital"
+    DTRACK_API_KEY: "{{ secret.DTRACK_API_KEY | default('') }}"
 
   tasks:
     - name: Log into registry
@@ -107,3 +112,22 @@
         REGISTRY: "{{ docker_registry }}"
         REPOSITORY: "{{ docker_namespace }}/kolla-ansible"
         VERSION: latest
+
+    - name: Run sbom script
+      ansible.builtin.shell:
+        executable: /bin/bash
+        chdir: "{{ zuul.project.src_dir | default('.') }}"
+        cmd: |
+          set -e
+          set -o pipefail
+          set -x
+
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          /usr/local/bin/syft scan "$repository:$version" -o cyclonedx-json > sbom.json
+          {{ python_venv_dir }}/bin/dtrackauditor \
+            -p kolla-ansible \
+            -v "$version" \
+            -f sbom.json \
+            -a
+      when: push_sbom | default(false) | bool
+      changed_when: true
