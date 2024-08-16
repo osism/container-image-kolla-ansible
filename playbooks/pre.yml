@@ -2,6 +2,9 @@
 - name: Run preparations
   hosts: all
 
+  vars:
+    python_venv_dir: /tmp/venv
+
   tasks:
     - name: Install required packages
       become: true
@@ -9,6 +12,12 @@
         name:
           - python3-docker
           - python3-requests
+
+    - name: Install dtrack-auditor package
+      ansible.builtin.pip:
+        name: dtrack-auditor
+        virtualenv: "{{ python_venv_dir }}"
+        virtualenv_command: "python3 -m venv"
 
   roles:
     - ensure-docker
