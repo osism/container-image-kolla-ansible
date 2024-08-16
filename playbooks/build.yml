@@ -122,6 +122,10 @@
           set -o pipefail
           set -x
 
+          if [[ $version == "latest" ]]; then
+              version=$openstack_version
+          fi
+
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
           /usr/local/bin/syft scan "$repository:$version" -o cyclonedx-json > sbom.json
           {{ python_venv_dir }}/bin/dtrackauditor \
