@@ -27,6 +27,31 @@
      image: "{{ barbican_worker_image_full }}"
      volumes: "{{ barbican_worker_default_volumes + barbican_worker_extra_volumes }}"
      dimensions: "{{ barbican_worker_dimensions }}"
+--- a/ansible/roles/barbican/handlers/main.yml
++++ b/ansible/roles/barbican/handlers/main.yml
+@@ -12,6 +12,7 @@
+     volumes: "{{ service.volumes | reject('equalto', '') | list }}"
+     dimensions: "{{ service.dimensions }}"
+     healthcheck: "{{ service.healthcheck | default(omit) }}"
++    environment: "{{ service.environment | default(omit) }}"
+   when:
+     - kolla_action != "config"
+ 
+@@ -28,6 +29,7 @@
+     volumes: "{{ service.volumes | reject('equalto', '') | list }}"
+     dimensions: "{{ service.dimensions }}"
+     healthcheck: "{{ service.healthcheck | default(omit) }}"
++    environment: "{{ service.environment | default(omit) }}"
+   when:
+     - kolla_action != "config"
+ 
+@@ -44,5 +46,6 @@
+     volumes: "{{ service.volumes | reject('equalto', '') | list }}"
+     dimensions: "{{ service.dimensions }}"
+     healthcheck: "{{ service.healthcheck | default(omit) }}"
++    environment: "{{ service.environment | default(omit) }}"
+   when:
+     - kolla_action != "config"
 --- a/ansible/roles/barbican/tasks/check-containers.yml
 +++ b/ansible/roles/barbican/tasks/check-containers.yml
 @@ -9,6 +9,7 @@
