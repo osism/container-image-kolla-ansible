@@ -8,7 +8,7 @@ index a1f61a0d0..0b52d108f 100644
    WSGIScriptAlias / "{{ binary_path }}/aodh-api"
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+  SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++  SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
  </VirtualHost>
 diff --git a/ansible/roles/cinder/templates/cinder-wsgi.conf.j2 b/ansible/roles/cinder/templates/cinder-wsgi.conf.j2
@@ -21,7 +21,7 @@ index b467bab02..2bb8d1ef3 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -36,7 +36,7 @@ index f3309bfef..77807f7c7 100644
    WSGIProcessGroup gnocchi
    WSGIScriptAlias / "{{ wsgi_path }}/gnocchi-api"
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+  SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++  SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
  
    <Directory "{{ wsgi_path }}">
@@ -51,7 +51,7 @@ index 27aea0dd0..cdb9aa642 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -67,7 +67,7 @@ index d197f764a..287e98021 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -83,7 +83,7 @@ index 7e62ac2c8..9c3ad15c7 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -99,7 +99,7 @@ index 26ffe493e..e7853c3cd 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -115,7 +115,7 @@ index 1891dcde8..899871991 100644
    WSGIScriptAlias / "{{ binary_path }}/masakari-wsgi"
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+  SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++  SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
  </VirtualHost>
 diff --git a/ansible/roles/nova/templates/nova-api-wsgi.conf.j2 b/ansible/roles/nova/templates/nova-api-wsgi.conf.j2
@@ -128,7 +128,7 @@ index e84c19496..f2be421eb 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -140,7 +140,7 @@ index e84c19496..f2be421eb 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -156,7 +156,7 @@ index e3a3a598c..c27b633e9 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -172,7 +172,7 @@ index 2f2a9dc91..fa171cd1a 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -188,7 +188,7 @@ index 26449a538..e04d77f1c 100644
      WSGIPassAuthorization On
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+    SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++    SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
 +
      <IfVersion >= 2.4>
@@ -204,6 +204,6 @@ index 725b95597..24f965739 100644
    WSGIScriptAlias / "/var/www/cgi-bin/zun/app.wsgi"
 +
 +{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
-+  SetEnv PYTHONWARNINGS "ignore::DeprecationWarning"
++  SetEnv PYTHONWARNINGS "ignore"
 +{% endif %}
  </VirtualHost>
