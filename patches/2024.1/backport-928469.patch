@@ -1,0 +1,20 @@
+From ec10a63db1ebbbe7890ac34aac64e533a4ce6b45 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Fri, 06 Sep 2024 21:11:31 +0200
+Subject: [PATCH] manila: add missing become to "Copying over existing policy file" task
+
+Change-Id: If78f944ea8d63f3d37398f72e9a432cc22eb5c6e
+---
+
+diff --git a/ansible/roles/manila/tasks/config.yml b/ansible/roles/manila/tasks/config.yml
+index ad39399..123fc01 100644
+--- a/ansible/roles/manila/tasks/config.yml
++++ b/ansible/roles/manila/tasks/config.yml
+@@ -93,6 +93,7 @@
+     src: "{{ manila_policy_file_path }}"
+     dest: "{{ node_config_directory }}/{{ item.key }}/{{ manila_policy_file }}"
+     mode: "0660"
++  become: true
+   when:
+     - manila_policy_file is defined
+   with_dict: "{{ manila_services | select_services_enabled_and_mapped_to_host }}"
