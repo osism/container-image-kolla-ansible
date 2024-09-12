@@ -3,5 +3,10 @@
     "github>osism/renovate-config",
     "github>osism/renovate-config:docker",
     "github>osism/renovate-config:python"
-  ]
+  ],
+  "pip_requirements": {
+    "fileMatch": [
+      "files/src/requirements.txt"
+     ]
+   }
 }
