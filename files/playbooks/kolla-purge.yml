@@ -1,6 +1,6 @@
 ---
 - name: Confirm whether user really meant to purge the kolla environment
-  hosts: all
+  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
 
   vars_prompt:
     - name: ireallymeanit
@@ -25,7 +25,7 @@
         - ireallymeanit != 'yes' or ireallyreallymeanit != 'ireallyreallymeanit'
 
 - name: Purge kolla environment
-  hosts: all
+  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
 
   vars:
     destroy_include_images: false

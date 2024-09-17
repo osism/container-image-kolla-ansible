@@ -1,6 +1,6 @@
 ---
 - name: Gather facts for all hosts
-  hosts: all
+  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
   gather_facts: false
   tasks:
     - name: Gather facts for all hosts
@@ -9,7 +9,7 @@
         gather_subset: "{{ osism_setup_gather_subset | default('') }}"
 
 - name: Gather facts for all hosts (if using --limit)
-  hosts: all
+  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
   gather_facts: false
   tasks:
     - name: Gather facts for all hosts (if using --limit)
