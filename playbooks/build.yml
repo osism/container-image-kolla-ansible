@@ -1,7 +1,6 @@
 ---
 - name: Build kolla-ansible image
   hosts: all
-
   vars:
     python_venv_dir: /tmp/venv
 

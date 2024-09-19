@@ -1,6 +1,6 @@
 ---
 - name: Group hosts based on configuration
-  hosts: all
+  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
   gather_facts: false
   tasks:
     - name: Group hosts based on OpenStack release
@@ -91,7 +91,7 @@
 
 - name: Apply common role
   gather_facts: false
-  hosts: all
+  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
   serial: '{{ kolla_serial | default("0") }}'
   roles:
     - role: common

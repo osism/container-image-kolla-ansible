@@ -3,7 +3,7 @@
 @@ -1,4 +1,21 @@
  ---
 +- name: Group hosts based on configuration
-+  hosts: all
++  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
 +  gather_facts: false
 +  tasks:
 +    - name: Group hosts based on OpenStack release
