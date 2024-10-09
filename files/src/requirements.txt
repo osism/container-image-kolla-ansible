@@ -3,3 +3,4 @@ PyYAML==6.0.2
 pottery==3.0.0
 requests==2.32.3
 yq==3.4.3
+MarkupSafe<3.0.0  # https://github.com/osism/issues/issues/1161 
