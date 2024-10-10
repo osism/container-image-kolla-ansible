@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.12
+ARG PYTHON_VERSION=3.13
 FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
 
 ARG OPENSTACK_VERSION
@@ -227,7 +227,7 @@ RUN python3 /src/render-playbooks.py
 
 USER dragon
 
-ARG PYTHON_VERSION=3.12
+ARG PYTHON_VERSION=3.13
 FROM python:${PYTHON_VERSION}-slim-bookworm
 
 COPY --link --from=builder / /
