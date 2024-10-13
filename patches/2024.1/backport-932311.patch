@@ -1,0 +1,746 @@
+From fc1a0fe88019becb8c817d1cc1129c6dd5e9ba46 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Sun, 13 Oct 2024 20:42:18 +0200
+Subject: [PATCH] Add service-start role
+
+With the `service-start` role it is possible to start all containers
+of a specific service. The role is the counterpart of the `service-stop`
+role. Containers that should not be started can be added to the
+`skip_start_containers` list.
+
+Similar to the service-stop role, this adds a start.yml file for all
+roles which runs the role accordingly.
+
+Change-Id: I6fd880ca0f596bc1f4de54d89a1872be4c778f32
+---
+
+diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
+index 7265b25..1474e48 100644
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -962,6 +962,12 @@
+ #   - container2
+ skip_stop_containers: []
+ 
++# List of containers to skip during start command in YAML list format
++# skip_start_containers:
++#   - container1
++#   - container2
++skip_start_containers: []
++
+ ####################
+ # Logging options
+ ####################
+diff --git a/ansible/roles/aodh/tasks/start.yml b/ansible/roles/aodh/tasks/start.yml
+new file mode 100644
+index 0000000..cf05065
+--- /dev/null
++++ b/ansible/roles/aodh/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ aodh_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/barbican/tasks/start.yml b/ansible/roles/barbican/tasks/start.yml
+new file mode 100644
+index 0000000..2a267e5
+--- /dev/null
++++ b/ansible/roles/barbican/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ barbican_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/blazar/tasks/start.yml b/ansible/roles/blazar/tasks/start.yml
+new file mode 100644
+index 0000000..fce4ff5
+--- /dev/null
++++ b/ansible/roles/blazar/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ blazar_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/ceilometer/tasks/start.yml b/ansible/roles/ceilometer/tasks/start.yml
+new file mode 100644
+index 0000000..33e4141
+--- /dev/null
++++ b/ansible/roles/ceilometer/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ ceilometer_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/ceph-rgw/tasks/start.yml b/ansible/roles/ceph-rgw/tasks/start.yml
+new file mode 100644
+index 0000000..ed97d53
+--- /dev/null
++++ b/ansible/roles/ceph-rgw/tasks/start.yml
+@@ -0,0 +1 @@
++---
+diff --git a/ansible/roles/cinder/tasks/start.yml b/ansible/roles/cinder/tasks/start.yml
+new file mode 100644
+index 0000000..33851d5
+--- /dev/null
++++ b/ansible/roles/cinder/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ cinder_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/cloudkitty/tasks/start.yml b/ansible/roles/cloudkitty/tasks/start.yml
+new file mode 100644
+index 0000000..6852c9d
+--- /dev/null
++++ b/ansible/roles/cloudkitty/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ cloudkitty_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/collectd/tasks/start.yml b/ansible/roles/collectd/tasks/start.yml
+new file mode 100644
+index 0000000..9a74138
+--- /dev/null
++++ b/ansible/roles/collectd/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ collectd_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/common/tasks/start.yml b/ansible/roles/common/tasks/start.yml
+new file mode 100644
+index 0000000..4199d77
+--- /dev/null
++++ b/ansible/roles/common/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ common_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/cyborg/tasks/start.yml b/ansible/roles/cyborg/tasks/start.yml
+new file mode 100644
+index 0000000..5d19555
+--- /dev/null
++++ b/ansible/roles/cyborg/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ cyborg_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/dcap/tasks/start.yml b/ansible/roles/dcap/tasks/start.yml
+new file mode 100644
+index 0000000..ae69c3c
+--- /dev/null
++++ b/ansible/roles/dcap/tasks/start.yml
+@@ -0,0 +1,12 @@
++---
++- name: "Starting dcap server containers"
++  vars:
++    service_name: "{{ dcap_server_service }}"
++    service: "{{ dcap_services[service_name] }}"
++  docker_container:
++    name: "{{ service.container_name }}"
++    state: started
++  when:
++    - service.enabled | bool
++    - service.container_name not in skip_start_containers
++    - inventory_hostname in groups[service.group]
+diff --git a/ansible/roles/designate/tasks/start.yml b/ansible/roles/designate/tasks/start.yml
+new file mode 100644
+index 0000000..2c7736e
+--- /dev/null
++++ b/ansible/roles/designate/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ designate_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/etcd/tasks/start.yml b/ansible/roles/etcd/tasks/start.yml
+new file mode 100644
+index 0000000..77d7955
+--- /dev/null
++++ b/ansible/roles/etcd/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ etcd_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/glance/tasks/start.yml b/ansible/roles/glance/tasks/start.yml
+new file mode 100644
+index 0000000..cc32bda
+--- /dev/null
++++ b/ansible/roles/glance/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ glance_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/gnocchi/tasks/start.yml b/ansible/roles/gnocchi/tasks/start.yml
+new file mode 100644
+index 0000000..519ef35
+--- /dev/null
++++ b/ansible/roles/gnocchi/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ gnocchi_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/grafana/tasks/start.yml b/ansible/roles/grafana/tasks/start.yml
+new file mode 100644
+index 0000000..6280fdd
+--- /dev/null
++++ b/ansible/roles/grafana/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ grafana_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/hacluster/tasks/start.yml b/ansible/roles/hacluster/tasks/start.yml
+new file mode 100644
+index 0000000..14af75f
+--- /dev/null
++++ b/ansible/roles/hacluster/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    role: service-start
++  vars:
++    project_services: "{{ hacluster_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/heat/tasks/start.yml b/ansible/roles/heat/tasks/start.yml
+new file mode 100644
+index 0000000..fc073e5
+--- /dev/null
++++ b/ansible/roles/heat/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ heat_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/horizon/tasks/start.yml b/ansible/roles/horizon/tasks/start.yml
+new file mode 100644
+index 0000000..793d39b
+--- /dev/null
++++ b/ansible/roles/horizon/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ horizon_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/influxdb/tasks/start.yml b/ansible/roles/influxdb/tasks/start.yml
+new file mode 100644
+index 0000000..d412f33
+--- /dev/null
++++ b/ansible/roles/influxdb/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ influxdb_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/ironic/tasks/start.yml b/ansible/roles/ironic/tasks/start.yml
+new file mode 100644
+index 0000000..cee5adc
+--- /dev/null
++++ b/ansible/roles/ironic/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ ironic_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/iscsi/tasks/start.yml b/ansible/roles/iscsi/tasks/start.yml
+new file mode 100644
+index 0000000..1b8c40b
+--- /dev/null
++++ b/ansible/roles/iscsi/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ iscsi_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/keystone/tasks/start.yml b/ansible/roles/keystone/tasks/start.yml
+new file mode 100644
+index 0000000..f313612
+--- /dev/null
++++ b/ansible/roles/keystone/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ keystone_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/kuryr/tasks/start.yml b/ansible/roles/kuryr/tasks/start.yml
+new file mode 100644
+index 0000000..635014d
+--- /dev/null
++++ b/ansible/roles/kuryr/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ kuryr_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/letsencrypt/tasks/start.yml b/ansible/roles/letsencrypt/tasks/start.yml
+new file mode 100644
+index 0000000..c9d1537
+--- /dev/null
++++ b/ansible/roles/letsencrypt/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    role: service-start
++  vars:
++    project_services: "{{ letsencrypt_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/loadbalancer/tasks/start.yml b/ansible/roles/loadbalancer/tasks/start.yml
+new file mode 100644
+index 0000000..16c7119
+--- /dev/null
++++ b/ansible/roles/loadbalancer/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ loadbalancer_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/magnum/tasks/start.yml b/ansible/roles/magnum/tasks/start.yml
+new file mode 100644
+index 0000000..9eebaef
+--- /dev/null
++++ b/ansible/roles/magnum/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ magnum_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/manila/tasks/start.yml b/ansible/roles/manila/tasks/start.yml
+new file mode 100644
+index 0000000..758fffc
+--- /dev/null
++++ b/ansible/roles/manila/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ manila_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/mariadb/tasks/start.yml b/ansible/roles/mariadb/tasks/start.yml
+new file mode 100644
+index 0000000..f486bba
+--- /dev/null
++++ b/ansible/roles/mariadb/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ mariadb_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/masakari/tasks/start.yml b/ansible/roles/masakari/tasks/start.yml
+new file mode 100644
+index 0000000..1c3ebb6
+--- /dev/null
++++ b/ansible/roles/masakari/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ masakari_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/memcached/tasks/start.yml b/ansible/roles/memcached/tasks/start.yml
+new file mode 100644
+index 0000000..42e4eeb
+--- /dev/null
++++ b/ansible/roles/memcached/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ memcached_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/mistral/tasks/start.yml b/ansible/roles/mistral/tasks/start.yml
+new file mode 100644
+index 0000000..28f2b9d
+--- /dev/null
++++ b/ansible/roles/mistral/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ mistral_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/multipathd/tasks/start.yml b/ansible/roles/multipathd/tasks/start.yml
+new file mode 100644
+index 0000000..c9e562a
+--- /dev/null
++++ b/ansible/roles/multipathd/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ multipathd_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/neutron/tasks/start.yml b/ansible/roles/neutron/tasks/start.yml
+new file mode 100644
+index 0000000..c9ea8de
+--- /dev/null
++++ b/ansible/roles/neutron/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ neutron_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/nova-cell/tasks/start.yml b/ansible/roles/nova-cell/tasks/start.yml
+new file mode 100644
+index 0000000..0013aa3
+--- /dev/null
++++ b/ansible/roles/nova-cell/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ nova_cell_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/nova/tasks/start.yml b/ansible/roles/nova/tasks/start.yml
+new file mode 100644
+index 0000000..5b7da83
+--- /dev/null
++++ b/ansible/roles/nova/tasks/start.yml
+@@ -0,0 +1,7 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ nova_services }}"
++    service_name: "{{ project_name }}"
++  tags: nova
+diff --git a/ansible/roles/octavia/tasks/start.yml b/ansible/roles/octavia/tasks/start.yml
+new file mode 100644
+index 0000000..4b269d1
+--- /dev/null
++++ b/ansible/roles/octavia/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ octavia_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/opensearch/tasks/start.yml b/ansible/roles/opensearch/tasks/start.yml
+new file mode 100644
+index 0000000..1951e39
+--- /dev/null
++++ b/ansible/roles/opensearch/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ opensearch_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/openvswitch/tasks/start.yml b/ansible/roles/openvswitch/tasks/start.yml
+new file mode 100644
+index 0000000..d07aefe
+--- /dev/null
++++ b/ansible/roles/openvswitch/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ openvswitch_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/ovn-controller/tasks/start.yml b/ansible/roles/ovn-controller/tasks/start.yml
+new file mode 100644
+index 0000000..f46129a
+--- /dev/null
++++ b/ansible/roles/ovn-controller/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    role: service-start
++  vars:
++    project_services: "{{ ovn_controller_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/ovn-db/tasks/start.yml b/ansible/roles/ovn-db/tasks/start.yml
+new file mode 100644
+index 0000000..10f86d9
+--- /dev/null
++++ b/ansible/roles/ovn-db/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    role: service-start
++  vars:
++    project_services: "{{ ovn_db_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/ovs-dpdk/tasks/start.yml b/ansible/roles/ovs-dpdk/tasks/start.yml
+new file mode 100644
+index 0000000..3ee04bb
+--- /dev/null
++++ b/ansible/roles/ovs-dpdk/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ ovsdpdk_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/placement/tasks/start.yml b/ansible/roles/placement/tasks/start.yml
+new file mode 100644
+index 0000000..e985abe
+--- /dev/null
++++ b/ansible/roles/placement/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ placement_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/prometheus/tasks/start.yml b/ansible/roles/prometheus/tasks/start.yml
+new file mode 100644
+index 0000000..4e67949
+--- /dev/null
++++ b/ansible/roles/prometheus/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ prometheus_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/rabbitmq/tasks/start.yml b/ansible/roles/rabbitmq/tasks/start.yml
+new file mode 100644
+index 0000000..6fe0aa9
+--- /dev/null
++++ b/ansible/roles/rabbitmq/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ rabbitmq_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/redis/tasks/start.yml b/ansible/roles/redis/tasks/start.yml
+new file mode 100644
+index 0000000..ea44df7
+--- /dev/null
++++ b/ansible/roles/redis/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ redis_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/service-start/tasks/main.yml b/ansible/roles/service-start/tasks/main.yml
+new file mode 100644
+index 0000000..0340c82
+--- /dev/null
++++ b/ansible/roles/service-start/tasks/main.yml
+@@ -0,0 +1,12 @@
++---
++- name: "Starting {{ service_name }} containers"
++  vars:
++    service: "{{ item.value }}"
++  become: true
++  kolla_container:
++    action: "start_container"
++    common_options: "{{ docker_common_options }}"
++    name: "{{ service.container_name }}"
++  when:
++    - service.container_name not in skip_start_containers
++  with_dict: "{{ project_services | select_services_enabled_and_mapped_to_host }}"
+diff --git a/ansible/roles/skyline/tasks/start.yml b/ansible/roles/skyline/tasks/start.yml
+new file mode 100644
+index 0000000..4c52992
+--- /dev/null
++++ b/ansible/roles/skyline/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ skyline_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/tacker/tasks/start.yml b/ansible/roles/tacker/tasks/start.yml
+new file mode 100644
+index 0000000..bcafbb3
+--- /dev/null
++++ b/ansible/roles/tacker/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ tacker_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/telegraf/tasks/start.yml b/ansible/roles/telegraf/tasks/start.yml
+new file mode 100644
+index 0000000..193f8d1
+--- /dev/null
++++ b/ansible/roles/telegraf/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ telegraf_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/trove/tasks/start.yml b/ansible/roles/trove/tasks/start.yml
+new file mode 100644
+index 0000000..92cbd63
+--- /dev/null
++++ b/ansible/roles/trove/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ trove_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/venus/tasks/start.yml b/ansible/roles/venus/tasks/start.yml
+new file mode 100644
+index 0000000..f5d9b06
+--- /dev/null
++++ b/ansible/roles/venus/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ venus_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/watcher/tasks/start.yml b/ansible/roles/watcher/tasks/start.yml
+new file mode 100644
+index 0000000..6296048
+--- /dev/null
++++ b/ansible/roles/watcher/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ watcher_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/ansible/roles/zun/tasks/start.yml b/ansible/roles/zun/tasks/start.yml
+new file mode 100644
+index 0000000..fcfc648
+--- /dev/null
++++ b/ansible/roles/zun/tasks/start.yml
+@@ -0,0 +1,6 @@
++---
++- import_role:
++    name: service-start
++  vars:
++    project_services: "{{ zun_services }}"
++    service_name: "{{ project_name }}"
+diff --git a/doc/source/user/operating-kolla.rst b/doc/source/user/operating-kolla.rst
+index 98e7664..d7d5140 100644
+--- a/doc/source/user/operating-kolla.rst
++++ b/doc/source/user/operating-kolla.rst
+@@ -248,6 +248,8 @@
+ ``kolla-ansible -i INVENTORY upgrade`` is used to upgrades existing OpenStack
+ Environment.
+ 
++``kolla-ansible -i INVENTORY start`` is used to start previously with stop stopped containers.
++
+ ``kolla-ansible -i INVENTORY stop`` is used to stop running containers.
+ 
+ ``kolla-ansible -i INVENTORY deploy-containers`` is used to check and if
+diff --git a/releasenotes/notes/role-service-start-89630a7199417e88.yaml b/releasenotes/notes/role-service-start-89630a7199417e88.yaml
+new file mode 100644
+index 0000000..11a70ea
+--- /dev/null
++++ b/releasenotes/notes/role-service-start-89630a7199417e88.yaml
+@@ -0,0 +1,7 @@
++---
++features:
++  - |
++    With the `service-start` role it is possible to start all containers
++    of a specific service. The role is the counterpart of the `service-stop`
++    role. Containers that should not be started can be added to the
++    `skip_start_containers` list.
+diff --git a/tools/kolla-ansible b/tools/kolla-ansible
+index f7c7ee1..d3a472d 100755
+--- a/tools/kolla-ansible
++++ b/tools/kolla-ansible
+@@ -201,6 +201,7 @@
+     rabbitmq-reset-state Force reset the state of RabbitMQ
+     rabbitmq-upgrade <version> Upgrade to a specific version of RabbitMQ
+     reconfigure          Reconfigure OpenStack service
++    start                Start Kolla containers
+     stop                 Stop Kolla containers
+     certificates         Generate self-signed certificate for TLS *For Development Only*
+     octavia-certificates Generate certificates for octavia deployment
+@@ -250,6 +251,7 @@
+ rabbitmq-reset-state
+ rabbitmq-upgrade
+ reconfigure
++start
+ stop
+ certificates
+ octavia-certificates
+@@ -530,6 +532,10 @@
+         ACTION="Reconfigure OpenStack service"
+         EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=reconfigure -e kolla_serial=${ANSIBLE_SERIAL}"
+         ;;
++(start)
++        ACTION="Start Kolla containers"
++        EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=start"
++	;;
+ (stop)
+         ACTION="Stop Kolla containers"
+         EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=stop"
