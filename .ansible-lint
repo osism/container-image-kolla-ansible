@@ -14,7 +14,6 @@ exclude_paths:
   - files/playbooks/2024.1/kolla-rabbitmq-ng.yml # exclude playbooks imported from the kolla-ansible upstream
   - files/playbooks/2024.1/kolla-rabbitmq.yml    # exclude playbooks imported from the kolla-ansible upstream
   - files/playbooks/kolla-loadbalancer-*.yml     # exclude playbooks imported from the kolla-ansible upstream
-  - files/playbooks/kolla-wait-for-keystone.yml  # exclude playbooks based on the kolla-ansible upstream
   - files/playbooks/kolla-testbed-identity.yml   # excluded until we find a way to mock playbooks
   - files/playbooks/kolla-testbed.yml            # excluded until we find a way to mock playbooks
 use_default_rules: true
