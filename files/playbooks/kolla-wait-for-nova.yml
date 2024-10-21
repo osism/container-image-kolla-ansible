@@ -1,7 +1,7 @@
 ---
 - name: Group hosts based on configuration
   hosts:
-    - keystone
+    - nova
   gather_facts: false
   tasks:
     - name: Group hosts based on Kolla action
@@ -13,23 +13,23 @@
         key: '{{ item }}'
       changed_when: false
       with_items:
-        - enable_keystone_{{ enable_keystone | bool }}
+        - enable_nova_{{ enable_nova | bool }}
   tags: always
 
-- name: Wait for the Keystone service
+- name: Wait for the Nova service
   gather_facts: false
   hosts:
-    - keystone
-    - '&enable_keystone_True'
+    - nova
+    - '&enable_nova_True'
   serial: '{{ kolla_serial | default("0") }}'
 
   tasks:
-    - name: Waiting for Keystone public port to be UP
+    - name: Waiting for Nova public port to be UP
       ansible.builtin.wait_for:
         host: "{{ api_interface_address }}"
-        port: "{{ keystone_public_listen_port }}"
+        port: "{{ nova_api_public_port }}"
         connect_timeout: 1
-      register: check_keystone_public_port
-      until: check_keystone_public_port is success
+      register: check_nova_public_port
+      until: check_nova_public_port is success
       retries: 60
       delay: 10
