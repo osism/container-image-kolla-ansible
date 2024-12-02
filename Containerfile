@@ -36,7 +36,7 @@ COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
 
 COPY --link files/src /src
 
-ADD https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.14.tar.gz /mitogen.tar.gz
+ADD https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.19.tar.gz /mitogen.tar.gz
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
