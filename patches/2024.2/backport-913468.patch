@@ -1,0 +1,26 @@
+From 9b8a8d4b1f6bc065d4d4d001607bbfa666ded785 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Sat, 16 Mar 2024 12:39:29 +0100
+Subject: [PATCH] ironic: fix tftp server address in the dnsmasq configuration
+
+The tftp server is reachable on the ironic_tftp_listen_address
+address.
+
+Change-Id: I07b0d4a9da439954f982d19f472f6440b08ae3f8
+---
+
+diff --git a/ansible/roles/ironic/templates/ironic-dnsmasq.conf.j2 b/ansible/roles/ironic/templates/ironic-dnsmasq.conf.j2
+index f7eb73e..7706f0a 100644
+--- a/ansible/roles/ironic/templates/ironic-dnsmasq.conf.j2
++++ b/ansible/roles/ironic/templates/ironic-dnsmasq.conf.j2
+@@ -18,8 +18,8 @@
+ {# TODO(yoctozepto): IPv6-only support - DHCPv6 PXE support #}
+ {# different options must be used here #}
+ {% else %}{# ipv4 #}
+-dhcp-option=option:tftp-server,{{ api_interface_address }}
+-dhcp-option=option:server-ip-address,{{ api_interface_address }}
++dhcp-option=option:tftp-server,{{ ironic_tftp_listen_address }}
++dhcp-option=option:server-ip-address,{{ ironic_tftp_listen_address }}
+ dhcp-option=210,/var/lib/ironic/tftpboot/
+ {% if ironic_dnsmasq_serve_ipxe | bool %}
+ dhcp-match=ipxe,175

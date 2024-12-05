@@ -44,6 +44,10 @@
     name: semaphore-container-image-kolla-ansible-push-caracal
     max: 1
 
+- semaphore:
+    name: semaphore-container-image-kolla-ansible-push-dalmatian
+    max: 1
+
 - job:
     name: container-image-kolla-ansible-build
     pre-run: playbooks/pre.yml
@@ -63,6 +67,12 @@
     parent: container-image-kolla-ansible-build
     vars:
       version_openstack: "2024.1"
+
+- job:
+    name: container-image-kolla-ansible-build-dalmatian
+    parent: container-image-kolla-ansible-build
+    vars:
+      version_openstack: "2024.2"
 
 - job:
     name: container-image-kolla-ansible-push-bobcat
@@ -93,6 +103,20 @@
         pass-to-parent: true
 
 - job:
+    name: container-image-kolla-ansible-push-dalmatian
+    parent: container-image-kolla-ansible-build
+    semaphores:
+      - name: semaphore-container-image-kolla-ansible-push-dalmatian
+    vars:
+      version_openstack: "2024.2"
+      push_image: true
+      push_sbom: true
+    secrets:
+      - name: secret
+        secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
+        pass-to-parent: true
+
+- job:
     name: container-image-kolla-ansible-release
     parent: container-image-kolla-ansible-build
     vars:
@@ -115,6 +139,7 @@
         - yamllint
         - container-image-kolla-ansible-build-bobcat
         - container-image-kolla-ansible-build-caracal
+        - container-image-kolla-ansible-build-dalmatian
     gate:
       jobs:
         - ansible-lint
@@ -133,11 +158,14 @@
       jobs:
         - container-image-kolla-ansible-push-bobcat
         - container-image-kolla-ansible-push-caracal
+        - container-image-kolla-ansible-push-dalmatian
     post:
       jobs:
         - container-image-kolla-ansible-push-bobcat:
             branches: main
         - container-image-kolla-ansible-push-caracal:
+            branches: main
+        - container-image-kolla-ansible-push-dalmatian:
             branches: main
     tag:
       jobs:
