@@ -28,10 +28,7 @@ template = environment.get_template("versions.yml.j2")
 with open("/release/%s/openstack-%s.yml" % (VERSION, OPENSTACK_VERSION), "rb") as fp:
     versions_openstack = yaml.load(fp, Loader=yaml.FullLoader)
 
-SBOM_URL = (
-    "https://raw.githubusercontent.com/osism/release/main/%s/sbom-openstack.yml"
-    % VERSION
-)  # noqa E501
+SBOM_URL = f"https://raw.githubusercontent.com/osism/release/main/{VERSION}/sbom-openstack-{OPENSTACK_VERSION}.yml"
 r = requests.get(SBOM_URL)
 
 if r.status_code == 200:
