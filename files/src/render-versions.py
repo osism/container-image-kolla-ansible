@@ -29,7 +29,8 @@ with open("/release/%s/openstack-%s.yml" % (VERSION, OPENSTACK_VERSION), "rb") a
     versions_openstack = yaml.load(fp, Loader=yaml.FullLoader)
 
 SBOM_URL = (
-    "https://raw.githubusercontent.com/osism/sbom/main/%s/openstack.yml" % VERSION
+    "https://raw.githubusercontent.com/osism/release/main/%s/sbom-openstack.yml"
+    % VERSION
 )  # noqa E501
 r = requests.get(SBOM_URL)
 
