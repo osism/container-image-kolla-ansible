@@ -40,7 +40,6 @@ ADD https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.19.tar.gz /mito
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# hadolint ignore=DL3003
 RUN <<EOF
 set -e
 set -x

@@ -1,6 +1,7 @@
 ---
 ignored:
-  - DL3008
-  - DL3059
-  - SC2016
-  - SC2086
+  - DL3003  # https://github.com/hadolint/hadolint/wiki/DL3003
+  - DL3008  # https://github.com/hadolint/hadolint/wiki/DL3008
+  - DL3059  # https://github.com/hadolint/hadolint/wiki/DL3059
+  - SC2016  # https://github.com/hadolint/hadolint/wiki/SC2016
+  - SC2086  # https://github.com/hadolint/hadolint/wiki/SC2086
