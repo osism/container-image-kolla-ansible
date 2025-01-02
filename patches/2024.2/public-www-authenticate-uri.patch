@@ -1,0 +1,336 @@
+From ddc0dfc8fadf5d6b9d17c40af1e3e0c80185895a Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Mon, 30 Dec 2024 16:25:02 +0100
+Subject: [PATCH] Use public keystone URL for www_authenticate_uri
+
+The `www_authenticate_uri` parameter is used to indicate to clients
+where they should get a token from in order to authenticate against a
+service. Most clients are not expected to be able to talk to the
+internal identity endpoint, so this parameter should refer to the public
+endpoint instead, see also [0].
+
+[0] https://opendev.org/openstack/keystonemiddleware/src/branch/master/keystonemiddleware/auth_token/_opts.py#L31-L50
+
+Change-Id: Ic99804967b5a62b5a9e39486749474520734ba48
+---
+diff --git a/ansible/roles/aodh/templates/aodh.conf.j2 b/ansible/roles/aodh/templates/aodh.conf.j2
+index 7aa1d664f..266b51d8c 100644
+--- a/ansible/roles/aodh/templates/aodh.conf.j2
++++ b/ansible/roles/aodh/templates/aodh.conf.j2
+@@ -20,7 +20,7 @@ service_type = alarming
+ memcache_security_strategy = {{ memcache_security_strategy }}
+ memcache_secret_key = {{ memcache_secret_key }}
+ memcached_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_address(host) | put_address_in_context('memcache') }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ project_domain_name = {{ default_project_domain_name }}
+ project_name = service
+ user_domain_name = {{ default_user_domain_name }}
+diff --git a/ansible/roles/barbican/templates/barbican.conf.j2 b/ansible/roles/barbican/templates/barbican.conf.j2
+index f7085f155..d8588a612 100644
+--- a/ansible/roles/barbican/templates/barbican.conf.j2
++++ b/ansible/roles/barbican/templates/barbican.conf.j2
+@@ -59,7 +59,7 @@ topic = barbican_notifications
+ 
+ [keystone_authtoken]
+ service_type = key-manager
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ project_domain_id = {{ default_project_domain_id }}
+ project_name = service
+ user_domain_id = {{ default_user_domain_id }}
+diff --git a/ansible/roles/blazar/templates/blazar.conf.j2 b/ansible/roles/blazar/templates/blazar.conf.j2
+index 453842080..a865187e0 100644
+--- a/ansible/roles/blazar/templates/blazar.conf.j2
++++ b/ansible/roles/blazar/templates/blazar.conf.j2
+@@ -21,7 +21,7 @@ plugins = virtual.instance.plugin,physical.host.plugin
+ 
+ [keystone_authtoken]
+ service_type = reservation
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = default
+diff --git a/ansible/roles/cinder/templates/cinder.conf.j2 b/ansible/roles/cinder/templates/cinder.conf.j2
+index 25edd2536..834fa244b 100644
+--- a/ansible/roles/cinder/templates/cinder.conf.j2
++++ b/ansible/roles/cinder/templates/cinder.conf.j2
+@@ -121,7 +121,7 @@ service_type = volume
+ # see: https://security.openstack.org/ossa/OSSA-2023-003.html
+ # and: https://docs.openstack.org/cinder/zed/configuration/block-storage/service-token.html#troubleshooting
+ service_token_roles_required = true
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/cloudkitty/templates/cloudkitty.conf.j2 b/ansible/roles/cloudkitty/templates/cloudkitty.conf.j2
+index b000e3e7b..71fd481ea 100644
+--- a/ansible/roles/cloudkitty/templates/cloudkitty.conf.j2
++++ b/ansible/roles/cloudkitty/templates/cloudkitty.conf.j2
+@@ -18,7 +18,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = rating
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/cyborg/templates/cyborg.conf.j2 b/ansible/roles/cyborg/templates/cyborg.conf.j2
+index 656094ac3..89a785365 100644
+--- a/ansible/roles/cyborg/templates/cyborg.conf.j2
++++ b/ansible/roles/cyborg/templates/cyborg.conf.j2
+@@ -20,7 +20,7 @@ memcache_security_strategy = {{ memcache_security_strategy }}
+ memcache_secret_key = {{ memcache_secret_key }}
+ memcache_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_address(host) | put_address_in_context('memcache') }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}
+ 
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ project_domain_name = {{ default_project_domain_name }}
+ project_name = service
+ user_domain_name = {{ default_user_domain_name }}
+diff --git a/ansible/roles/designate/templates/designate.conf.j2 b/ansible/roles/designate/templates/designate.conf.j2
+index 2fbb768df..4fce643e7 100644
+--- a/ansible/roles/designate/templates/designate.conf.j2
++++ b/ansible/roles/designate/templates/designate.conf.j2
+@@ -20,7 +20,7 @@ enabled_extensions_admin = quotas, reports
+ 
+ [keystone_authtoken]
+ service_type = dns
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/glance/templates/glance-api.conf.j2 b/ansible/roles/glance/templates/glance-api.conf.j2
+index d760dfcc1..93dd85c8e 100644
+--- a/ansible/roles/glance/templates/glance-api.conf.j2
++++ b/ansible/roles/glance/templates/glance-api.conf.j2
+@@ -39,7 +39,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = image
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/gnocchi/templates/gnocchi.conf.j2 b/ansible/roles/gnocchi/templates/gnocchi.conf.j2
+index 2eb1fdaa7..32993f08c 100644
+--- a/ansible/roles/gnocchi/templates/gnocchi.conf.j2
++++ b/ansible/roles/gnocchi/templates/gnocchi.conf.j2
+@@ -45,7 +45,7 @@ url = mysql+pymysql://{{ gnocchi_database_user }}:{{ gnocchi_database_password }
+ 
+ [keystone_authtoken]
+ service_type = metric
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ project_domain_id = {{ default_project_domain_id }}
+ project_name = service
+ user_domain_id = {{ default_user_domain_id }}
+diff --git a/ansible/roles/heat/templates/heat.conf.j2 b/ansible/roles/heat/templates/heat.conf.j2
+index 5b8a1fbb0..5c7d3cbe9 100644
+--- a/ansible/roles/heat/templates/heat.conf.j2
++++ b/ansible/roles/heat/templates/heat.conf.j2
+@@ -30,7 +30,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = orchestration
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/ironic/templates/ironic-inspector.conf.j2 b/ansible/roles/ironic/templates/ironic-inspector.conf.j2
+index adf9567bb..6d5c89195 100644
+--- a/ansible/roles/ironic/templates/ironic-inspector.conf.j2
++++ b/ansible/roles/ironic/templates/ironic-inspector.conf.j2
+@@ -45,7 +45,7 @@ endpoint_override = {{ ironic_internal_endpoint }}
+ {% if ironic_enable_keystone_integration | bool %}
+ [keystone_authtoken]
+ service_type = baremetal-introspection
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/ironic/templates/ironic.conf.j2 b/ansible/roles/ironic/templates/ironic.conf.j2
+index 66e0774c1..5ca9b3399 100644
+--- a/ansible/roles/ironic/templates/ironic.conf.j2
++++ b/ansible/roles/ironic/templates/ironic.conf.j2
+@@ -74,7 +74,7 @@ max_retries = -1
+ {% if ironic_enable_keystone_integration | bool %}
+ [keystone_authtoken]
+ service_type = baremetal
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/magnum/templates/magnum.conf.j2 b/ansible/roles/magnum/templates/magnum.conf.j2
+index 37d8d2138..1e696664a 100644
+--- a/ansible/roles/magnum/templates/magnum.conf.j2
++++ b/ansible/roles/magnum/templates/magnum.conf.j2
+@@ -81,7 +81,7 @@ cafile = {{ openstack_cacert }}
+ 
+ [keystone_authtoken]
+ service_type = container-infra
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_name = {{ default_project_domain_name }}
+diff --git a/ansible/roles/manila/templates/manila.conf.j2 b/ansible/roles/manila/templates/manila.conf.j2
+index 1cd53601b..2edf5b5ca 100644
+--- a/ansible/roles/manila/templates/manila.conf.j2
++++ b/ansible/roles/manila/templates/manila.conf.j2
+@@ -32,7 +32,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = share
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/masakari/templates/masakari.conf.j2 b/ansible/roles/masakari/templates/masakari.conf.j2
+index 10c4ac072..f0d760518 100644
+--- a/ansible/roles/masakari/templates/masakari.conf.j2
++++ b/ansible/roles/masakari/templates/masakari.conf.j2
+@@ -23,7 +23,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = instance-ha
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_name = {{ default_project_domain_name }}
+diff --git a/ansible/roles/mistral/templates/mistral.conf.j2 b/ansible/roles/mistral/templates/mistral.conf.j2
+index 84f86d7ff..934dc06b3 100644
+--- a/ansible/roles/mistral/templates/mistral.conf.j2
++++ b/ansible/roles/mistral/templates/mistral.conf.j2
+@@ -40,7 +40,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = workflow
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/neutron/templates/neutron.conf.j2 b/ansible/roles/neutron/templates/neutron.conf.j2
+index 68e040ba1..515b42ce0 100644
+--- a/ansible/roles/neutron/templates/neutron.conf.j2
++++ b/ansible/roles/neutron/templates/neutron.conf.j2
+@@ -106,7 +106,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = network
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/nova/templates/nova.conf.j2 b/ansible/roles/nova/templates/nova.conf.j2
+index f55a3e25e..fce497868 100644
+--- a/ansible/roles/nova/templates/nova.conf.j2
++++ b/ansible/roles/nova/templates/nova.conf.j2
+@@ -111,7 +111,7 @@ memcache_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_address
+ 
+ [keystone_authtoken]
+ service_type = compute
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/octavia/templates/octavia.conf.j2 b/ansible/roles/octavia/templates/octavia.conf.j2
+index ca59acd35..5b6609a57 100644
+--- a/ansible/roles/octavia/templates/octavia.conf.j2
++++ b/ansible/roles/octavia/templates/octavia.conf.j2
+@@ -59,7 +59,7 @@ memcached_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_addres
+ 
+ [keystone_authtoken]
+ service_type = load-balancer
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/placement/templates/placement.conf.j2 b/ansible/roles/placement/templates/placement.conf.j2
+index ba13cc145..a5a742b43 100644
+--- a/ansible/roles/placement/templates/placement.conf.j2
++++ b/ansible/roles/placement/templates/placement.conf.j2
+@@ -26,7 +26,7 @@ memcache_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_address
+ 
+ [keystone_authtoken]
+ service_type = placement
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/tacker/templates/tacker.conf.j2 b/ansible/roles/tacker/templates/tacker.conf.j2
+index 21d2fde58..46876a3ca 100644
+--- a/ansible/roles/tacker/templates/tacker.conf.j2
++++ b/ansible/roles/tacker/templates/tacker.conf.j2
+@@ -33,7 +33,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = nfv-orchestration
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_name = {{ default_project_domain_id }}
+diff --git a/ansible/roles/trove/templates/trove.conf.j2 b/ansible/roles/trove/templates/trove.conf.j2
+index 238575dcd..6a435986a 100644
+--- a/ansible/roles/trove/templates/trove.conf.j2
++++ b/ansible/roles/trove/templates/trove.conf.j2
+@@ -54,7 +54,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = database
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ project_domain_name = {{ default_project_domain_name }}
+ project_name = service
+ user_domain_name = {{ default_user_domain_name }}
+diff --git a/ansible/roles/watcher/templates/watcher.conf.j2 b/ansible/roles/watcher/templates/watcher.conf.j2
+index f087b6673..5e9ad9265 100644
+--- a/ansible/roles/watcher/templates/watcher.conf.j2
++++ b/ansible/roles/watcher/templates/watcher.conf.j2
+@@ -20,7 +20,7 @@ max_retries = -1
+ 
+ [keystone_authtoken]
+ service_type = infra-optim
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+diff --git a/ansible/roles/zun/templates/zun.conf.j2 b/ansible/roles/zun/templates/zun.conf.j2
+index 03979ac14..8caa33f49 100644
+--- a/ansible/roles/zun/templates/zun.conf.j2
++++ b/ansible/roles/zun/templates/zun.conf.j2
+@@ -28,7 +28,7 @@ max_retries = -1
+ # keystone_authtoken sections are used and Zun internals may use either -
+ # - best keep them both in sync
+ [keystone_auth]
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
+@@ -51,7 +51,7 @@ memcached_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_addres
+ # - best keep them both in sync
+ [keystone_authtoken]
+ service_type = container
+-www_authenticate_uri = {{ keystone_internal_url }}
++www_authenticate_uri = {{ keystone_public_url }}
+ auth_url = {{ keystone_internal_url }}
+ auth_type = password
+ project_domain_id = {{ default_project_domain_id }}
