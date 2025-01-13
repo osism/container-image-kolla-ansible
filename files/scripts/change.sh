@@ -14,8 +14,11 @@ if [[ "$1" == "kolla-ansible" ]]; then
     rm -rf /ansible/roles/*
     rm -rf /repository
 
-    git clone https://opendev.org/openstack/kolla-ansible
-    git pull https://review.opendev.org/openstack/kolla-ansible $1
+    git clone https://opendev.org/openstack/kolla-ansible /repository
+    git -C /repository config advice.detachedHead false
+    git -C /repository fetch https://review.opendev.org/openstack/kolla-ansible.git $2
+    git -C /repository checkout FETCH_HEAD
+
 
     cp -r /repository/ansible/action_plugins/* /ansible/action_plugins
     if [ -e /repository/ansible/filter_plugins ]; then
