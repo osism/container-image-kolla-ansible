@@ -26,7 +26,7 @@ index eae1f03fb..a5d0d3d61 100644
  # Prometheus
  ############
 diff --git a/ansible/roles/grafana/tasks/config.yml b/ansible/roles/grafana/tasks/config.yml
-index cc12d874a..2dc0b13a2 100644
+index 89a71df43..b78ac943d 100644
 --- a/ansible/roles/grafana/tasks/config.yml
 +++ b/ansible/roles/grafana/tasks/config.yml
 @@ -14,7 +14,10 @@
@@ -80,7 +80,7 @@ index cc12d874a..2dc0b13a2 100644
    notify:
      - Restart grafana container
  
-@@ -115,43 +97,62 @@
+@@ -115,44 +97,63 @@
    when:
      - inventory_hostname in groups[service.group]
      - service.enabled | bool
@@ -106,22 +106,23 @@ index cc12d874a..2dc0b13a2 100644
  
 -- name: Remove templated Grafana dashboards
 +- name: Find templated grafana dashboards
-   become: true
-   vars:
-     service: "{{ grafana_services['grafana'] }}"
++  become: true
++  vars:
++    service: "{{ grafana_services['grafana'] }}"
 +  find:
 +    path: "{{ node_config_directory }}/grafana/dashboards"
 +    recurse: true
 +    file_type: any
 +  register: grafana_templated_dashboards
 +  when:
++    - not ansible_check_mode
 +    - inventory_hostname in groups[service.group]
 +    - service.enabled | bool
 +
 +- name: Prune templated Grafana dashboards
-+  become: true
-+  vars:
-+    service: "{{ grafana_services['grafana'] }}"
+   become: true
+   vars:
+     service: "{{ grafana_services['grafana'] }}"
 +    dashboards_templated_path_regex: "^{{ node_config_directory | regex_escape }}/grafana/dashboards/(.*)$"
 +    dashboards_config_paths_regex: "^({{ grafana_custom_dashboards_paths | map('regex_escape') | join('|') }})/(.*)$"
 +    dashboards_templated_relative_path: "{{ grafana_templated_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_templated_path_regex, '\\1') }}"
@@ -131,6 +132,7 @@ index cc12d874a..2dc0b13a2 100644
 -    path: "{{ node_config_directory }}/grafana/dashboards/"
 +    path: "{{ node_config_directory }}/grafana/dashboards/{{ item }}"
    when:
+-    - not ansible_check_mode
      - inventory_hostname in groups[service.group]
      - service.enabled | bool
 +  with_items: "{{ dashboards_templated_relative_path | reject('in', dashboards_config_relative_path) | reject('in', dashboards_config_relative_path | map('dirname')) }}"
@@ -158,10 +160,10 @@ index cc12d874a..2dc0b13a2 100644
    notify:
      - Restart grafana container
 diff --git a/ansible/roles/grafana/tasks/post_config.yml b/ansible/roles/grafana/tasks/post_config.yml
-index 82993cecf..97a9bc818 100644
+index 7d11d0d6a..16e924635 100644
 --- a/ansible/roles/grafana/tasks/post_config.yml
 +++ b/ansible/roles/grafana/tasks/post_config.yml
-@@ -57,4 +57,4 @@
+@@ -58,4 +58,4 @@
    register: grafana_response
    changed_when: grafana_response.status == 200
    run_once: true
