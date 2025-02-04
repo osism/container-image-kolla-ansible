@@ -37,15 +37,15 @@
           +f3U0lv4jEFlPNqCkveCOYfxS8eiTAxLd63JBRM3yb+c0Zq0ci/SfVc9D6hfdM=
 
 - semaphore:
-    name: semaphore-container-image-kolla-ansible-push-bobcat
+    name: semaphore-container-image-kolla-ansible-push-2023.2
     max: 1
 
 - semaphore:
-    name: semaphore-container-image-kolla-ansible-push-caracal
+    name: semaphore-container-image-kolla-ansible-push-2024.1
     max: 1
 
 - semaphore:
-    name: semaphore-container-image-kolla-ansible-push-dalmatian
+    name: semaphore-container-image-kolla-ansible-push-2024.2
     max: 1
 
 - job:
@@ -57,28 +57,28 @@
       docker_registry: osism.harbor.regio.digital
 
 - job:
-    name: container-image-kolla-ansible-build-bobcat
+    name: container-image-kolla-ansible-build-2023.2
     parent: container-image-kolla-ansible-build
     vars:
       version_openstack: "2023.2"
 
 - job:
-    name: container-image-kolla-ansible-build-caracal
+    name: container-image-kolla-ansible-build-2024.1
     parent: container-image-kolla-ansible-build
     vars:
       version_openstack: "2024.1"
 
 - job:
-    name: container-image-kolla-ansible-build-dalmatian
+    name: container-image-kolla-ansible-build-2024.2
     parent: container-image-kolla-ansible-build
     vars:
       version_openstack: "2024.2"
 
 - job:
-    name: container-image-kolla-ansible-push-bobcat
+    name: container-image-kolla-ansible-push-2023.2
     parent: container-image-kolla-ansible-build
     semaphores:
-      - name: semaphore-container-image-kolla-ansible-push-bobcat
+      - name: semaphore-container-image-kolla-ansible-push-2023.2
     vars:
       version_openstack: "2023.2"
       push_image: true
@@ -89,10 +89,10 @@
         pass-to-parent: true
 
 - job:
-    name: container-image-kolla-ansible-push-caracal
+    name: container-image-kolla-ansible-push-2024.1
     parent: container-image-kolla-ansible-build
     semaphores:
-      - name: semaphore-container-image-kolla-ansible-push-caracal
+      - name: semaphore-container-image-kolla-ansible-push-2024.1
     vars:
       version_openstack: "2024.1"
       push_image: true
@@ -103,10 +103,10 @@
         pass-to-parent: true
 
 - job:
-    name: container-image-kolla-ansible-push-dalmatian
+    name: container-image-kolla-ansible-push-2024.2
     parent: container-image-kolla-ansible-build
     semaphores:
-      - name: semaphore-container-image-kolla-ansible-push-dalmatian
+      - name: semaphore-container-image-kolla-ansible-push-2024.2
     vars:
       version_openstack: "2024.2"
       push_image: true
@@ -137,9 +137,9 @@
         - hadolint
         - python-black
         - yamllint
-        - container-image-kolla-ansible-build-bobcat
-        - container-image-kolla-ansible-build-caracal
-        - container-image-kolla-ansible-build-dalmatian
+        - container-image-kolla-ansible-build-2023.2
+        - container-image-kolla-ansible-build-2024.1
+        - container-image-kolla-ansible-build-2024.2
     gate:
       jobs:
         - ansible-lint
@@ -156,16 +156,16 @@
         - yamllint
     periodic-midnight:
       jobs:
-        - container-image-kolla-ansible-push-bobcat
-        - container-image-kolla-ansible-push-caracal
-        - container-image-kolla-ansible-push-dalmatian
+        - container-image-kolla-ansible-push-2023.2
+        - container-image-kolla-ansible-push-2024.1
+        - container-image-kolla-ansible-push-2024.2
     post:
       jobs:
-        - container-image-kolla-ansible-push-bobcat:
+        - container-image-kolla-ansible-push-2023.2:
             branches: main
-        - container-image-kolla-ansible-push-caracal:
+        - container-image-kolla-ansible-push-2024.1:
             branches: main
-        - container-image-kolla-ansible-push-dalmatian:
+        - container-image-kolla-ansible-push-2024.2:
             branches: main
     tag:
       jobs:
