@@ -10,7 +10,7 @@
     registry: "{{ docker_registry | default('osism.harbor.regio.digital') }}"
     repository: "{{ docker_namespace | default('osism') }}/kolla-ansible"
     version: "{{ zuul['tag'] | default('latest') }}"
-    DTRACK_SERVER: "https://osism.dtrack.regio.digital"
+    DTRACK_SERVER: "https://dtrack.osism.tech"
     DTRACK_API_KEY: "{{ secret.DTRACK_API_KEY | default('') }}"
 
   tasks:
