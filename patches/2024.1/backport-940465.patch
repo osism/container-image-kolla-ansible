@@ -1,0 +1,60 @@
+From 57f526907c3929074d74a364ce31b56b93160b5a Mon Sep 17 00:00:00 2001
+From: Dr. Jens Harbott <frickler@offenerstapel.de>
+Date: Thu, 30 Jan 2025 16:55:06 +0000
+Subject: [PATCH] Revert "keystone: handle OIDC metadata & attribute mappings as template"
+
+This reverts commit 7223bb75c9578026e83949bd06c89d1a1d3e4b6f.
+
+Reason for revert: seems this is not working as intended, see the linked bug
+
+Change-Id: I19dfa02b15040cb12b04c41015ff65e2829bf210
+Closes-Bug: 2097005
+---
+
+diff --git a/ansible/roles/keystone/tasks/config-federation-oidc.yml b/ansible/roles/keystone/tasks/config-federation-oidc.yml
+index 51cd41d..8138493 100644
+--- a/ansible/roles/keystone/tasks/config-federation-oidc.yml
++++ b/ansible/roles/keystone/tasks/config-federation-oidc.yml
+@@ -28,11 +28,11 @@
+   when:
+     - inventory_hostname in groups[keystone.group]
+ 
+-- name: Templating OpenID Identity Providers metadata
++- name: Copying OpenID Identity Providers metadata
+   vars:
+     keystone: "{{ keystone_services['keystone'] }}"
+   become: true
+-  template:
++  copy:
+     src: "{{ item.metadata_folder }}/"
+     dest: "{{ keystone_host_federation_oidc_metadata_folder }}"
+     mode: "0660"
+@@ -55,11 +55,11 @@
+     - item.certificate_file is defined
+     - inventory_hostname in groups[keystone.group]
+ 
+-- name: Templating OpenStack Identity Providers attribute mappings
++- name: Copying OpenStack Identity Providers attribute mappings
+   vars:
+     keystone: "{{ keystone_services['keystone'] }}"
+   become: true
+-  template:
++  copy:
+     src: "{{ item.file }}"
+     dest: "{{ keystone_host_federation_oidc_attribute_mappings_folder }}/{{ item.file | basename }}"
+     mode: "0660"
+diff --git a/releasenotes/notes/template-config-federation-oidc-8e62742de5fcb376.yaml b/releasenotes/notes/template-config-federation-oidc-8e62742de5fcb376.yaml
+deleted file mode 100644
+index ac95b70..0000000
+--- a/releasenotes/notes/template-config-federation-oidc-8e62742de5fcb376.yaml
++++ /dev/null
+@@ -1,9 +0,0 @@
+----
+-features:
+-  - |
+-    In the Keystone role files for the
+-    ``keystone_host_federation_oidc_metadata_folder`` and
+-    ``keystone_host_federation_oidc_attribute_mappings_folder`` directories
+-    are now handled as templates. This relates to the OpenID Identity Providers
+-    metadata and the OpenStack Identity Providers attribute mappings as part of
+-    the identity federation with OIDC.
