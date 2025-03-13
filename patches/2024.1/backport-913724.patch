@@ -1,0 +1,135 @@
+From 8f0a4bcb0d60f98af591b5c87e774826ac2c63fd Mon Sep 17 00:00:00 2001
+From: Michal Arbet <michal.arbet@ultimum.io>
+Date: Tue, 19 Mar 2024 23:42:16 +0100
+Subject: [PATCH] Switch mariadb's loadbalancer from HAProxy to ProxySQL
+
+It's been some time since ProxySQL has been
+with us in Kolla. Let's switch the load balancer
+for MariaDB connections from HAProxy to ProxySQL.
+
+Depends-On: https://review.opendev.org/c/openstack/kolla/+/928956
+Change-Id: I42ba4fb83b5bb31058e888f0d39d47c27b844de5
+---
+
+diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
+index ba0d9d7..a212005 100644
+--- a/ansible/group_vars/all.yml
++++ b/ansible/group_vars/all.yml
+@@ -549,6 +549,7 @@
+ mariadb_shard_name: "shard_{{ mariadb_shard_id }}"
+ mariadb_shard_group: "mariadb_{{ mariadb_shard_name }}"
+ mariadb_loadbalancer: "{{ 'proxysql' if enable_proxysql | bool else 'haproxy' }}"
++mariadb_backup_target: "{{ 'active' if mariadb_loadbalancer == 'haproxy' else 'replica' }}"
+ mariadb_shard_root_user_prefix: "root_shard_"
+ mariadb_shard_backup_user_prefix: "backup_shard_"
+ mariadb_shards_info: "{{ groups['mariadb'] | database_shards_info() }}"
+@@ -937,7 +938,7 @@
+ enable_osprofiler: "no"
+ enable_placement: "{{ enable_nova | bool or enable_zun | bool }}"
+ enable_prometheus: "no"
+-enable_proxysql: "no"
++enable_proxysql: "yes"
+ enable_redis: "no"
+ enable_skyline: "no"
+ enable_swift: "no"
+diff --git a/ansible/roles/mariadb/defaults/main.yml b/ansible/roles/mariadb/defaults/main.yml
+index a1ac4fa..49f2e43 100644
+--- a/ansible/roles/mariadb/defaults/main.yml
++++ b/ansible/roles/mariadb/defaults/main.yml
+@@ -129,7 +129,7 @@
+ ####################
+ # Clustercheck
+ ####################
+-enable_mariadb_clustercheck: "{{ enable_haproxy }}"
++enable_mariadb_clustercheck: "{{ 'True' if mariadb_loadbalancer == 'haproxy' else 'False' }}"
+ 
+ ####################
+ # Sharding
+diff --git a/ansible/roles/mariadb/tasks/backup.yml b/ansible/roles/mariadb/tasks/backup.yml
+index 4facbe9..1c25f9b 100644
+--- a/ansible/roles/mariadb/tasks/backup.yml
++++ b/ansible/roles/mariadb/tasks/backup.yml
+@@ -10,10 +10,12 @@
+   register: container_facts
+ 
+ - name: Taking {{ mariadb_backup_type }} database backup via Mariabackup
++  vars:
++    cmd: "{{ 'kolla_mariadb_backup.sh' if mariadb_backup_target == 'active' else 'kolla_mariadb_backup_replica.sh' }}"
+   become: true
+   kolla_container:
+     action: "start_container"
+-    command: "bash -c 'sudo -E kolla_set_configs && /usr/local/bin/kolla_mariadb_backup.sh'"
++    command: "bash -c 'sudo -E kolla_set_configs && /usr/local/bin/{{ cmd }}'"
+     common_options: "{{ docker_common_options }}"
+     detach: False
+     # NOTE(mgoddard): Try to use the same image as the MariaDB server container
+diff --git a/etc/kolla/globals.yml b/etc/kolla/globals.yml
+index 0eef2a3..da7574e 100644
+--- a/etc/kolla/globals.yml
++++ b/etc/kolla/globals.yml
+@@ -411,7 +411,7 @@
+ #enable_osprofiler: "no"
+ #enable_placement: "{{ enable_nova | bool or enable_zun | bool }}"
+ #enable_prometheus: "no"
+-#enable_proxysql: "no"
++#enable_proxysql: "yes"
+ #enable_redis: "no"
+ #enable_skyline: "no"
+ #enable_swift: "no"
+diff --git a/releasenotes/notes/switch-to-proxysql-907c2bc2f2c04de4.yaml b/releasenotes/notes/switch-to-proxysql-907c2bc2f2c04de4.yaml
+new file mode 100644
+index 0000000..649ffd5
+--- /dev/null
++++ b/releasenotes/notes/switch-to-proxysql-907c2bc2f2c04de4.yaml
+@@ -0,0 +1,15 @@
++---
++upgrade:
++  - |
++    The config option ``enable_proxysql`` has been changed to
++    ``yes``, which means that MySQL connections will now be
++    handled by ProxySQL by default instead of HAProxy. Users
++    who wish to retain load balancing of MySQL connections
++    through HAProxy must set ``enable_proxysql`` to ``no``.
++    Also Due to this change, the config option
++    ``enable_mariadb_clustercheck`` is also dynamically
++    changed to ``no``. Users who still wish to maintain
++    ``mariadb_clustercheck`` can override this config option
++    in the configuration. However, with ProxySQL,
++    ``mariadb_clustercheck`` is no longer needed and can be
++    manually removed.
+diff --git a/tests/setup_gate.sh b/tests/setup_gate.sh
+index c311540..8b8b291 100755
+--- a/tests/setup_gate.sh
++++ b/tests/setup_gate.sh
+@@ -13,7 +13,7 @@
+     fi
+ 
+     if [[ $SCENARIO != "bifrost" ]]; then
+-        GATE_IMAGES="^cron,^fluentd,^glance,^haproxy,^keepalived,^keystone,^kolla-toolbox,^mariadb,^memcached,^neutron,^nova-,^openvswitch,^rabbitmq,^horizon,^heat,^placement"
++        GATE_IMAGES="^cron,^fluentd,^glance,^haproxy,^proxysql,^keepalived,^keystone,^kolla-toolbox,^mariadb,^memcached,^neutron,^nova-,^openvswitch,^rabbitmq,^horizon,^heat,^placement"
+     else
+         GATE_IMAGES="bifrost"
+     fi
+@@ -58,7 +58,7 @@
+     fi
+ 
+     if [[ $SCENARIO == "mariadb" ]]; then
+-        GATE_IMAGES="^cron,^fluentd,^haproxy,^keepalived,^kolla-toolbox,^mariadb"
++        GATE_IMAGES="^cron,^fluentd,^haproxy,^proxysql,^keepalived,^kolla-toolbox,^mariadb"
+     fi
+ 
+     if [[ $SCENARIO == "lets-encrypt" ]]; then
+@@ -66,11 +66,11 @@
+     fi
+ 
+     if [[ $SCENARIO == "prometheus-opensearch" ]]; then
+-        GATE_IMAGES="^cron,^fluentd,^grafana,^haproxy,^keepalived,^kolla-toolbox,^mariadb,^memcached,^opensearch,^prometheus,^rabbitmq"
++        GATE_IMAGES="^cron,^fluentd,^grafana,^haproxy,^proxysql,^keepalived,^kolla-toolbox,^mariadb,^memcached,^opensearch,^prometheus,^rabbitmq"
+     fi
+ 
+     if [[ $SCENARIO == "venus" ]]; then
+-        GATE_IMAGES="^cron,^opensearch,^fluentd,^haproxy,^keepalived,^keystone,^kolla-toolbox,^mariadb,^memcached,^rabbitmq,^venus"
++        GATE_IMAGES="^cron,^opensearch,^fluentd,^haproxy,^proxysql,^keepalived,^keystone,^kolla-toolbox,^mariadb,^memcached,^rabbitmq,^venus"
+     fi
+ 
+     if [[ $SCENARIO == "skyline" || $SCENARIO == "skyline-sso" ]]; then
