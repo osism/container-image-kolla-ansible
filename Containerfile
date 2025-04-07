@@ -84,16 +84,16 @@ git clone https://github.com/osism/release /release
 
 # prepare project repository
 git clone https://github.com/osism/ansible-playbooks /playbooks
-( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/$VERSION/openstack.yml")" )
-
 git clone https://github.com/osism/defaults /defaults
-( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/$VERSION/openstack.yml")" )
-
 git clone https://github.com/osism/cfg-generics /generics
-( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/$VERSION/openstack.yml")" )
-
 git clone https://github.com/osism/kolla-operations /operations
-( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/$VERSION/base.yml")" )
+
+if [ "$VERSION" != "latest" ]; then
+  ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/$VERSION/base.yml")" )
+  ( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/$VERSION/base.yml")" )
+  ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/$VERSION/base.yml")" )
+  ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/$VERSION/base.yml")" )
+fi
 
 # add inventory files
 mkdir -p /ansible/inventory.generics /ansible/inventory
