@@ -37,6 +37,7 @@ COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
 COPY --link files/src /src
 
 ADD https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.22.tar.gz /mitogen.tar.gz
+COPY --from=ghcr.io/astral-sh/uv:0.6.14 /uv /usr/local/bin/uv
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -62,17 +63,11 @@ apt-get install -y --no-install-recommends \
   openssh-client \
   patch \
   procps \
-  python3-dev \
-  python3-pip \
-  python3-setuptools \
-  python3-wheel \
   rsync \
   sshpass
-
-python3 -m pip install --no-cache-dir --upgrade 'pip==25.0.1'
-pip install --no-cache-dir -r /src/requirements.txt
-
-update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3 1
+update-alternatives --install /usr/bin/python python /usr/local/bin/python 1
+uv pip install --no-cache --system -r /src/requirements.txt
 
 # add user
 groupadd -g "$GROUP_ID" dragon
@@ -108,7 +103,7 @@ python3 /src/render-python-requirements.py
 python3 /src/render-versions.py
 
 # install required python packages
-pip install --no-cache-dir -r /requirements.txt
+uv pip install --no-cache --system -r /requirements.txt
 
 # set ansible version in the motd
 ansible_version=$(python3 -c 'import ansible; print(ansible.release.__version__)')
@@ -155,8 +150,8 @@ rm /mitogen.tar.gz
 
 # project specific instructions
 ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
-pip install --no-cache-dir -r /repository/requirements.txt
-pip install --no-cache-dir /repository
+uv pip install --no-cache --system -r /repository/requirements.txt
+uv pip install --no-cache --system /repository
 mkdir -p /ansible/group_vars
 cp -r /defaults/* /ansible/group_vars/
 rm -f /ansible/group_vars/LICENSE /ansible/group_vars/README.md
@@ -215,9 +210,9 @@ rm -rf \
   /var/lib/apt/lists/* \
   /var/tmp/*
 
-pip install --no-cache-dir pyclean==3.0.0
+uv pip install --no-cache --system pyclean==3.0.0
 pyclean /usr
-pip uninstall -y pyclean
+uv pip uninstall --system pyclean
 EOF
 
 COPY --link files/playbooks/$OPENSTACK_VERSION/kolla-*.yml /ansible/
