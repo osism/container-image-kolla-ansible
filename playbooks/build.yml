@@ -39,6 +39,9 @@
           if [[ $version != "latest" ]]; then
               filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/openstack.yml)
               openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }')
+              docker create --name sbom $registry/kolla/release/sbom:$version nologin
+              docker cp sbom:/images.yml sbom.yml
+              docker rm sbom
           fi
 
           . defaults/${openstack_version}.sh

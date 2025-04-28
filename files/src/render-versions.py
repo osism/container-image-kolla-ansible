@@ -3,7 +3,6 @@
 import os
 
 import jinja2
-import requests
 import yaml
 
 # get environment parameters
@@ -13,7 +12,7 @@ OPENSTACK_VERSION = os.environ.get("OPENSTACK_VERSION", "latest")
 
 # load versions files from release repository
 
-with open("/release/%s/base.yml" % VERSION, "rb") as fp:
+with open(f"/release/{VERSION}/base.yml", "rb") as fp:
     versions = yaml.load(fp, Loader=yaml.FullLoader)
 
 # prepare jinja2 environment
@@ -25,15 +24,13 @@ environment = jinja2.Environment(loader=loader)
 
 template = environment.get_template("versions.yml.j2")
 
-with open("/release/%s/openstack-%s.yml" % (VERSION, OPENSTACK_VERSION), "rb") as fp:
+with open(f"/release/{VERSION}/openstack-{OPENSTACK_VERSION}.yml", "rb") as fp:
     versions_openstack = yaml.load(fp, Loader=yaml.FullLoader)
 
-SBOM_URL = f"https://raw.githubusercontent.com/osism/release/main/{VERSION}/sbom-openstack-{OPENSTACK_VERSION}.yml"
-r = requests.get(SBOM_URL)
-
-if r.status_code == 200:
-    release_versions = yaml.full_load(r.text)
-else:
+try:
+    with open("sbom.yml") as fp:
+        release_versions = yaml.load(fp, Loader=yaml.FullLoader)
+except FileNotFoundError:
     release_versions = {"versions": {}}
 
 result = template.render(
