@@ -6,7 +6,7 @@
 
   environment:
     openstack_version: "{{ version_openstack | default('master') }}"
-    python_version: "{{ version_python | default('3.11') }}"
+    python_version: "{{ version_python | default('3.13') }}"
     registry: "{{ docker_registry | default('osism.harbor.regio.digital') }}"
     repository: "{{ docker_namespace | default('osism') }}/kolla-ansible"
     version: "{{ zuul['tag'] | default('latest') }}"
