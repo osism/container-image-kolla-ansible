@@ -132,8 +132,8 @@ ansible-galaxy collection install -v -f -r /ansible/galaxy/requirements.yml -p /
 ln -s /usr/share/ansible/collections /ansible/collections
 
 # prepare project repository
-if [ "$OPENSTACK_VERSION" = "master" ]; then git clone https://opendev.org/openstack/kolla-ansible /repository; fi
-if [ "$OPENSTACK_VERSION" != "master" ]; then git clone -b stable/$OPENSTACK_VERSION https://opendev.org/openstack/kolla-ansible /repository; fi
+if [ "$OPENSTACK_VERSION" = "master" ]; then git clone https://github.com/openstack/kolla-ansible /repository; fi
+if [ "$OPENSTACK_VERSION" != "master" ]; then git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository; fi
 
 # apply patches
 for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do
