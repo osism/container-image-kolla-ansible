@@ -1,5 +1,7 @@
 ARG PYTHON_VERSION=3.13
-FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
+ARG IMAGE=registry.osism.tech/dockerhub/python
+
+FROM ${IMAGE}:${PYTHON_VERSION}-slim-bookworm AS builder
 
 ARG OPENSTACK_VERSION
 ARG VERSION
@@ -222,7 +224,9 @@ RUN python3 /src/render-playbooks.py
 USER dragon
 
 ARG PYTHON_VERSION=3.13
-FROM python:${PYTHON_VERSION}-slim-bookworm
+ARG IMAGE=registry.osism.tech/dockerhub/python
+
+FROM ${IMAGE}:${PYTHON_VERSION}-slim-bookworm
 
 COPY --link --from=builder / /
 
