@@ -39,7 +39,7 @@ COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
 COPY --link files/src /src
 
 ADD https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.22.tar.gz /mitogen.tar.gz
-COPY --from=ghcr.io/astral-sh/uv:0.7.7 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.7.8 /uv /usr/local/bin/uv
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
