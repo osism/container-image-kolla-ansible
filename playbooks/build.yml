@@ -34,11 +34,17 @@
           created=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           revision=$(git rev-parse --short HEAD)
 
+          {% raw %}
+          if [[ $version != "latest" ]]; then
+              version="${version:1:${#version}-1}"
+          fi
+          {% endraw %}
+
           # NOTE: For builds for a specific release, the OpenStack version is taken
           #       from the release repository.
           if [[ $version != "latest" ]]; then
-              filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/openstack.yml)
-              openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }')
+              filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/latest/openstack.yml)
+              openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/main/latest/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }')
               docker create --name sbom $registry/kolla/release/sbom:$version nologin
               docker cp sbom:/images.yml sbom.yml
               docker rm sbom
