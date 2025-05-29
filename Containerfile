@@ -86,10 +86,11 @@ git clone https://github.com/osism/cfg-generics /generics
 git clone https://github.com/osism/kolla-operations /operations
 
 if [ "$VERSION" != "latest" ]; then
-  ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/$VERSION/base.yml")" )
-  ( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/$VERSION/base.yml")" )
-  ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/$VERSION/base.yml")" )
-  ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/$VERSION/base.yml")" )
+  ( cd /release || exit; git fetch --all --force; git checkout "kolla-ansible-$VERSION" )
+  ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/latest/base.yml")" )
+  ( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/latest/base.yml")" )
+  ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/latest/base.yml")" )
+  ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/latest/base.yml")" )
 fi
 
 # add inventory files

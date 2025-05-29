@@ -12,7 +12,7 @@ OPENSTACK_VERSION = os.environ.get("OPENSTACK_VERSION", "latest")
 
 # load versions files from release repository
 
-with open(f"/release/{VERSION}/base.yml", "rb") as fp:
+with open("/release/latest/base.yml", "rb") as fp:
     versions = yaml.load(fp, Loader=yaml.FullLoader)
 
 # prepare jinja2 environment
@@ -24,7 +24,7 @@ environment = jinja2.Environment(loader=loader)
 
 template = environment.get_template("versions.yml.j2")
 
-with open(f"/release/{VERSION}/openstack-{OPENSTACK_VERSION}.yml", "rb") as fp:
+with open(f"/release/latest/openstack-{OPENSTACK_VERSION}.yml", "rb") as fp:
     versions_openstack = yaml.load(fp, Loader=yaml.FullLoader)
 
 try:
