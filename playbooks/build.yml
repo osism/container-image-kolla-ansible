@@ -34,18 +34,16 @@
           created=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           revision=$(git rev-parse --short HEAD)
 
-          {% raw %}
-          if [[ $version != "latest" ]]; then
-              version="${version:1:${#version}-1}"
-          fi
-          {% endraw %}
-
           # NOTE: For builds for a specific release, the OpenStack version is taken
           #       from the release repository.
           if [[ $version != "latest" ]]; then
-              filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/latest/openstack.yml)
-              openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/main/latest/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }' | tr -d '"')
-              docker create --name sbom $registry/kolla/release/sbom:$version nologin
+              filename=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/openstack.yml)
+              openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }' | tr -d '"')
+
+              {% raw %}
+              sbom_version="${version:1:${#version}-1}"
+              {% endraw %}
+              docker create --name sbom $registry/kolla/release/sbom:$sbom_version nologin
               docker cp sbom:/images.yml sbom.yml
               docker rm sbom
           fi
@@ -88,8 +86,8 @@
 
           # NOTE: For builds for a specific release, the OpenStack version is taken from the release repository.
           if [[ $version != "latest" ]]; then
-              filename=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/openstack.yml)
-              openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/main/$version/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }' | tr -d '"')
+              filename=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/openstack.yml)
+              openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }' | tr -d '"')
           fi
 
           . defaults/${openstack_version}.sh
@@ -97,6 +95,12 @@
           if [[ -n $registry ]]; then
               repository="$registry/$repository"
           fi
+
+          {% raw %}
+          if [[ $version != "latest" ]]; then
+              version="${version:1:${#version}-1}"
+          fi
+          {% endraw %}
 
           if [[ $openstack_version == "master" ]]; then
               tag=$repository:latest
