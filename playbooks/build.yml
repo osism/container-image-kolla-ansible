@@ -136,6 +136,10 @@
 
           if [[ $version == "latest" ]]; then
               version=$openstack_version
+          else
+              {% raw %}
+              version="${version:1:${#version}-1}"
+              {% endraw %}
           fi
 
           if [[ -n $registry ]]; then
