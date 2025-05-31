@@ -44,7 +44,7 @@
               sbom_version="${version:1:${#version}-1}"
               {% endraw %}
               docker create --name sbom $registry/kolla/release/sbom:$sbom_version nologin
-              docker cp sbom:/images.yml sbom.yml
+              docker cp sbom:/images.yml files/sbom.yml
               docker rm sbom
           fi
 

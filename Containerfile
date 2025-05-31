@@ -36,6 +36,8 @@ COPY --link files/ansible.cfg /etc/ansible/ansible.cfg
 COPY --link files/ara.env /ansible/ara.env
 COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
 
+COPY --link files/sbom.yml* /
+
 COPY --link files/src /src
 
 ADD https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.22.tar.gz /mitogen.tar.gz

@@ -28,7 +28,7 @@ with open(f"/release/latest/openstack-{OPENSTACK_VERSION}.yml", "rb") as fp:
     versions_openstack = yaml.load(fp, Loader=yaml.FullLoader)
 
 try:
-    with open("sbom.yml") as fp:
+    with open("/sbom.yml") as fp:
         release_versions = yaml.load(fp, Loader=yaml.FullLoader)
 except FileNotFoundError:
     release_versions = {"versions": {}}
