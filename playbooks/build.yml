@@ -10,6 +10,8 @@
     registry: "{{ docker_registry | default('osism.harbor.regio.digital') }}"
     repository: "{{ docker_namespace | default('osism') }}/kolla-ansible"
     version: "{{ zuul['tag'] | default('latest') }}"
+    COSIGN_PASSWORD: "{{ secret.COSIGN_PASSWORD | default('') }}"
+    COSIGN_PRIVATE_KEY: "{{ secret.COSIGN_PRIVATE_KEY | default('') }}"
     DTRACK_SERVER: "https://dtrack.osism.tech"
     DTRACK_API_KEY: "{{ secret.DTRACK_API_KEY | default('') }}"
 
@@ -124,6 +126,33 @@
         REGISTRY: "{{ docker_registry }}"
         REPOSITORY: "{{ docker_namespace }}/kolla-ansible"
         VERSION: latest
+
+    - name: Run cosign script
+      ansible.builtin.shell:
+        executable: /bin/bash
+        chdir: "{{ zuul.project.src_dir }}"
+        cmd: |
+          set -e
+          set -o pipefail
+          set -x
+
+          if [[ $version == "latest" ]]; then
+              version=$openstack_version
+          else
+              {% raw %}
+              version="${version:1:${#version}-1}"
+              {% endraw %}
+          fi
+
+          if [[ -n $registry ]]; then
+              repository="$registry/$repository"
+          fi
+
+          curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64"
+          chmod +x cosign-linux-amd64
+          ./cosign-linux-amd64 sign --yes --key env://COSIGN_PRIVATE_KEY "$repository:$version"
+      when: push_sbom | default(false) | bool
+      changed_when: true
 
     - name: Run sbom script
       ansible.builtin.shell:
