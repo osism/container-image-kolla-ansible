@@ -41,7 +41,7 @@ COPY --link files/sbom.yml* /
 COPY --link files/src /src
 
 ADD https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.22.tar.gz /mitogen.tar.gz
-COPY --from=ghcr.io/astral-sh/uv:0.7.20 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.8.13 /uv /usr/local/bin/uv
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
