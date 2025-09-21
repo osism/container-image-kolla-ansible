@@ -42,9 +42,18 @@
               filename=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/openstack.yml)
               openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }' | tr -d '"')
 
-              {% raw %}
-              sbom_version="${version:1:${#version}-1}"
-              {% endraw %}
+              # Check if kolla-ansible-$version.yml exists in next directory
+              next_file_url="https://raw.githubusercontent.com/osism/release/main/next/kolla-ansible-$version.yml"
+              if curl -f -s "$next_file_url" >/dev/null 2>&1; then
+                  # File exists, extract openstack_sbom value
+                  sbom_version=$(curl -L "$next_file_url" | grep "openstack_sbom:" | awk -F': ' '{ print $2 }' | tr -d '"' | tr -d ' ')
+              else
+                  # File doesn't exist, use the same version
+                  {% raw %}
+                  sbom_version="${version:1:${#version}-1}"
+                  {% endraw %}
+              fi
+
               docker create --name sbom $registry/kolla/release/sbom:$sbom_version nologin
               docker cp sbom:/images.yml files/sbom.yml
               docker rm sbom
