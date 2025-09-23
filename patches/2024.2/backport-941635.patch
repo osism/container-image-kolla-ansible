@@ -1,0 +1,51 @@
+From 62c07e73dc5a6229e629034a3daae2e51c19c556 Mon Sep 17 00:00:00 2001
+From: Dawud <dawud@stackhpc.com>
+Date: Thu, 13 Feb 2025 19:15:06 +0000
+Subject: [PATCH] Fix regex for blackbox exporter targets
+
+Fixes the regex used to match blackbox exporter targets in the
+prometheus.yml.j2 template to be less strict. Previously we were using
+\w which did not allow for names with periods or hyphens.
+
+Closes-Bug: #2098511
+Change-Id: I3ac18bd12ed1dceef206040b3e793faa79717a19
+---
+
+diff --git a/ansible/roles/prometheus/templates/prometheus.yml.j2 b/ansible/roles/prometheus/templates/prometheus.yml.j2
+index 99d1298..a8cf08f 100644
+--- a/ansible/roles/prometheus/templates/prometheus.yml.j2
++++ b/ansible/roles/prometheus/templates/prometheus.yml.j2
+@@ -178,17 +178,17 @@
+ {% endfor %}
+     relabel_configs:
+       - source_labels: [__address__]
+-        regex: (\w+):(\w+):(.+)
++        regex: ([^:]+):([^:]+):(.+)
+         target_label: service
+         replacement: ${1}
+       - source_labels: [__address__]
+-        regex: (\w+):(\w+):(.+)
++        regex: ([^:]+):([^:]+):(.+)
+         target_label: __param_module
+         replacement: ${2}
+       - source_labels: [__param_module]
+         target_label: module
+       - source_labels: [__address__]
+-        regex: (\w+):(\w+):(.+)
++        regex: ([^:]+):([^:]+):(.+)
+         target_label: __param_target
+         replacement: ${3}
+       - source_labels: [__param_target]
+diff --git a/releasenotes/notes/fix-blackbox-regex-b16f3f86563de6db.yaml b/releasenotes/notes/fix-blackbox-regex-b16f3f86563de6db.yaml
+new file mode 100644
+index 0000000..7488f73
+--- /dev/null
++++ b/releasenotes/notes/fix-blackbox-regex-b16f3f86563de6db.yaml
+@@ -0,0 +1,7 @@
++---
++fixes:
++  - |
++    Fixes the regex used to match blackbox exporter targets in the
++    ``prometheus.yml.j2`` template to be less strict. Previously we were using
++    ``\w`` which did not allow for names with periods or hyphens. The service
++    and module labels can now contain all characters except for a colon.
