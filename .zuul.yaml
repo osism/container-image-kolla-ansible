@@ -76,6 +76,10 @@
     name: semaphore-container-image-kolla-ansible-push-2024.2
     max: 1
 
+- semaphore:
+    name: semaphore-container-image-kolla-ansible-push-2025.1
+    max: 1
+
 - job:
     name: container-image-kolla-ansible-build
     pre-run: playbooks/pre.yml
@@ -95,6 +99,12 @@
     parent: container-image-kolla-ansible-build
     vars:
       version_openstack: "2024.2"
+
+- job:
+    name: container-image-kolla-ansible-build-2025.1
+    parent: container-image-kolla-ansible-build
+    vars:
+      version_openstack: "2025.1"
 
 - job:
     name: container-image-kolla-ansible-push-2024.1
@@ -125,6 +135,20 @@
         pass-to-parent: true
 
 - job:
+    name: container-image-kolla-ansible-push-2025.1
+    parent: container-image-kolla-ansible-build
+    semaphores:
+      - name: semaphore-container-image-kolla-ansible-push-2025.1
+    vars:
+      version_openstack: "2025.1"
+      push_image: true
+      push_sbom: true
+    secrets:
+      - name: secret
+        secret: SECRET_CONTAINER_IMAGE_KOLLA_ANSIBLE
+        pass-to-parent: true
+
+- job:
     name: container-image-kolla-ansible-release
     parent: container-image-kolla-ansible-build
     vars:
@@ -147,13 +171,7 @@
         - yamllint
         - container-image-kolla-ansible-build-2024.1
         - container-image-kolla-ansible-build-2024.2
-    gate:
-      jobs:
-        - ansible-lint
-        - flake8
-        - hadolint
-        - python-black
-        - yamllint
+        - container-image-kolla-ansible-build-2025.1
     periodic-daily:
       jobs:
         - ansible-lint
@@ -165,11 +183,14 @@
       jobs:
         - container-image-kolla-ansible-push-2024.1
         - container-image-kolla-ansible-push-2024.2
+        - container-image-kolla-ansible-push-2025.1
     post:
       jobs:
         - container-image-kolla-ansible-push-2024.1:
             branches: main
         - container-image-kolla-ansible-push-2024.2:
+            branches: main
+        - container-image-kolla-ansible-push-2025.1:
             branches: main
     tag:
       jobs:

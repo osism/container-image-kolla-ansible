@@ -1,0 +1,209 @@
+diff --git a/ansible/roles/aodh/templates/wsgi-aodh.conf.j2 b/ansible/roles/aodh/templates/wsgi-aodh.conf.j2
+index a1f61a0d0..0b52d108f 100644
+--- a/ansible/roles/aodh/templates/wsgi-aodh.conf.j2
++++ b/ansible/roles/aodh/templates/wsgi-aodh.conf.j2
+@@ -35,4 +35,8 @@ LogLevel info
+   WSGIDaemonProcess aodh group=aodh processes={{ aodh_api_workers }} threads=1 user=aodh
+   WSGIProcessGroup aodh
+   WSGIScriptAlias / "{{ binary_path }}/aodh-api"
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++  SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+ </VirtualHost>
+diff --git a/ansible/roles/cinder/templates/cinder-wsgi.conf.j2 b/ansible/roles/cinder/templates/cinder-wsgi.conf.j2
+index b467bab02..2bb8d1ef3 100644
+--- a/ansible/roles/cinder/templates/cinder-wsgi.conf.j2
++++ b/ansible/roles/cinder/templates/cinder-wsgi.conf.j2
+@@ -23,6 +23,11 @@ LogLevel info
+     WSGIScriptAlias / /var/www/cgi-bin/cinder/cinder-wsgi
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+diff --git a/ansible/roles/gnocchi/templates/wsgi-gnocchi.conf.j2 b/ansible/roles/gnocchi/templates/wsgi-gnocchi.conf.j2
+index f3309bfef..77807f7c7 100644
+--- a/ansible/roles/gnocchi/templates/wsgi-gnocchi.conf.j2
++++ b/ansible/roles/gnocchi/templates/wsgi-gnocchi.conf.j2
+@@ -26,6 +26,9 @@ LogLevel info
+   WSGIDaemonProcess gnocchi group=gnocchi processes={{ gnocchi_api_workers }} threads=1 user=gnocchi
+   WSGIProcessGroup gnocchi
+   WSGIScriptAlias / "{{ wsgi_path }}/gnocchi-api"
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++  SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+ 
+   <Directory "{{ wsgi_path }}">
+         Require all granted
+diff --git a/ansible/roles/heat/templates/wsgi-heat-api-cfn.conf.j2 b/ansible/roles/heat/templates/wsgi-heat-api-cfn.conf.j2
+index 27aea0dd0..cdb9aa642 100644
+--- a/ansible/roles/heat/templates/wsgi-heat-api-cfn.conf.j2
++++ b/ansible/roles/heat/templates/wsgi-heat-api-cfn.conf.j2
+@@ -34,6 +34,11 @@ CustomLog "{{ heat_log_dir }}/apache-cfn-access.log" common
+     WSGIScriptAlias / {{ binary_path }}/heat-wsgi-api-cfn
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+diff --git a/ansible/roles/heat/templates/wsgi-heat-api.conf.j2 b/ansible/roles/heat/templates/wsgi-heat-api.conf.j2
+index d197f764a..287e98021 100644
+--- a/ansible/roles/heat/templates/wsgi-heat-api.conf.j2
++++ b/ansible/roles/heat/templates/wsgi-heat-api.conf.j2
+@@ -34,6 +34,11 @@ CustomLog "{{ heat_log_dir }}/apache-access.log" common
+     WSGIScriptAlias / {{ binary_path }}/heat-wsgi-api
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+diff --git a/ansible/roles/ironic/templates/ironic-api-wsgi.conf.j2 b/ansible/roles/ironic/templates/ironic-api-wsgi.conf.j2
+index 7e62ac2c8..9c3ad15c7 100644
+--- a/ansible/roles/ironic/templates/ironic-api-wsgi.conf.j2
++++ b/ansible/roles/ironic/templates/ironic-api-wsgi.conf.j2
+@@ -37,6 +37,11 @@ LogLevel info
+     WSGIScriptAlias / {{ wsgi_directory }}/ironic-api-wsgi
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+diff --git a/ansible/roles/keystone/templates/wsgi-keystone.conf.j2 b/ansible/roles/keystone/templates/wsgi-keystone.conf.j2
+index 26ffe493e..e7853c3cd 100644
+--- a/ansible/roles/keystone/templates/wsgi-keystone.conf.j2
++++ b/ansible/roles/keystone/templates/wsgi-keystone.conf.j2
+@@ -44,6 +44,11 @@ LogLevel info
+     WSGIScriptAlias / {{ binary_path }}/keystone-wsgi-public
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+diff --git a/ansible/roles/masakari/templates/wsgi-masakari.conf.j2 b/ansible/roles/masakari/templates/wsgi-masakari.conf.j2
+index 1891dcde8..899871991 100644
+--- a/ansible/roles/masakari/templates/wsgi-masakari.conf.j2
++++ b/ansible/roles/masakari/templates/wsgi-masakari.conf.j2
+@@ -34,4 +34,8 @@ LogLevel info
+   WSGIDaemonProcess masakari group=masakari processes={{ masakari_api_workers }} threads=1 user=masakari
+   WSGIProcessGroup masakari
+   WSGIScriptAlias / "{{ binary_path }}/masakari-wsgi"
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++  SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+ </VirtualHost>
+diff --git a/ansible/roles/nova/templates/nova-api-wsgi.conf.j2 b/ansible/roles/nova/templates/nova-api-wsgi.conf.j2
+index e84c19496..f2be421eb 100644
+--- a/ansible/roles/nova/templates/nova-api-wsgi.conf.j2
++++ b/ansible/roles/nova/templates/nova-api-wsgi.conf.j2
+@@ -38,6 +38,11 @@ LogLevel info
+     WSGIScriptAlias / {{ wsgi_directory }}/nova-api-wsgi
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+@@ -57,6 +62,11 @@ LogLevel info
+     WSGIScriptAlias / {{ wsgi_directory }}/nova-metadata-wsgi
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+diff --git a/ansible/roles/octavia/templates/octavia-wsgi.conf.j2 b/ansible/roles/octavia/templates/octavia-wsgi.conf.j2
+index e3a3a598c..c27b633e9 100644
+--- a/ansible/roles/octavia/templates/octavia-wsgi.conf.j2
++++ b/ansible/roles/octavia/templates/octavia-wsgi.conf.j2
+@@ -24,6 +24,11 @@ LogLevel info
+     WSGIScriptAlias / {{ wsgi_directory }}/octavia-wsgi
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+diff --git a/ansible/roles/placement/templates/placement-api-wsgi.conf.j2 b/ansible/roles/placement/templates/placement-api-wsgi.conf.j2
+index 2f2a9dc91..fa171cd1a 100644
+--- a/ansible/roles/placement/templates/placement-api-wsgi.conf.j2
++++ b/ansible/roles/placement/templates/placement-api-wsgi.conf.j2
+@@ -25,6 +25,11 @@ LogLevel info
+     WSGIScriptAlias / {{ wsgi_directory }}/placement-api
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+diff --git a/ansible/roles/trove/templates/trove-wsgi.conf.j2 b/ansible/roles/trove/templates/trove-wsgi.conf.j2
+index 26449a538..e04d77f1c 100644
+--- a/ansible/roles/trove/templates/trove-wsgi.conf.j2
++++ b/ansible/roles/trove/templates/trove-wsgi.conf.j2
+@@ -24,6 +24,11 @@ LogLevel info
+     WSGIScriptAlias / {{ wsgi_directory }}/trove-wsgi
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
++
+     <IfVersion >= 2.4>
+       ErrorLogFormat "%{cu}t %M"
+     </IfVersion>
+diff --git a/ansible/roles/zun/templates/wsgi-zun.conf.j2 b/ansible/roles/zun/templates/wsgi-zun.conf.j2
+index 725b95597..24f965739 100644
+--- a/ansible/roles/zun/templates/wsgi-zun.conf.j2
++++ b/ansible/roles/zun/templates/wsgi-zun.conf.j2
+@@ -38,4 +38,8 @@ LogLevel info
+   WSGIDaemonProcess zun group=zun processes={{ zun_api_workers }} threads=1 user=zun
+   WSGIProcessGroup zun
+   WSGIScriptAlias / "/var/www/cgi-bin/zun/app.wsgi"
++
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++  SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+ </VirtualHost>

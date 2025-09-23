@@ -1,0 +1,14 @@
+---
+# External Ceph keyrings
+ceph_cinder_keyring: "client.{{ ceph_cinder_user }}.keyring"
+ceph_cinder_backup_keyring: "client.{{ ceph_cinder_backup_user }}.keyring"
+ceph_glance_keyring: "client.{{ ceph_glance_user }}.keyring"
+ceph_gnocchi_keyring: "client.{{ ceph_gnocchi_user }}.keyring"
+ceph_manila_keyring: "client.{{ ceph_manila_user }}.keyring"
+ceph_nova_keyring: "client.{{ ceph_nova_user }}.keyring"
+
+# https://mariadb.com/kb/en/mariabackup-overview/#authentication-and-privileges
+#
+# To use the --history option, the backup user also needs to have the following privileges granted:
+# GRANT CREATE, INSERT ON mysql.* TO 'mariabackup'@'localhost';
+mariadb_backup_database_schema: mysql
