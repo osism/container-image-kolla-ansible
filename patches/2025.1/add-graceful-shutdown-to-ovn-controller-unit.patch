@@ -22,8 +22,6 @@ Signed-off-by: Jan Horstmann <horstmann@osism.tech>
  create mode 100644 ansible/roles/ovn-controller/templates/ovn-controller-systemd-override.conf.j2
  create mode 100644 releasenotes/notes/bug-2093328-db7299bb092fb12b.yaml
 
-diff --git a/ansible/roles/ovn-controller/handlers/main.yml b/ansible/roles/ovn-controller/handlers/main.yml
-index 6068d9fb4..874f9ed76 100644
 --- a/ansible/roles/ovn-controller/handlers/main.yml
 +++ b/ansible/roles/ovn-controller/handlers/main.yml
 @@ -1,4 +1,9 @@
@@ -36,14 +34,12 @@ index 6068d9fb4..874f9ed76 100644
  - name: Restart ovn-controller container
    vars:
      service_name: "ovn-controller"
-diff --git a/ansible/roles/ovn-controller/tasks/config.yml b/ansible/roles/ovn-controller/tasks/config.yml
-index 62a37a945..621131b0e 100644
 --- a/ansible/roles/ovn-controller/tasks/config.yml
 +++ b/ansible/roles/ovn-controller/tasks/config.yml
-@@ -18,3 +18,26 @@
+@@ -16,3 +16,26 @@
+     mode: "0660"
+   become: true
    with_dict: "{{ ovn_controller_services | select_services_enabled_and_mapped_to_host }}"
-   notify:
-     - Restart {{ item.key }} container
 +
 +- name: Ensuring systemd override directory exists
 +  vars:
@@ -67,9 +63,6 @@ index 62a37a945..621131b0e 100644
 +  with_dict: "{{ ovn_controller_services | select_services_enabled_and_mapped_to_host }}"
 +  when: item.key == 'ovn-controller'
 +  notify: Reload systemd config
-diff --git a/ansible/roles/ovn-controller/templates/ovn-controller-systemd-override.conf.j2 b/ansible/roles/ovn-controller/templates/ovn-controller-systemd-override.conf.j2
-new file mode 100644
-index 000000000..84304d6c5
 --- /dev/null
 +++ b/ansible/roles/ovn-controller/templates/ovn-controller-systemd-override.conf.j2
 @@ -0,0 +1,14 @@
@@ -87,9 +80,6 @@ index 000000000..84304d6c5
 +ExecStop=
 +ExecStop=-/usr/bin/{{ kolla_container_engine }} exec ovn_controller /bin/sh -c 'ovs-appctl --target /run/ovn/ovn-controller.*.ctl exit'
 +ExecStop=/usr/bin/{{ kolla_container_engine }} stop ovn_controller -t {{ docker_graceful_timeout }}
-diff --git a/releasenotes/notes/bug-2093328-db7299bb092fb12b.yaml b/releasenotes/notes/bug-2093328-db7299bb092fb12b.yaml
-new file mode 100644
-index 000000000..e0045e0ff
 --- /dev/null
 +++ b/releasenotes/notes/bug-2093328-db7299bb092fb12b.yaml
 @@ -0,0 +1,8 @@
