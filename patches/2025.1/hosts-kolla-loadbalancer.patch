@@ -1,5 +1,3 @@
-diff --git a/ansible/roles/loadbalancer/defaults/main.yml b/ansible/roles/loadbalancer/defaults/main.yml
-index 787ae7cb2..ab3c5c1be 100644
 --- a/ansible/roles/loadbalancer/defaults/main.yml
 +++ b/ansible/roles/loadbalancer/defaults/main.yml
 @@ -2,7 +2,7 @@
@@ -38,8 +36,6 @@ index 787ae7cb2..ab3c5c1be 100644
      enabled: "{{ enable_letsencrypt | bool }}"
      image: "{{ haproxy_ssh_image_full }}"
      volumes: "{{ haproxy_ssh_default_volumes }}"
-diff --git a/ansible/roles/loadbalancer/tasks/main.yml b/ansible/roles/loadbalancer/tasks/main.yml
-index 61bef8fc9..6b974971d 100644
 --- a/ansible/roles/loadbalancer/tasks/main.yml
 +++ b/ansible/roles/loadbalancer/tasks/main.yml
 @@ -1,3 +1,3 @@
@@ -47,11 +43,9 @@ index 61bef8fc9..6b974971d 100644
  - include_tasks: "{{ kolla_action }}.yml"
 -  when: inventory_hostname in groups['loadbalancer']
 +  when: inventory_hostname in groups[hosts_kolla_loadbalancer|default('loadbalancer')]
-diff --git a/ansible/roles/loadbalancer/tasks/precheck.yml b/ansible/roles/loadbalancer/tasks/precheck.yml
-index 41cca0f75..0b659e202 100644
 --- a/ansible/roles/loadbalancer/tasks/precheck.yml
 +++ b/ansible/roles/loadbalancer/tasks/precheck.yml
-@@ -23,7 +23,7 @@
+@@ -24,7 +24,7 @@
    check_mode: false
    when:
      - enable_keepalived | bool
@@ -60,7 +54,7 @@ index 41cca0f75..0b659e202 100644
  
  - name: Group hosts by whether they are running HAProxy
    group_by:
-@@ -32,7 +32,7 @@
+@@ -33,7 +33,7 @@
    check_mode: false
    when:
      - enable_haproxy | bool
@@ -69,7 +63,7 @@ index 41cca0f75..0b659e202 100644
  
  - name: Group hosts by whether they are running ProxySQL
    group_by:
-@@ -41,14 +41,14 @@
+@@ -42,14 +42,14 @@
    check_mode: false
    when:
      - enable_proxysql | bool
@@ -86,25 +80,25 @@ index 41cca0f75..0b659e202 100644
    set_fact:
      keepalived_vip_prechecks: "{{ all_hosts_in_batch and groups['keepalived_running_True'] is not defined }}"
      haproxy_vip_prechecks: "{{ all_hosts_in_batch and groups['haproxy_running_True'] is not defined }}"
-@@ -137,7 +137,7 @@
+@@ -132,7 +132,7 @@
    when:
      - enable_haproxy | bool
-     - container_facts['haproxy'] is not defined
+     - container_facts.containers['haproxy'] is not defined
 -    - inventory_hostname in groups['loadbalancer']
 +    - inventory_hostname in groups[hosts_kolla_loadbalancer|default('loadbalancer')]
  
  - name: Checking free port for HAProxy monitor (api interface)
    wait_for:
-@@ -149,7 +149,7 @@
+@@ -144,7 +144,7 @@
    when:
      - enable_haproxy | bool
-     - container_facts['haproxy'] is not defined
+     - container_facts.containers['haproxy'] is not defined
 -    - inventory_hostname in groups['loadbalancer']
 +    - inventory_hostname in groups[hosts_kolla_loadbalancer|default('loadbalancer')]
  
  - name: Checking free port for HAProxy monitor (vip interface)
    wait_for:
-@@ -161,7 +161,7 @@
+@@ -156,7 +156,7 @@
    when:
      - enable_haproxy | bool
      - haproxy_vip_prechecks
@@ -113,16 +107,16 @@ index 41cca0f75..0b659e202 100644
      - api_interface_address != kolla_internal_vip_address
  
  - name: Checking free port for ProxySQL admin (api interface)
-@@ -174,7 +174,7 @@
+@@ -169,7 +169,7 @@
    when:
      - enable_proxysql | bool
-     - container_facts['proxysql'] is not defined
+     - container_facts.containers['proxysql'] is not defined
 -    - inventory_hostname in groups['loadbalancer']
 +    - inventory_hostname in groups[hosts_kolla_loadbalancer|default('loadbalancer')]
  
  - name: Checking free port for ProxySQL admin (vip interface)
    wait_for:
-@@ -186,7 +186,7 @@
+@@ -181,7 +181,7 @@
    when:
      - enable_proxysql | bool
      - proxysql_vip_prechecks
@@ -130,17 +124,35 @@ index 41cca0f75..0b659e202 100644
 +    - inventory_hostname in groups[hosts_kolla_loadbalancer|default('loadbalancer')]
      - api_interface_address != kolla_internal_vip_address
  
+ - name: Checking free port for ProxySQL prometheus exporter (api interface)
+@@ -195,7 +195,7 @@
+     - enable_proxysql | bool
+     - enable_prometheus_proxysql_exporter | bool
+     - container_facts.containers['proxysql'] is not defined
+-    - inventory_hostname in groups['loadbalancer']
++    - inventory_hostname in groups[hosts_kolla_loadbalancer|default('loadbalancer')]
+ 
+ - name: Checking free port for ProxySQL prometheus exporter (vip interface)
+   wait_for:
+@@ -208,7 +208,7 @@
+     - enable_proxysql | bool
+     - enable_prometheus_proxysql_exporter | bool
+     - proxysql_vip_prechecks
+-    - inventory_hostname in groups['loadbalancer']
++    - inventory_hostname in groups[hosts_kolla_loadbalancer|default('loadbalancer')]
+     - api_interface_address != kolla_internal_vip_address
+ 
  # FIXME(yoctozepto): this req seems arbitrary, they need not be, just routable is fine
-@@ -203,7 +203,7 @@
+@@ -225,7 +225,7 @@
      - enable_haproxy | bool
      - enable_keepalived | bool
-     - container_facts['keepalived'] is not defined
+     - container_facts.containers['keepalived'] is not defined
 -    - inventory_hostname in groups['loadbalancer']
 +    - inventory_hostname in groups[hosts_kolla_loadbalancer|default('loadbalancer')]
  
  - name: Getting haproxy stat
    become: true
-@@ -226,7 +226,7 @@
+@@ -248,7 +248,7 @@
      state: stopped
    when:
      - enable_aodh | bool
@@ -149,7 +161,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('aodh_api') == -1
      - haproxy_vip_prechecks
  
-@@ -239,7 +239,7 @@
+@@ -261,7 +261,7 @@
      state: stopped
    when:
      - enable_barbican | bool
@@ -158,7 +170,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('barbican_api') == -1
      - haproxy_vip_prechecks
  
-@@ -252,7 +252,7 @@
+@@ -274,7 +274,7 @@
      state: stopped
    when:
      - enable_blazar | bool
@@ -167,7 +179,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('blazar_api') == -1
      - haproxy_vip_prechecks
  
-@@ -266,7 +266,7 @@
+@@ -288,7 +288,7 @@
    when:
      - enable_ceph_rgw | bool
      - enable_ceph_rgw_loadbalancer | bool
@@ -176,7 +188,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('radosgw') == -1
      - haproxy_vip_prechecks
  
-@@ -279,7 +279,7 @@
+@@ -301,7 +301,7 @@
      state: stopped
    when:
      - enable_cinder | bool
@@ -185,7 +197,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('cinder_api') == -1
      - haproxy_vip_prechecks
  
-@@ -292,7 +292,7 @@
+@@ -314,7 +314,7 @@
      state: stopped
    when:
      - enable_cloudkitty | bool
@@ -194,7 +206,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('cloudkitty_api') == -1
      - haproxy_vip_prechecks
  
-@@ -305,7 +305,7 @@
+@@ -327,7 +327,7 @@
      state: stopped
    when:
      - enable_cyborg | bool
@@ -203,7 +215,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('cyborg_api') == -1
      - haproxy_vip_prechecks
  
-@@ -318,7 +318,7 @@
+@@ -340,7 +340,7 @@
      state: stopped
    when:
      - enable_designate | bool
@@ -212,7 +224,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('designate_api') == -1
      - haproxy_vip_prechecks
  
-@@ -331,7 +331,7 @@
+@@ -353,7 +353,7 @@
      state: stopped
    when:
      - enable_glance | bool
@@ -221,7 +233,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('glance_api') == -1
      - haproxy_vip_prechecks
  
-@@ -344,7 +344,7 @@
+@@ -366,7 +366,7 @@
      state: stopped
    when:
      - enable_gnocchi | bool
@@ -230,7 +242,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('gnocchi_api') == -1
      - haproxy_vip_prechecks
  
-@@ -357,7 +357,7 @@
+@@ -379,7 +379,7 @@
      state: stopped
    when:
      - enable_grafana | bool
@@ -239,7 +251,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('grafana_server') == -1
      - haproxy_vip_prechecks
  
-@@ -370,7 +370,7 @@
+@@ -392,7 +392,7 @@
      state: stopped
    when:
      - enable_heat | bool
@@ -248,7 +260,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('heat_api') == -1
      - haproxy_vip_prechecks
  
-@@ -383,7 +383,7 @@
+@@ -405,7 +405,7 @@
      state: stopped
    when:
      - enable_heat | bool
@@ -257,7 +269,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('heat_api_cfn') == -1
      - haproxy_vip_prechecks
  
-@@ -396,7 +396,7 @@
+@@ -418,7 +418,7 @@
      state: stopped
    when:
      - enable_horizon | bool
@@ -266,7 +278,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('horizon') == -1
      - haproxy_vip_prechecks
  
-@@ -409,7 +409,7 @@
+@@ -431,7 +431,7 @@
      state: stopped
    when:
      - enable_ironic | bool
@@ -275,7 +287,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('ironic_api') == -1
      - haproxy_vip_prechecks
  
-@@ -422,7 +422,7 @@
+@@ -444,7 +444,7 @@
      state: stopped
    when:
      - enable_ironic | bool
@@ -284,7 +296,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('ironic_inspector') == -1
      - haproxy_vip_prechecks
  
-@@ -435,7 +435,7 @@
+@@ -457,7 +457,7 @@
      state: stopped
    when:
      - enable_keystone | bool
@@ -293,7 +305,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('keystone_internal') == -1
      - haproxy_vip_prechecks
  
-@@ -449,7 +449,7 @@
+@@ -471,7 +471,7 @@
    when:
      - haproxy_enable_external_vip | bool
      - enable_keystone | bool
@@ -302,7 +314,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('keystone_external') == -1
      - haproxy_vip_prechecks
  
-@@ -462,7 +462,7 @@
+@@ -484,7 +484,7 @@
      state: stopped
    when:
      - enable_magnum | bool
@@ -311,7 +323,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('magnum_api') == -1
      - haproxy_vip_prechecks
  
-@@ -475,7 +475,7 @@
+@@ -497,7 +497,7 @@
      state: stopped
    when:
      - enable_manila | bool
@@ -320,7 +332,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('manila_api') == -1
      - haproxy_vip_prechecks
  
-@@ -488,7 +488,7 @@
+@@ -510,7 +510,7 @@
      state: stopped
    when:
      - enable_mariadb | bool
@@ -329,7 +341,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('mariadb') == -1
      - haproxy_vip_prechecks or proxysql_vip_prechecks
  
-@@ -501,7 +501,7 @@
+@@ -523,7 +523,7 @@
      state: stopped
    when:
      - enable_masakari | bool
@@ -338,7 +350,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('masakari_api') == -1
      - haproxy_vip_prechecks
  
-@@ -514,7 +514,7 @@
+@@ -536,7 +536,7 @@
      state: stopped
    when:
      - enable_mistral | bool
@@ -347,7 +359,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('mistral_api') == -1
      - haproxy_vip_prechecks
  
-@@ -527,7 +527,7 @@
+@@ -549,7 +549,7 @@
      state: stopped
    when:
      - enable_neutron | bool
@@ -356,7 +368,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('neutron_server') == -1
      - haproxy_vip_prechecks
  
-@@ -540,7 +540,7 @@
+@@ -562,7 +562,7 @@
      state: stopped
    when:
      - enable_nova | bool
@@ -365,7 +377,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('nova_api') == -1
      - haproxy_vip_prechecks
  
-@@ -553,7 +553,7 @@
+@@ -575,7 +575,7 @@
      state: stopped
    when:
      - enable_nova | bool
@@ -374,7 +386,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('nova_metadata') == -1
      - haproxy_vip_prechecks
  
-@@ -567,7 +567,7 @@
+@@ -589,7 +589,7 @@
    when:
      - enable_nova | bool
      - nova_console == 'novnc'
@@ -383,7 +395,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('nova_novncproxy') == -1
      - haproxy_vip_prechecks
  
-@@ -582,7 +582,7 @@
+@@ -604,7 +604,7 @@
      - enable_nova | bool
      - haproxy_stat.find('nova_serialconsole_proxy') == -1
      - enable_nova_serialconsole_proxy | bool
@@ -392,7 +404,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_vip_prechecks
  
  - name: Checking free port for Nova Spice HTML5 HAProxy
-@@ -595,7 +595,7 @@
+@@ -617,7 +617,7 @@
    when:
      - enable_nova | bool
      - nova_console == 'spice'
@@ -401,7 +413,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('nova_spicehtml5proxy') == -1
      - haproxy_vip_prechecks
  
-@@ -608,7 +608,7 @@
+@@ -630,7 +630,7 @@
      state: stopped
    when:
      - enable_nova | bool
@@ -410,7 +422,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('placement_api') == -1
      - haproxy_vip_prechecks
  
-@@ -621,7 +621,7 @@
+@@ -643,7 +643,7 @@
      state: stopped
    when:
      - enable_octavia | bool
@@ -419,7 +431,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('octavia_api') == -1
      - haproxy_vip_prechecks
  
-@@ -634,7 +634,7 @@
+@@ -656,7 +656,7 @@
      state: stopped
    when:
      - enable_opensearch | bool
@@ -428,7 +440,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('opensearch') == -1
      - haproxy_vip_prechecks
  
-@@ -647,7 +647,7 @@
+@@ -669,7 +669,7 @@
      state: stopped
    when:
      - enable_opensearch_dashboards | bool
@@ -437,7 +449,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('opensearch_dashboards') == -1
      - haproxy_vip_prechecks
  
-@@ -660,7 +660,7 @@
+@@ -682,7 +682,7 @@
      state: stopped
    when:
      - enable_rabbitmq | bool
@@ -446,16 +458,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('rabbitmq_management') == -1
      - haproxy_vip_prechecks
  
-@@ -673,7 +673,7 @@
-     state: stopped
-   when:
-     - enable_swift | bool
--    - inventory_hostname in groups['loadbalancer']
-+    - inventory_hostname in groups[hosts_kolla_loadbalancer|default('loadbalancer')]
-     - haproxy_stat.find('swift_api') == -1
-     - haproxy_vip_prechecks
- 
-@@ -686,7 +686,7 @@
+@@ -695,7 +695,7 @@
      state: stopped
    when:
      - enable_tacker | bool
@@ -464,7 +467,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('tacker_server') == -1
      - haproxy_vip_prechecks
  
-@@ -699,7 +699,7 @@
+@@ -708,7 +708,7 @@
      state: stopped
    when:
      - enable_trove | bool
@@ -473,7 +476,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('trove_api') == -1
      - haproxy_vip_prechecks
  
-@@ -712,7 +712,7 @@
+@@ -721,7 +721,7 @@
      state: stopped
    when:
      - enable_watcher | bool
@@ -482,7 +485,7 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('watcher_api') == -1
      - haproxy_vip_prechecks
  
-@@ -725,7 +725,7 @@
+@@ -734,7 +734,7 @@
      state: stopped
    when:
      - enable_zun | bool
@@ -491,8 +494,6 @@ index 41cca0f75..0b659e202 100644
      - haproxy_stat.find('zun_api') == -1
      - haproxy_vip_prechecks
  
-diff --git a/ansible/roles/loadbalancer/templates/keepalived/keepalived.conf.j2 b/ansible/roles/loadbalancer/templates/keepalived/keepalived.conf.j2
-index 6ef7d6a82..36d8669a1 100644
 --- a/ansible/roles/loadbalancer/templates/keepalived/keepalived.conf.j2
 +++ b/ansible/roles/loadbalancer/templates/keepalived/keepalived.conf.j2
 @@ -12,13 +12,13 @@ vrrp_instance kolla_internal_vip_{{ keepalived_virtual_router_id }} {
