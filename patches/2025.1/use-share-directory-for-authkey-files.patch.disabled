@@ -1,0 +1,74 @@
+diff --git a/ansible/roles/hacluster/tasks/bootstrap.yml b/ansible/roles/hacluster/tasks/bootstrap.yml
+index baf83bbc9..8663a6db9 100644
+--- a/ansible/roles/hacluster/tasks/bootstrap.yml
++++ b/ansible/roles/hacluster/tasks/bootstrap.yml
+@@ -1,7 +1,7 @@
+ ---
+-- name: Ensure config directories exist
++- name: Ensure share directories exist
+   file:
+-    path: "{{ node_custom_config }}/{{ item }}"
++    path: "/share/{{ item }}"
+     state: directory
+   delegate_to: localhost
+   changed_when: False
+@@ -25,8 +25,22 @@
+   run_once: True
+   register: hacluster_pacemaker_authkey_file
+ 
++- name: Copy Corosync authkey file
++  copy:
++    src: "{{ node_custom_config }}/hacluster-corosync/authkey"
++  delegate_to: localhost
++  run_once: True
++  when: hacluster_corosync_authkey_file.stat.exists
++
++- name: Copy Pacemaker authkey file
++  copy:
++    src: "{{ node_custom_config }}/hacluster-pacemaker/authkey"
++  delegate_to: localhost
++  run_once: True
++  when: hacluster_pacemaker_authkey_file.stat.exists
++
+ - name: Generating Corosync authkey file
+-  command: "dd if=/dev/urandom of={{ node_custom_config }}/hacluster-corosync/authkey bs=4096 count=1"
++  command: "dd if=/dev/urandom of=/share/hacluster-corosync/authkey bs=4096 count=1"
+   delegate_to: localhost
+   changed_when: False
+   check_mode: no
+@@ -34,7 +48,7 @@
+   when: not hacluster_corosync_authkey_file.stat.exists
+ 
+ - name: Generating Pacemaker authkey file
+-  command: "dd if=/dev/urandom of={{ node_custom_config }}/hacluster-pacemaker/authkey bs=4096 count=1"
++  command: "dd if=/dev/urandom of=/share/hacluster-pacemaker/authkey bs=4096 count=1"
+   delegate_to: localhost
+   changed_when: False
+   check_mode: no
+diff --git a/ansible/roles/hacluster/tasks/config.yml b/ansible/roles/hacluster/tasks/config.yml
+index e33f7cf48..d4df0321b 100644
+--- a/ansible/roles/hacluster/tasks/config.yml
++++ b/ansible/roles/hacluster/tasks/config.yml
+@@ -48,6 +48,7 @@
+   with_first_found:
+     - "{{ node_custom_config }}/hacluster-corosync/{{ inventory_hostname }}/authkey"
+     - "{{ node_custom_config }}/hacluster-corosync/authkey"
++    - "/share/hacluster-corosync/authkey"
+   notify:
+     - Restart hacluster-corosync container
+ 
+@@ -63,6 +64,7 @@
+   with_first_found:
+     - "{{ node_custom_config }}/hacluster-pacemaker/{{ inventory_hostname }}/authkey"
+     - "{{ node_custom_config }}/hacluster-pacemaker/authkey"
++    - "/share/hacluster-pacemaker/authkey"
+   notify:
+     - Restart hacluster-pacemaker container
+ 
+@@ -78,5 +80,6 @@
+   with_first_found:
+     - "{{ node_custom_config }}/hacluster-pacemaker/{{ inventory_hostname }}/authkey"
+     - "{{ node_custom_config }}/hacluster-pacemaker/authkey"
++    - "/share/hacluster-pacemaker/authkey"
+   notify:
+     - Restart hacluster-pacemaker-remote container

@@ -1,0 +1,222 @@
+diff --git a/ansible/roles/grafana/defaults/main.yml b/ansible/roles/grafana/defaults/main.yml
+index cce9562fe..5e30660ce 100644
+--- a/ansible/roles/grafana/defaults/main.yml
++++ b/ansible/roles/grafana/defaults/main.yml
+@@ -93,6 +93,22 @@ grafana_start_first_node_retries: 12
+ # TODO(dawudm): make this True in the D release
+ grafana_remove_old_volume: false
+ 
++grafana_custom_extra_config_paths:
++  - "{{ node_custom_config }}/grafana/"
++
++grafana_prometheus_config_paths:
++    - "{{ node_custom_config }}/grafana/{{ inventory_hostname }}/prometheus.yaml"
++    - "{{ node_custom_config }}/grafana/prometheus.yaml"
++    - "prometheus.yaml.j2"
++
++grafana_provisioning_config_paths:
++    - "{{ node_custom_config }}/grafana/{{ inventory_hostname }}/provisioning.yaml"
++    - "{{ node_custom_config }}/grafana/provisioning.yaml"
++    - "provisioning.yaml.j2"
++
++grafana_custom_dashboards_paths:
++  - "{{ node_custom_config }}/grafana/dashboards"
++
+ ############
+ # Prometheus
+ ############
+diff --git a/ansible/roles/grafana/tasks/config.yml b/ansible/roles/grafana/tasks/config.yml
+index 7913e51d3..2a10a58b8 100644
+--- a/ansible/roles/grafana/tasks/config.yml
++++ b/ansible/roles/grafana/tasks/config.yml
+@@ -11,7 +11,7 @@
+ 
+ - name: Check if extra configuration file exists
+   find:
+-    path: "{{ node_custom_config }}/grafana/"
++    paths: "{{ grafana_custom_extra_config_paths }}"
+     excludes:
+       - "prometheus.yaml"
+       - "provisioning.yaml"
+@@ -57,8 +57,7 @@
+     mode: "0660"
+   when:
+     - item is defined
+-  with_items:
+-    - "{{ check_extra_conf_grafana.files }}"
++  with_items: "{{ dict( check_extra_conf_grafana.files | map(attribute='path') | map('basename') | zip(check_extra_conf_grafana.files) ) | dict2items | map(attribute='value') }}"
+   notify:
+     - Restart grafana container
+ 
+@@ -73,10 +72,7 @@
+   when:
+     - service | service_enabled_and_mapped_to_host
+     - enable_prometheus | bool
+-  with_first_found:
+-    - "{{ node_custom_config }}/grafana/{{ inventory_hostname }}/prometheus.yaml"
+-    - "{{ node_custom_config }}/grafana/prometheus.yaml"
+-    - "prometheus.yaml.j2"
++  with_first_found: "{{ grafana_prometheus_config_paths }}"
+   notify:
+     - Restart grafana container
+ 
+@@ -89,42 +85,59 @@
+     mode: "0660"
+   become: true
+   when: service | service_enabled_and_mapped_to_host
+-  with_first_found:
+-    - "{{ node_custom_config }}/grafana/{{ inventory_hostname }}/provisioning.yaml"
+-    - "{{ node_custom_config }}/grafana/provisioning.yaml"
+-    - "{{ role_path }}/templates/provisioning.yaml.j2"
++  with_first_found: "{{ grafana_provisioning_config_paths }}"
+   notify:
+     - Restart grafana container
+ 
+-- name: Check if the folder for custom grafana dashboards exists
+-  stat:
+-    path: "{{ node_custom_config }}/grafana/dashboards"
++- name: Find custom grafana dashboards
++  find:
++    paths: "{{ grafana_custom_dashboards_paths }}"
++    recurse: true
+   delegate_to: localhost
+-  register: grafana_custom_dashboards_folder
++  register: grafana_custom_dashboards
+   run_once: True
+ 
+-- name: Remove templated Grafana dashboards
++- name: Find templated grafana dashboards
+   become: true
+   vars:
+     service: "{{ grafana_services['grafana'] }}"
++  find:
++    path: "{{ node_config_directory }}/grafana/dashboards"
++    recurse: true
++    file_type: any
++  register: grafana_templated_dashboards
++  when: service | service_enabled_and_mapped_to_host
++
++- name: Prune templated Grafana dashboards
++  become: true
++  vars:
++    service: "{{ grafana_services['grafana'] }}"
++    dashboards_templated_path_regex: "^{{ node_config_directory | regex_escape }}/grafana/dashboards/(.*)$"
++    dashboards_config_paths_regex: "^({{ grafana_custom_dashboards_paths | map('regex_escape') | join('|') }})/(.*)$"
++    dashboards_templated_relative_path: "{{ grafana_templated_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_templated_path_regex, '\\1') }}"
++    dashboards_config_relative_path: "{{ grafana_custom_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_config_paths_regex, '\\2') | unique }}"
+   file:
+     state: absent
+-    path: "{{ node_config_directory }}/grafana/dashboards/"
++    path: "{{ node_config_directory }}/grafana/dashboards/{{ item }}"
+   when:
+     - not ansible_check_mode
+     - service | service_enabled_and_mapped_to_host
++  with_items: "{{ dashboards_templated_relative_path | reject('in', dashboards_config_relative_path) | reject('in', dashboards_config_relative_path | map('dirname')) }}"
++  notify:
++    - Restart grafana container
+ 
+ - name: Copying over custom dashboards
+   vars:
+     service: "{{ grafana_services['grafana'] }}"
++    dashboards_config_paths_regex: "^({{ grafana_custom_dashboards_paths | map('regex_escape') | join('|') }})/(.*)$"
++    dashboards_config_relative_path: "{{ grafana_custom_dashboards.files | map(attribute='path') | map('regex_replace', dashboards_config_paths_regex,'\\2') }}"
+   copy:
+-    src: "{{ node_custom_config }}/grafana/dashboards"
+-    dest: "{{ node_config_directory }}/grafana/"
++    src: "{{ item.value.path }}"
++    dest: "{{ node_config_directory }}/grafana/dashboards/{{ item.key | dirname }}/"
+     mode: "0660"
+   become: true
+   when:
+-    - grafana_custom_dashboards_folder.stat.exists
+-    - grafana_custom_dashboards_folder.stat.isdir
+     - service | service_enabled_and_mapped_to_host
++  with_items: "{{ dict( dashboards_config_relative_path | zip(grafana_custom_dashboards.files) ) | dict2items }}"
+   notify:
+     - Restart grafana container
+diff --git a/ansible/roles/prometheus/defaults/main.yml b/ansible/roles/prometheus/defaults/main.yml
+index 71168fb32..4ecddc5da 100644
+--- a/ansible/roles/prometheus/defaults/main.yml
++++ b/ansible/roles/prometheus/defaults/main.yml
+@@ -126,6 +126,12 @@ prometheus_services:
+ ####################
+ # Prometheus Server
+ ####################
++prometheus_custom_alert_paths:
++  - "{{ node_custom_config }}/prometheus/"
++
++prometheus_common_config_overrides_paths:
++  - "{{ node_custom_config }}/prometheus/prometheus.yml.d"
++
+ prometheus_external_labels:
+ #  <labelname>: <labelvalue>
+ 
+diff --git a/ansible/roles/prometheus/tasks/config.yml b/ansible/roles/prometheus/tasks/config.yml
+index bd1918384..bc7f33a50 100644
+--- a/ansible/roles/prometheus/tasks/config.yml
++++ b/ansible/roles/prometheus/tasks/config.yml
+@@ -25,7 +25,7 @@
+ 
+ - name: Find custom prometheus alert rules files
+   find:
+-    path: "{{ node_custom_config }}/prometheus/"
++    paths: "{{ prometheus_custom_alert_paths }}"
+     pattern: "*.rules"
+   run_once: True
+   delegate_to: localhost
+@@ -45,15 +45,14 @@
+     - service | service_enabled_and_mapped_to_host
+     - enable_prometheus_alertmanager | bool
+     - prometheus_alert_rules is defined and prometheus_alert_rules.files | length > 0
+-  with_items: "{{ prometheus_alert_rules.files }}"
++  with_items: "{{ dict( prometheus_alert_rules.files | map(attribute='path') | map('basename') | zip(prometheus_alert_rules.files) ) | dict2items | map(attribute='value') }}"
+   notify:
+     - Restart prometheus-server container
+ 
+ - name: Find prometheus common config overrides
+   find:
+     # NOTE(wszumski): Non-existent paths don't produce a failure
+-    paths:
+-      - "{{ node_custom_config }}/prometheus/prometheus.yml.d"
++    paths: "{{ prometheus_common_config_overrides_paths }}"
+     patterns: "*.yml"
+   delegate_to: localhost
+   register: prometheus_common_config_overrides_result
+@@ -74,8 +73,9 @@
+   become: true
+   vars:
+     service: "{{ prometheus_services['prometheus-server'] }}"
+-    common_overrides: "{{ prometheus_common_config_overrides_result.files | map(attribute='path') | list }}"
++    _common_overrides: "{{ prometheus_common_config_overrides_result.files | map(attribute='path') | list }}"
+     host_overrides: "{{ prometheus_host_config_overrides_result.files | map(attribute='path') | list }}"
++    common_overrides: "{{ dict( _common_overrides | map('basename') | zip(_common_overrides) ) | dict2items | sort(attribute='key') | map(attribute='value') | list }}"
+   merge_yaml:
+     sources: "{{ [item] + common_overrides + host_overrides }}"
+     dest: "{{ node_config_directory }}/prometheus-server/prometheus.yml"
+diff --git a/ansible/roles/prometheus/templates/prometheus.yml.j2 b/ansible/roles/prometheus/templates/prometheus.yml.j2
+index 99d1298a6..5c827e831 100644
+--- a/ansible/roles/prometheus/templates/prometheus.yml.j2
++++ b/ansible/roles/prometheus/templates/prometheus.yml.j2
+@@ -11,8 +11,8 @@ global:
+ 
+ {% if prometheus_alert_rules.files is defined and prometheus_alert_rules.files | length  > 0 %}
+ rule_files:
+-{% for rule in prometheus_alert_rules.files %}
+-  - "/etc/prometheus/{{ rule.path | basename }}"
++{% for rule in prometheus_alert_rules.files | map(attribute='path') | map('basename') | unique %}
++  - "/etc/prometheus/{{ rule }}"
+ {% endfor %}
+ {% endif %}
+ 
+diff --git a/releasenotes/notes/bug-2068002-223594395c1b981d.yaml b/releasenotes/notes/bug-2068002-223594395c1b981d.yaml
+new file mode 100644
+index 000000000..dd2c0125a
+--- /dev/null
++++ b/releasenotes/notes/bug-2068002-223594395c1b981d.yaml
+@@ -0,0 +1,6 @@
++---
++fixes:
++  - |
++    Fixes grafana container restart on every deployment when custom dashboards
++    are deployed.
++    `LP#2068002 <https://launchpad.net/bugs/2068002>`__
