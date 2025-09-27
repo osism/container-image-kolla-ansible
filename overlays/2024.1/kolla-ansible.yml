@@ -12,3 +12,6 @@ ceph_nova_keyring: "client.{{ ceph_nova_user }}.keyring"
 # To use the --history option, the backup user also needs to have the following privileges granted:
 # GRANT CREATE, INSERT ON mysql.* TO 'mariabackup'@'localhost';
 mariadb_backup_database_schema: mysql
+
+# Backward compatibility
+enable_swift: false
