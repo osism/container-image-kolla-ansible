@@ -60,6 +60,10 @@
   hosts:
     - rabbitmq
     - '&enable_rabbitmq_True'
+  max_fail_percentage: >-
+    {{ rabbitmq_max_fail_percentage |
+       default(kolla_max_fail_percentage) |
+       default(100) }}
   tags:
     - rabbitmq
   tasks:
