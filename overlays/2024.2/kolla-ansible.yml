@@ -16,3 +16,9 @@ mariadb_backup_database_schema: mysql
 ovn_sb_connection: "{% for host in groups['ovn-sb-db'] %}tcp:{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ ovn_sb_db_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 
 glance_backend_swift: "no"
+
+swift_internal_fqdn: "{{ kolla_internal_fqdn }}"
+swift_external_fqdn: "{{ kolla_external_fqdn }}"
+swift_internal_base_endpoint: "{{ swift_internal_fqdn | kolla_url(internal_protocol, swift_proxy_server_port) }}"
+swift_public_base_endpoint: "{{ swift_external_fqdn | kolla_url(public_protocol, swift_proxy_server_port) }}"
+swift_proxy_server_port: "8080"
