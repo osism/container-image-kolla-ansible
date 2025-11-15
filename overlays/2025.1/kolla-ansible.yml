@@ -13,4 +13,7 @@ ceph_nova_keyring: "client.{{ ceph_nova_user }}.keyring"
 # GRANT CREATE, INSERT ON mysql.* TO 'mariabackup'@'localhost';
 mariadb_backup_database_schema: mysql
 
+om_enable_queue_manager: true
+om_enable_rabbitmq_quorum_queues: true
+om_enable_rabbitmq_transient_quorum_queue: true
 om_enable_rabbitmq_stream_fanout: true
