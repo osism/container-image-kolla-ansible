@@ -28,7 +28,6 @@ UNSUPPORTED_ROLES = [
     "telegraf",
     "venus",
     "vitrage",
-    "watcher",
     "zookeeper",
 ]
 

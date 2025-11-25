@@ -41,7 +41,6 @@ HIDE = [
     "tempest",
     "vitrage",
     "vmtp",
-    "watcher",
     "zookeeper",
 ]
 
