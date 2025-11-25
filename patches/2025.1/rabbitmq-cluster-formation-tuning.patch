@@ -1,0 +1,15 @@
+--- a/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2
++++ b/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2
+@@ -20,6 +20,12 @@ cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config
+ cluster_formation.classic_config.nodes.{{ loop.index0 }} = rabbit@{{ hostvars[host].ansible_facts.hostname }}
+ {% endfor %}
+
++{% if rabbitmq_cluster_formation_tuning | default(false) | bool %}
++cluster_formation.discovery_retry_limit = {{ rabbitmq_cluster_formation_retry_limit | default(5) }}
++cluster_formation.discovery_retry_interval = {{ rabbitmq_cluster_formation_retry_interval | default(1000) }}
++cluster_formation.target_cluster_size_hint = {{ rabbitmq_cluster_formation_target_size | default(groups[role_rabbitmq_groups] | length) }}
++{% endif %}
++
+ {% if rabbitmq_enable_tls | bool %}
+ # https://www.rabbitmq.com/ssl.html
+ ssl_options.certfile = /etc/rabbitmq/certs/{{ project_name }}-cert.pem
