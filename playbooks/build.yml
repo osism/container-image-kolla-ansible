@@ -54,7 +54,7 @@
                   {% endraw %}
               fi
 
-              docker create --name sbom $registry/kolla/release/sbom:$sbom_version nologin
+              docker create --name sbom $registry/kolla/release/$openstack_version/sbom:$sbom_version nologin
               docker cp sbom:/images.yml files/sbom.yml
               docker rm sbom
           fi
