@@ -40,7 +40,7 @@ COPY --link files/sbom.yml* /
 
 COPY --link files/src /src
 
-COPY --from=ghcr.io/astral-sh/uv:0.9.24 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.9.27 /uv /usr/local/bin/uv
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
