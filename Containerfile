@@ -40,6 +40,7 @@ COPY --link files/sbom.yml* /
 
 COPY --link files/src /src
 
+ADD https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.39.tar.gz /mitogen.tar.gz
 COPY --from=ghcr.io/astral-sh/uv:0.9.27 /uv /usr/local/bin/uv
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -145,6 +146,12 @@ for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do
   ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1
   ( cd /repository && patch --forward --batch -p1 ) < $patchfile
 done
+
+# install mitogen ansible plugin
+mkdir -p /usr/share/mitogen
+tar xzf /mitogen.tar.gz --strip-components=1 -C /usr/share/mitogen
+rm -rf /usr/share/mitogen/{tests,docs,.ci,.lgtm.yml,.travis.yml}
+rm /mitogen.tar.gz
 
 # project specific instructions
 ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
