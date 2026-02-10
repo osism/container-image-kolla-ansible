@@ -1,0 +1,33 @@
+From 92813ed539be69a9857fdbcf73472d9cc1445a65 Mon Sep 17 00:00:00 2001
+From: Jan Horstmann <horstmann@osism.tech>
+Date: Tue, 10 Feb 2026 09:47:47 +0100
+Subject: [PATCH] Wait for octavia interface
+
+Add a pre-start loop to wait for the octavia interface to apppear in the
+`octavia-interface.service` systemd unit.
+On a node restart the service will fail on setting the MAC address for
+the interface, while the interface has not been created yet by
+openvswitch. Therefore the unit is modified to wait for the interface to
+appear.
+
+Change-Id: Ica364f2815a828fd120738b641a9c89976e1cc73
+Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+---
+ ansible/roles/octavia/templates/octavia-interface.service.j2 | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/ansible/roles/octavia/templates/octavia-interface.service.j2 b/ansible/roles/octavia/templates/octavia-interface.service.j2
+index 532cdc72e..9d611bd03 100644
+--- a/ansible/roles/octavia/templates/octavia-interface.service.j2
++++ b/ansible/roles/octavia/templates/octavia-interface.service.j2
+@@ -12,6 +12,7 @@ Restart=on-failure
+ TimeoutStartSec={{ octavia_interface_wait_timeout }}
+ {% endif %}
+ RemainAfterExit=true
++ExecStartPre=/bin/bash -c "while ! /sbin/ip link show dev {{ octavia_network_interface }} &>/dev/null; do sleep {{ octavia_interface_pre_start_sleep_interval | default(2) }}; done"
+ ExecStartPre=/sbin/ip link set dev {{ octavia_network_interface }} address {{ port_info.port.mac_address }}
+ ExecStart=/sbin/dhclient -v {{ octavia_network_interface }} -cf /etc/dhcp/octavia-dhclient.conf
+ ExecStop=/sbin/dhclient -r {{ octavia_network_interface }}
+-- 
+2.52.0
+
