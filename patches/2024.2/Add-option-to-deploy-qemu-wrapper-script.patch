@@ -1,0 +1,76 @@
+From 68f44691ed8e94b9ddcec6211d1606ff17b7f15d Mon Sep 17 00:00:00 2001
+From: Jan Horstmann <horstmann@osism.tech>
+Date: Fri, 6 Feb 2026 13:20:37 +0100
+Subject: [PATCH] Add option to deploy qemu wrapper script
+
+Change-Id: Id6d98ee763689889c3da4a55bc1b4bfd64627416
+Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+---
+ ansible/roles/nova-cell/tasks/config.yml      |  6 ++++++
+ .../roles/nova-cell/tasks/qemu_wrapper.yml    | 19 +++++++++++++++++++
+ .../nova-cell/templates/nova-libvirt.json.j2  |  6 ++++++
+ 3 files changed, 31 insertions(+)
+ create mode 100644 ansible/roles/nova-cell/tasks/qemu_wrapper.yml
+
+diff --git a/ansible/roles/nova-cell/tasks/config.yml b/ansible/roles/nova-cell/tasks/config.yml
+index 32bfc9f2f..4317a4dfe 100644
+--- a/ansible/roles/nova-cell/tasks/config.yml
++++ b/ansible/roles/nova-cell/tasks/config.yml
+@@ -18,6 +18,12 @@
+     - (nova_backend == "rbd" or cinder_backend_ceph | bool)
+     - inventory_hostname in groups[nova_cell_compute_group]
+ 
++- name: Include tasks from qemu_wrapper.yml
++  vars:
++    service: "{{ nova_cell_services['nova-libvirt'] }}"
++  include_tasks: qemu_wrapper.yml
++  when: service | service_enabled_and_mapped_to_host
++
+ - name: Check if policies shall be overwritten
+   stat:
+     path: "{{ item }}"
+diff --git a/ansible/roles/nova-cell/tasks/qemu_wrapper.yml b/ansible/roles/nova-cell/tasks/qemu_wrapper.yml
+new file mode 100644
+index 000000000..b8fa65def
+--- /dev/null
++++ b/ansible/roles/nova-cell/tasks/qemu_wrapper.yml
+@@ -0,0 +1,19 @@
++---
++- name: Check qemu wrapper file
++  vars:
++    paths:
++      - "{{ node_custom_config }}/nova/{{ inventory_hostname }}/qemu-wrapper"
++      - "{{ node_custom_config }}/nova/qemu-wrapper"
++  stat:
++    path: "{{ lookup('first_found', paths, skip=True) }}"
++  delegate_to: localhost
++  register: nova_qemu_wrapper_file
++  failed_when: false
++
++- name: Copy qemu wrapper
++  become: true
++  copy:
++    src: "{{ nova_qemu_wrapper_file.stat.path }}"
++    dest: "{{ node_config_directory }}/nova-libvirt/qemu-wrapper"
++    mode: "0755"
++  when: nova_qemu_wrapper_file.stat.exists
+diff --git a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2 b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
+index d2ddc9e6f..d135f7e78 100644
+--- a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
+@@ -67,6 +67,12 @@
+             "dest": "/root/.config/libvirt/auth.conf",
+             "owner": "root",
+             "perm": "0600"
++        }{% endif %}{% if nova_qemu_wrapper_file and nova_qemu_wrapper_file.stat.exists %},
++        {
++            "source": "{{ container_config_directory }}/qemu-wrapper",
++            "dest": "/usr/local/bin/qemu-system-{{ ansible_facts.architecture }}",
++            "owner": "root",
++            "perm": "0755"
+         }{% endif %}
+     ]
+ }
+-- 
+2.52.0
+
