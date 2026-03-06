@@ -1,0 +1,230 @@
+From c93b39fb69b8d4385cfc25208a26f96f80e21582 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Mon, 30 Jun 2025 15:01:12 +0200
+Subject: [PATCH] skyline: add TLSv1.2 and TLSv1.3 support for HTTPS upstream endpoints
+
+When the upstream endpoint uses HTTPS, TLS errors were observed.
+This fix checks if the upstream endpoint is HTTPS and ensures
+TLSv1.2 and TLSv1.3 are enabled in the nginx configuration.
+
+References:
+
+* https://review.opendev.org/c/openstack/skyline-apiserver/+/941715
+* https://bugs.launchpad.net/skyline-apiserver/+bug/1951437
+
+Change-Id: I597c8f1f609580cfc8c29efbc79ada312e667441
+---
+
+diff --git a/ansible/roles/skyline/templates/nginx.conf.j2 b/ansible/roles/skyline/templates/nginx.conf.j2
+index 9444804..f83d730 100644
+--- a/ansible/roles/skyline/templates/nginx.conf.j2
++++ b/ansible/roles/skyline/templates/nginx.conf.j2
+@@ -94,6 +94,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+ 
+         {% if enable_keystone | bool %}# Region: {{ openstack_region_name }}, Service: keystone
+@@ -105,6 +109,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -117,6 +125,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -129,6 +141,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -141,6 +157,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -153,6 +173,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -165,6 +189,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -177,6 +205,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -189,6 +221,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -201,6 +237,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -213,6 +253,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -225,6 +269,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -237,6 +285,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -249,6 +301,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -261,6 +317,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -273,6 +333,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -285,6 +349,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+ 
+@@ -297,6 +365,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% elif skyline_external_swift | bool %}# Region: {{ openstack_region_name }}, Service: external swift
+         location {{ skyline_nginx_prefix }}/{{ openstack_region_name | lower }}/swift {
+@@ -307,6 +379,10 @@
+             proxy_set_header X-Forwarded-Proto $scheme;
+             proxy_set_header X-Forwarded-Host $host;
+             proxy_set_header Host $http_host;
++            {% if internal_protocol == 'https' %}
++            proxy_ssl_protocols TLSv1.2 TLSv1.3;
++            proxy_ssl_server_name on;
++            {% endif %}
+         }
+         {% endif %}
+     }
