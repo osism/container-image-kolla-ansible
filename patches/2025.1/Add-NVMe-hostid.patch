@@ -1,0 +1,113 @@
+From c939159e05b01e188dbf52652e1f87599fd20566 Mon Sep 17 00:00:00 2001
+From: Jan Horstmann <horstmann@osism.tech>
+Date: Tue, 3 Feb 2026 18:45:56 +0100
+Subject: [PATCH] Add NVMe hostid
+
+Change-Id: I3db3347cc7bf59c833ed57bd46c112ff41942edb
+Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+---
+ ansible/roles/cinder/tasks/config.yml                 | 11 +++++++++++
+ ansible/roles/cinder/templates/cinder-volume.json.j2  |  6 ++++++
+ ansible/roles/cinder/templates/hostid.j2              |  1 +
+ ansible/roles/nova-cell/tasks/config.yml              | 11 +++++++++++
+ ansible/roles/nova-cell/templates/hostid.j2           |  1 +
+ .../roles/nova-cell/templates/nova-compute.json.j2    |  6 ++++++
+ 6 files changed, 36 insertions(+)
+ create mode 100644 ansible/roles/cinder/templates/hostid.j2
+ create mode 100644 ansible/roles/nova-cell/templates/hostid.j2
+
+diff --git a/ansible/roles/cinder/tasks/config.yml b/ansible/roles/cinder/tasks/config.yml
+index c77dd0e42..785461714 100644
+--- a/ansible/roles/cinder/tasks/config.yml
++++ b/ansible/roles/cinder/tasks/config.yml
+@@ -113,6 +113,17 @@
+   become: true
+   when: service | service_enabled_and_mapped_to_host
+ 
++- name: Generating 'hostid' file for cinder_volume
++  vars:
++    service: "{{ cinder_services['cinder-volume'] }}"
++    hostid: "{{ ansible_facts.hostname | to_uuid }}"
++  template:
++    src: "templates/hostid.j2"
++    dest: "{{ node_config_directory }}/cinder-volume/hostid"
++    mode: "0660"
++  become: true
++  when: service | service_enabled_and_mapped_to_host
++
+ - name: Copying over existing policy file
+   become: true
+   template:
+diff --git a/ansible/roles/cinder/templates/cinder-volume.json.j2 b/ansible/roles/cinder/templates/cinder-volume.json.j2
+index 3de38cddb..3c6da048d 100644
+--- a/ansible/roles/cinder/templates/cinder-volume.json.j2
++++ b/ansible/roles/cinder/templates/cinder-volume.json.j2
+@@ -32,6 +32,12 @@
+             "dest": "/etc/nvme/hostnqn",
+             "owner": "root",
+             "perm": "0644"
++        },
++        {
++            "source": "{{ container_config_directory }}/hostid",
++            "dest": "/etc/nvme/hostid",
++            "owner": "root",
++            "perm": "0644"
+         }{% if cinder_policy_file is defined %},
+         {
+             "source": "{{ container_config_directory }}/{{ cinder_policy_file }}",
+diff --git a/ansible/roles/cinder/templates/hostid.j2 b/ansible/roles/cinder/templates/hostid.j2
+new file mode 100644
+index 000000000..141c3020d
+--- /dev/null
++++ b/ansible/roles/cinder/templates/hostid.j2
+@@ -0,0 +1 @@
++{{ hostid }}
+diff --git a/ansible/roles/nova-cell/tasks/config.yml b/ansible/roles/nova-cell/tasks/config.yml
+index dd49e56de..1475d551a 100644
+--- a/ansible/roles/nova-cell/tasks/config.yml
++++ b/ansible/roles/nova-cell/tasks/config.yml
+@@ -178,6 +178,17 @@
+   become: true
+   when: service | service_enabled_and_mapped_to_host
+ 
++- name: Generating 'hostid' file for nova_compute
++  vars:
++    hostid: "{{ ansible_facts.hostname | to_uuid }}"
++    service: "{{ nova_cell_services['nova-compute'] }}"
++  template:
++    src: "templates/hostid.j2"
++    dest: "{{ node_config_directory }}/nova-compute/hostid"
++    mode: "0660"
++  become: true
++  when: service | service_enabled_and_mapped_to_host
++
+ - name: Copying over existing policy file
+   become: true
+   template:
+diff --git a/ansible/roles/nova-cell/templates/hostid.j2 b/ansible/roles/nova-cell/templates/hostid.j2
+new file mode 100644
+index 000000000..141c3020d
+--- /dev/null
++++ b/ansible/roles/nova-cell/templates/hostid.j2
+@@ -0,0 +1 @@
++{{ hostid }}
+diff --git a/ansible/roles/nova-cell/templates/nova-compute.json.j2 b/ansible/roles/nova-cell/templates/nova-compute.json.j2
+index dc33c3b81..aaac0e7d2 100644
+--- a/ansible/roles/nova-cell/templates/nova-compute.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-compute.json.j2
+@@ -61,6 +61,12 @@
+             "dest": "/etc/nvme/hostnqn",
+             "owner": "root",
+             "perm": "0644"
++        },
++        {
++            "source": "{{ container_config_directory }}/hostid",
++            "dest": "/etc/nvme/hostid",
++            "owner": "root",
++            "perm": "0644"
+         }{% if nova_compute_virt_type in ['kvm', 'qemu'] and libvirt_enable_sasl | bool %},
+         {
+             "source": "{{ container_config_directory }}/auth.conf",
+-- 
+2.52.0
+
