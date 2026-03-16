@@ -27,7 +27,9 @@ if [[ -e /ansible/ara.env ]]; then
     source /ansible/ara.env
 fi
 
-if [[ -d $ANSIBLE_DIRECTORY/inventory/fast ]]; then
+INVENTORY_MODE=${INVENTORY_MODE:-legacy}
+
+if [[ $INVENTORY_MODE == "fast" ]] && [[ -d $ANSIBLE_DIRECTORY/inventory/fast ]]; then
     export ANSIBLE_INVENTORY=$ANSIBLE_DIRECTORY/inventory/fast
 else
     export ANSIBLE_INVENTORY=$ANSIBLE_DIRECTORY/inventory/hosts.yml
@@ -40,7 +42,7 @@ elif [[ -e $ENVIRONMENTS_DIRECTORY/$SUB/ansible.cfg ]]; then
     export ANSIBLE_CONFIG=$ENVIRONMENTS_DIRECTORY/$SUB/ansible.cfg
 fi
 
-if [[ ! -d $ANSIBLE_DIRECTORY/inventory/fast ]] && [[ -w $ANSIBLE_INVENTORY ]]; then
+if [[ $INVENTORY_MODE != "fast" ]] && [[ -w $ANSIBLE_INVENTORY ]]; then
     rsync -a /ansible/group_vars/ /ansible/inventory/group_vars/
     rsync -a /ansible/inventory.generics/ /ansible/inventory/
     rsync -a /opt/configuration/inventory/ /ansible/inventory/
