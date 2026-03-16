@@ -83,14 +83,12 @@ git clone https://github.com/osism/release /release
 
 # prepare project repository
 git clone https://github.com/osism/ansible-playbooks /playbooks
-git clone https://github.com/osism/defaults /defaults
 git clone https://github.com/osism/cfg-generics /generics
 git clone https://github.com/osism/kolla-operations /operations
 
 if [ "$VERSION" != "latest" ]; then
   ( cd /release || exit; git fetch --all --force; git checkout "kolla-ansible-$VERSION" )
   ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/latest/base.yml")" )
-  ( cd /defaults || exit; git fetch --all --force; git checkout "$(yq -M -r .defaults_version "/release/latest/base.yml")" )
   ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/latest/base.yml")" )
   ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/latest/base.yml")" )
 fi
@@ -157,9 +155,6 @@ rm /mitogen.tar.gz
 ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
 uv pip install --no-cache --system -r /repository/requirements.txt
 uv pip install --no-cache --system /repository
-mkdir -p /ansible/group_vars
-cp -r /defaults/* /ansible/group_vars/
-rm -f /ansible/group_vars/LICENSE /ansible/group_vars/README.md
 python3 /remove-common-as-dependency.py
 python3 /split-kolla-ansible-site.py
 cp -r /repository/ansible/action_plugins/* /ansible/action_plugins
