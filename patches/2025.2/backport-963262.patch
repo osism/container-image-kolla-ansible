@@ -1,0 +1,30 @@
+From 2e29f7d844202057ba9bfa924fdb44166d99b671 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Tue, 07 Oct 2025 12:39:22 +0200
+Subject: [PATCH] letsencrypt: do not hardcode the webserver port
+
+The port can be configured with letsencrypt_webserver_port. It should
+not be hardcoded in the letsencrypt-webserver.conf.j2 template.
+
+Signed-off-by: Christian Berendt <berendt@osism.tech>
+Change-Id: If75524642bd998a8fa1cad4c5a2fe1c77c520248
+---
+
+diff --git a/ansible/roles/letsencrypt/templates/letsencrypt-webserver.conf.j2 b/ansible/roles/letsencrypt/templates/letsencrypt-webserver.conf.j2
+index f2555ca..9d1a26a 100644
+--- a/ansible/roles/letsencrypt/templates/letsencrypt-webserver.conf.j2
++++ b/ansible/roles/letsencrypt/templates/letsencrypt-webserver.conf.j2
+@@ -1,11 +1,11 @@
+-Listen {{ api_interface_address }}:8081
++Listen {{ api_interface_address }}:{{ letsencrypt_webserver_port }}
+ 
+ ServerSignature Off
+ ServerTokens Prod
+ TraceEnable off
+ KeepAliveTimeout 60
+ 
+-<VirtualHost {{ api_interface_address }}:8081>
++<VirtualHost {{ api_interface_address }}:{{ letsencrypt_webserver_port }}>
+     DocumentRoot /etc/letsencrypt/http-01
+     ErrorLog "/var/log/kolla/letsencrypt/letsencrypt-webserver-error.log"
+     CustomLog "/var/log/kolla/letsencrypt/letsencrypt-webserver-access.log" common
