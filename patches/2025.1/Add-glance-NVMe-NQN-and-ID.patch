@@ -1,4 +1,4 @@
-From 4744eddef881c2e9cec6a353bcdfb3a5125281da Mon Sep 17 00:00:00 2001
+From ae8e43eff3815a0a97e387ff28de1bf94777d461 Mon Sep 17 00:00:00 2001
 From: Jan Horstmann <horstmann@osism.tech>
 Date: Wed, 4 Feb 2026 13:07:59 +0100
 Subject: [PATCH] Add glance NVMe NQN and ID
@@ -38,7 +38,7 @@ index 9f3e41068..49a242f94 100644
    - "{{ node_config_directory }}/glance-tls-proxy/:{{ container_config_directory }}/:ro"
    - "/etc/localtime:/etc/localtime:ro"
 diff --git a/ansible/roles/glance/tasks/config.yml b/ansible/roles/glance/tasks/config.yml
-index 3e53288a5..542dfb88e 100644
+index 3e53288a5..cd2493175 100644
 --- a/ansible/roles/glance/tasks/config.yml
 +++ b/ansible/roles/glance/tasks/config.yml
 @@ -136,3 +136,29 @@
@@ -57,7 +57,7 @@ index 3e53288a5..542dfb88e 100644
 +  become: true
 +  when:
 +    - service | service_enabled_and_mapped_to_host
-+    - glance_backend_nvme | default(false) | bool)
++    - glance_backend_nvme | default(false) | bool
 +
 +- name: Generating 'hostid' file for glance_api
 +  vars:
@@ -70,15 +70,16 @@ index 3e53288a5..542dfb88e 100644
 +  become: true
 +  when:
 +    - service | service_enabled_and_mapped_to_host
-+    - glance_backend_nvme | default(false) | bool)
++    - glance_backend_nvme | default(false) | bool
 diff --git a/ansible/roles/glance/templates/glance-api.json.j2 b/ansible/roles/glance/templates/glance-api.json.j2
-index 60042e9a0..255000d4b 100644
+index 60042e9a0..a9d14553e 100644
 --- a/ansible/roles/glance/templates/glance-api.json.j2
 +++ b/ansible/roles/glance/templates/glance-api.json.j2
-@@ -1,6 +1,18 @@
- {
-     "command": "glance-api",
-     "config_files": [
+@@ -42,6 +42,18 @@
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+             "perm": "0600"
++        }{% endif %}{% if glance_backend_nvme | default(false) | bool %},
 +        {
 +            "source": "{{ container_config_directory }}/hostnqn",
 +            "dest": "/etc/nvme/hostnqn",
@@ -90,10 +91,9 @@ index 60042e9a0..255000d4b 100644
 +            "dest": "/etc/nvme/hostid",
 +            "owner": "root",
 +            "perm": "0644"
-+        },
-         {
-             "source": "{{ container_config_directory }}/glance-api.conf",
-             "dest": "/etc/glance/glance-api.conf",
+         }{% endif %}
+     ],
+     "permissions": [
 diff --git a/ansible/roles/glance/templates/hostid.j2 b/ansible/roles/glance/templates/hostid.j2
 new file mode 100644
 index 000000000..141c3020d
