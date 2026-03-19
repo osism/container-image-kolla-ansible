@@ -1,4 +1,4 @@
-From f0663fa8621d6a8117289de257974beddca3b538 Mon Sep 17 00:00:00 2001
+From fe09fcf5046cae684e7a8c68da9fe350fb0f1f5a Mon Sep 17 00:00:00 2001
 From: Jan Horstmann <horstmann@osism.tech>
 Date: Wed, 4 Feb 2026 13:07:59 +0100
 Subject: [PATCH] Add glance NVMe NQN and ID
@@ -7,11 +7,11 @@ Change-Id: I496316eecb12486ac8f83da72201be80098f4920
 Signed-off-by: Jan Horstmann <horstmann@osism.tech>
 ---
  ansible/roles/glance/defaults/main.yml        |  4 +--
- ansible/roles/glance/tasks/config.yml         | 26 +++++++++++++++++++
- .../roles/glance/templates/glance-api.json.j2 | 12 +++++++++
+ ansible/roles/glance/tasks/config.yml         | 30 +++++++++++++++++++
+ .../roles/glance/templates/glance-api.json.j2 | 12 ++++++++
  ansible/roles/glance/templates/hostid.j2      |  1 +
  ansible/roles/glance/templates/hostnqn.j2     |  1 +
- 5 files changed, 42 insertions(+), 2 deletions(-)
+ 5 files changed, 46 insertions(+), 2 deletions(-)
  create mode 100644 ansible/roles/glance/templates/hostid.j2
  create mode 100644 ansible/roles/glance/templates/hostnqn.j2
 
@@ -38,10 +38,10 @@ index 23ff848c7..d976becb4 100644
    - "{{ node_config_directory }}/glance-tls-proxy/:{{ container_config_directory }}/:ro"
    - "/etc/localtime:/etc/localtime:ro"
 diff --git a/ansible/roles/glance/tasks/config.yml b/ansible/roles/glance/tasks/config.yml
-index f98aefc29..2a02fe010 100644
+index f98aefc29..b11d56e06 100644
 --- a/ansible/roles/glance/tasks/config.yml
 +++ b/ansible/roles/glance/tasks/config.yml
-@@ -168,3 +168,29 @@
+@@ -168,3 +168,33 @@
    when: service | service_enabled_and_mapped_to_host
    notify:
      - Restart glance-tls-proxy container
@@ -57,7 +57,9 @@ index f98aefc29..2a02fe010 100644
 +  become: true
 +  when:
 +    - service | service_enabled_and_mapped_to_host
-+    - glance_backend_nvme | default(false) | bool)
++    - glance_backend_nvme | default(false) | bool
++  notify:
++    - Restart glance-api container
 +
 +- name: Generating 'hostid' file for glance_api
 +  vars:
@@ -70,15 +72,18 @@ index f98aefc29..2a02fe010 100644
 +  become: true
 +  when:
 +    - service | service_enabled_and_mapped_to_host
-+    - glance_backend_nvme | default(false) | bool)
++    - glance_backend_nvme | default(false) | bool
++  notify:
++    - Restart glance-api container
 diff --git a/ansible/roles/glance/templates/glance-api.json.j2 b/ansible/roles/glance/templates/glance-api.json.j2
-index 69ed72247..cc81e7d2c 100644
+index 69ed72247..1d8a80c04 100644
 --- a/ansible/roles/glance/templates/glance-api.json.j2
 +++ b/ansible/roles/glance/templates/glance-api.json.j2
-@@ -1,6 +1,18 @@
- {
-     "command": "glance-api",
-     "config_files": [
+@@ -42,6 +42,18 @@
+             "dest": "/etc/glance/property-protections-rules.conf",
+             "owner": "glance",
+             "perm": "0600"
++        }{% endif %}{% if glance_backend_nvme | default(false) | bool %},
 +        {
 +            "source": "{{ container_config_directory }}/hostnqn",
 +            "dest": "/etc/nvme/hostnqn",
@@ -90,10 +95,9 @@ index 69ed72247..cc81e7d2c 100644
 +            "dest": "/etc/nvme/hostid",
 +            "owner": "root",
 +            "perm": "0644"
-+        },
-         {
-             "source": "{{ container_config_directory }}/glance-api.conf",
-             "dest": "/etc/glance/glance-api.conf",
+         }{% endif %}
+     ],
+     "permissions": [
 diff --git a/ansible/roles/glance/templates/hostid.j2 b/ansible/roles/glance/templates/hostid.j2
 new file mode 100644
 index 000000000..141c3020d
