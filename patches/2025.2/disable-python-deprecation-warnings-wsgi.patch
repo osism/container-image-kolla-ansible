@@ -1,0 +1,90 @@
+--- a/ansible/roles/aodh/templates/wsgi-aodh.conf.j2
++++ b/ansible/roles/aodh/templates/wsgi-aodh.conf.j2
+@@ -35,4 +35,7 @@ LogLevel info
+   WSGIDaemonProcess aodh group=aodh processes={{ aodh_api_workers }} threads=1 user=aodh
+   WSGIProcessGroup aodh
+   WSGIScriptAlias / "{{ binary_path }}/aodh-api"
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+ </VirtualHost>
+--- a/ansible/roles/cloudkitty/templates/wsgi-cloudkitty.conf.j2
++++ b/ansible/roles/cloudkitty/templates/wsgi-cloudkitty.conf.j2
+@@ -26,6 +26,9 @@ LogLevel info
+   WSGIDaemonProcess cloudkitty group=cloudkitty processes={{ cloudkitty_api_workers }} threads=1 user=cloudkitty
+   WSGIProcessGroup cloudkitty
+   WSGIScriptAlias / "{{ binary_path }}/cloudkitty-api"
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+
+   <Directory "{{ binary_path }}">
+        <FilesMatch "^cloudkitty-api$">
+--- a/ansible/roles/gnocchi/templates/wsgi-gnocchi.conf.j2
++++ b/ansible/roles/gnocchi/templates/wsgi-gnocchi.conf.j2
+@@ -26,6 +26,9 @@ LogLevel info
+   WSGIDaemonProcess gnocchi group=gnocchi processes={{ gnocchi_api_workers }} threads=1 user=gnocchi
+   WSGIProcessGroup gnocchi
+   WSGIScriptAlias / "{{ wsgi_path }}/gnocchi-api"
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+
+   <Directory "{{ wsgi_path }}">
+         Require all granted
+--- a/ansible/roles/heat/templates/wsgi-heat-api-cfn.conf.j2
++++ b/ansible/roles/heat/templates/wsgi-heat-api-cfn.conf.j2
+@@ -34,6 +34,9 @@ CustomLog "{{ heat_log_dir }}/apache-cfn-access.log" common
+     WSGIScriptAlias / {{ binary_path }}/heat-wsgi-api-cfn
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+     ErrorLogFormat "%{cu}t %M"
+     ErrorLog "{{ heat_log_dir }}/heat-api-cfn-error.log"
+     LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
+--- a/ansible/roles/heat/templates/wsgi-heat-api.conf.j2
++++ b/ansible/roles/heat/templates/wsgi-heat-api.conf.j2
+@@ -34,6 +34,9 @@ CustomLog "{{ heat_log_dir }}/apache-access.log" common
+     WSGIScriptAlias / {{ binary_path }}/heat-wsgi-api
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+     ErrorLogFormat "%{cu}t %M"
+     ErrorLog "{{ heat_log_dir }}/heat-api-error.log"
+     LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
+--- a/ansible/roles/keystone/templates/wsgi-keystone.conf.j2
++++ b/ansible/roles/keystone/templates/wsgi-keystone.conf.j2
+@@ -44,6 +44,9 @@ LogLevel info
+     WSGIScriptAlias / {{ binary_path }}/keystone-wsgi-public
+     WSGIApplicationGroup %{GLOBAL}
+     WSGIPassAuthorization On
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+     ErrorLogFormat "%{cu}t %M"
+     ErrorLog "{{ keystone_log_dir }}/keystone-apache-public-error.log"
+     LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
+--- a/ansible/roles/masakari/templates/wsgi-masakari.conf.j2
++++ b/ansible/roles/masakari/templates/wsgi-masakari.conf.j2
+@@ -34,4 +34,7 @@ LogLevel info
+   WSGIDaemonProcess masakari group=masakari processes={{ masakari_api_workers }} threads=1 user=masakari
+   WSGIProcessGroup masakari
+   WSGIScriptAlias / "{{ binary_path }}/masakari-wsgi"
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+ </VirtualHost>
+--- a/ansible/roles/zun/templates/wsgi-zun.conf.j2
++++ b/ansible/roles/zun/templates/wsgi-zun.conf.j2
+@@ -38,4 +38,7 @@ LogLevel info
+   WSGIDaemonProcess zun group=zun processes={{ zun_api_workers }} threads=1 user=zun
+   WSGIProcessGroup zun
+   WSGIScriptAlias / "/var/www/cgi-bin/zun/app.wsgi"
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++    SetEnv PYTHONWARNINGS "ignore"
++{% endif %}
+ </VirtualHost>

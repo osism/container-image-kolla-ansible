@@ -1,0 +1,8 @@
+---
+- name: Apply role common
+  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
+  serial: '{{ serial | default("0") }}'
+  roles:
+    - {role: common, tags: common}
+
+  gather_facts: false

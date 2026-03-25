@@ -1,0 +1,29 @@
+--- a/ansible/roles/service-config-validate/defaults/main.yml
++++ b/ansible/roles/service-config-validate/defaults/main.yml
+@@ -2,5 +2,5 @@
+ # Common role for config-validates.
+
+ # Dict of services.
+-service_config_validate_output_dir: "/var/log/kolla/config-validate"
++service_config_validate_output_dir: "/share/kolla-ansible/config-validate"
+ service_config_validate_services: {}
+diff --git a/ansible/roles/service-config-validate/tasks/validate.yml b/ansible/roles/service-config-validate/tasks/validate.yml
+index a327277fe..4a872be51 100644
+--- a/ansible/roles/service-config-validate/tasks/validate.yml
++++ b/ansible/roles/service-config-validate/tasks/validate.yml
+@@ -23,7 +23,6 @@
+   changed_when: False
+
+ - name: "{{ project_name }} : {{ service.container_name }} | Ensure log directory exists"
+-  become: True
+   file:
+     path: "{{ output_dir }}"
+     state: directory
+@@ -33,7 +32,6 @@
+   delegate_to: localhost
+
+ - name: "{{ project_name }} : {{ service.container_name }} | Log configuration errors"
+-  become: True
+   copy:
+     content: "{{ inner_item.stderr }}"
+     dest: "{{ output_dir }}/{{ inner_item.inner_item.config | basename }}.err"

@@ -127,13 +127,6 @@ mkdir -p \
   /interface \
   /share
 
-# install required ansible collections & roles
-ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/roles
-ln -s /usr/share/ansible/roles /ansible/galaxy
-
-ansible-galaxy collection install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/collections
-ln -s /usr/share/ansible/collections /ansible/collections
-
 # prepare project repository
 if [ "$OPENSTACK_VERSION" = "master" ]; then git clone https://github.com/openstack/kolla-ansible /repository; fi
 if [ "$OPENSTACK_VERSION" != "master" ]; then git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository; fi
@@ -144,6 +137,13 @@ for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do
   ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1
   ( cd /repository && patch --forward --batch -p1 ) < $patchfile
 done
+
+# install required ansible collections & roles
+ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/roles
+ln -s /usr/share/ansible/roles /ansible/galaxy
+
+ansible-galaxy collection install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/collections
+ln -s /usr/share/ansible/collections /ansible/collections
 
 # install mitogen ansible plugin
 mkdir -p /usr/share/mitogen
