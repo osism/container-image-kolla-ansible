@@ -57,7 +57,7 @@
    with_first_found:
      - "{{ node_custom_config }}/hacluster-pacemaker/{{ inventory_hostname }}/authkey"
      - "{{ node_custom_config }}/hacluster-pacemaker/authkey"
-+    - "/share/hacluster-corosync/authkey"
++    - "/share/hacluster-pacemaker/authkey"
  
  - name: Copying over Pacemaker authkey file into hacluster-pacemaker-remote
    vars:
