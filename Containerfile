@@ -83,7 +83,7 @@ git clone https://github.com/osism/release /release
 
 # prepare project repository
 git clone https://github.com/osism/ansible-playbooks /playbooks
-git clone https://github.com/osism/cfg-generics /generics
+git clone https://github.com/osism/generics /generics
 git clone https://github.com/osism/kolla-operations /operations
 
 if [ "$VERSION" != "latest" ]; then
