@@ -1,0 +1,77 @@
+From efe6fd72d75bb22832d8a7f4753442bb3969c722 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 24 Apr 2026 07:49:52 +0200
+Subject: [PATCH] opensearch: re-enable shard allocation after upgrade restart
+
+The opensearch role disables shard allocation via a transient cluster
+setting (cluster.routing.allocation.enable=none) before the rolling
+restart and never re-enables it. The role relies on the transient
+being cleared by container restart, but in a rolling restart of a
+3-node (or larger) HA cluster, at least one master-eligible node
+stays up throughout, cluster state is preserved across the restart,
+and the transient persists. Replicas then stay unassigned indefinitely
+and the cluster remains YELLOW. This also blocks allocation of new
+primaries and replicas cluster-wide and compounds across upgrades.
+
+Add a symmetric 'Enable shard allocation' handler that listens on
+the same 'Restart opensearch container' topic as the disable handler
+and fires after the restart (handlers with a shared listen topic
+execute in file-declaration order). Setting the transient to null
+removes it and lets the cluster fall back to the default ('all').
+
+The 'Enable shard allocation' handler runs immediately after the
+rolling-restart phase, when the load balancer in front of opensearch
+may not yet have re-detected any backend as healthy and returns 503
+to the API call. Mirror the existing 'Perform a flush' handler's
+retry pattern (register / until result.status == 200 / retries /
+delay) so the PUT is retried until the LB recovers and opensearch
+is reachable. 30 retries * 5s delay covers up to 150s of post-
+restart instability, which is well beyond observed HAProxy +
+opensearch startup windows.
+
+Matches the user workaround documented on LP#2085943, which has been
+open and unfixed upstream since October 2024 with no Gerrit change
+attached.
+
+AI-assisted: Claude Code
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+---
+ ansible/roles/opensearch/handlers/main.yml | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/ansible/roles/opensearch/handlers/main.yml b/ansible/roles/opensearch/handlers/main.yml
+index 9791d1b..2d21111 100644
+--- a/ansible/roles/opensearch/handlers/main.yml
++++ b/ansible/roles/opensearch/handlers/main.yml
+@@ -57,6 +57,31 @@
+     dimensions: "{{ service.dimensions }}"
+     healthcheck: "{{ service.healthcheck | default(omit) }}"
+ 
++- name: Enable shard allocation
++  become: true
++  vars:
++    opensearch_shard_body: {"transient": {"cluster.routing.allocation.enable": null}}
++  kolla_toolbox:
++    container_engine: "{{ kolla_container_engine }}"
++    module_name: uri
++    module_args:
++      url: "{{ opensearch_internal_endpoint }}/_cluster/settings"
++      method: PUT
++      status_code: 200
++      return_content: yes
++      body: "{{ opensearch_shard_body | to_json }}"
++      body_format: json
++      ca_path: "{{ openstack_cacert }}"
++  delegate_to: "{{ groups['opensearch'][0] }}"
++  run_once: true
++  retries: 30
++  delay: 5
++  register: result
++  until: ('status' in result) and result.status == 200
++  listen: "Restart opensearch container"
++  when:
++    - kolla_action == "upgrade"
++
+ - name: Restart opensearch-dashboards container
+   vars:
+     service_name: "opensearch-dashboards"
