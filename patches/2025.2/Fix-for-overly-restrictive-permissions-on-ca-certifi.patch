@@ -1,0 +1,1970 @@
+From 83d3e2d9fe42a36c68ae707879e33f93217a2ebc Mon Sep 17 00:00:00 2001
+From: Rafal Lewandowski <rafal@stackhpc.com>
+Date: Sun, 30 Nov 2025 18:30:21 +0100
+Subject: [PATCH] Fix for overly restrictive permissions on ca-certificates
+ directory
+
+Closes-Bug: #2112280
+Change-Id: I52499bdf2b7fc70f91a4c2920749bfef83a79850
+Signed-off-by: Rafal Lewandowski <rafal@stackhpc.com>
+Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+---
+ ansible/roles/aodh/templates/aodh-api.json.j2               | 2 +-
+ ansible/roles/aodh/templates/aodh-evaluator.json.j2         | 2 +-
+ ansible/roles/aodh/templates/aodh-listener.json.j2          | 2 +-
+ ansible/roles/aodh/templates/aodh-notifier.json.j2          | 2 +-
+ ansible/roles/barbican/templates/barbican-api.json.j2       | 2 +-
+ .../barbican/templates/barbican-keystone-listener.json.j2   | 2 +-
+ ansible/roles/barbican/templates/barbican-worker.json.j2    | 2 +-
+ ansible/roles/blazar/templates/blazar-api.json.j2           | 2 +-
+ ansible/roles/blazar/templates/blazar-manager.json.j2       | 2 +-
+ .../roles/ceilometer/templates/ceilometer-central.json.j2   | 2 +-
+ .../roles/ceilometer/templates/ceilometer-compute.json.j2   | 2 +-
+ ansible/roles/ceilometer/templates/ceilometer-ipmi.json.j2  | 2 +-
+ .../ceilometer/templates/ceilometer-notification.json.j2    | 2 +-
+ ansible/roles/cinder/templates/cinder-api.json.j2           | 2 +-
+ ansible/roles/cinder/templates/cinder-backup.json.j2        | 2 +-
+ ansible/roles/cinder/templates/cinder-scheduler.json.j2     | 2 +-
+ ansible/roles/cinder/templates/cinder-volume.json.j2        | 2 +-
+ ansible/roles/cloudkitty/templates/cloudkitty-api.json.j2   | 2 +-
+ .../roles/cloudkitty/templates/cloudkitty-processor.json.j2 | 2 +-
+ ansible/roles/common/templates/kolla-toolbox.json.j2        | 2 +-
+ ansible/roles/cron/templates/cron.json.j2                   | 2 +-
+ ansible/roles/cyborg/templates/cyborg-agent.json.j2         | 2 +-
+ ansible/roles/cyborg/templates/cyborg-api.json.j2           | 2 +-
+ ansible/roles/cyborg/templates/cyborg-conductor.json.j2     | 2 +-
+ ansible/roles/designate/templates/designate-api.json.j2     | 2 +-
+ .../designate/templates/designate-backend-bind9.json.j2     | 2 +-
+ ansible/roles/designate/templates/designate-central.json.j2 | 2 +-
+ ansible/roles/designate/templates/designate-mdns.json.j2    | 2 +-
+ .../roles/designate/templates/designate-producer.json.j2    | 2 +-
+ ansible/roles/designate/templates/designate-sink.json.j2    | 2 +-
+ ansible/roles/designate/templates/designate-worker.json.j2  | 2 +-
+ ansible/roles/etcd/templates/etcd.json.j2                   | 2 +-
+ ansible/roles/fluentd/templates/fluentd.json.j2             | 2 +-
+ ansible/roles/glance/templates/glance-api.json.j2           | 3 +--
+ ansible/roles/glance/templates/glance-tls-proxy.json.j2     | 2 +-
+ ansible/roles/gnocchi/templates/gnocchi-api.json.j2         | 2 +-
+ ansible/roles/gnocchi/templates/gnocchi-metricd.json.j2     | 2 +-
+ ansible/roles/gnocchi/templates/gnocchi-statsd.json.j2      | 2 +-
+ ansible/roles/grafana/templates/grafana.json.j2             | 2 +-
+ ansible/roles/heat/templates/heat-api-cfn.json.j2           | 2 +-
+ ansible/roles/heat/templates/heat-api.json.j2               | 2 +-
+ ansible/roles/heat/templates/heat-engine.json.j2            | 2 +-
+ ansible/roles/horizon/templates/horizon.json.j2             | 2 +-
+ ansible/roles/ironic/templates/ironic-api.json.j2           | 2 +-
+ ansible/roles/ironic/templates/ironic-conductor.json.j2     | 2 +-
+ ansible/roles/ironic/templates/ironic-dnsmasq.json.j2       | 2 +-
+ ansible/roles/ironic/templates/ironic-http.json.j2          | 2 +-
+ .../ironic/templates/ironic-prometheus-exporter.json.j2     | 2 +-
+ ansible/roles/keystone/templates/keystone-fernet.json.j2    | 2 +-
+ ansible/roles/keystone/templates/keystone-httpd.json.j2     | 2 +-
+ ansible/roles/keystone/templates/keystone-ssh.json.j2       | 2 +-
+ ansible/roles/keystone/templates/keystone.json.j2           | 2 +-
+ ansible/roles/kuryr/templates/kuryr.json.j2                 | 2 +-
+ .../roles/letsencrypt/templates/letsencrypt-lego.json.j2    | 2 +-
+ .../letsencrypt/templates/letsencrypt-webserver.json.j2     | 2 +-
+ .../loadbalancer/templates/haproxy-ssh/haproxy-ssh.json.j2  | 2 +-
+ .../roles/loadbalancer/templates/haproxy/haproxy.json.j2    | 2 +-
+ .../loadbalancer/templates/keepalived/keepalived.json.j2    | 2 +-
+ .../roles/loadbalancer/templates/proxysql/proxysql.json.j2  | 2 +-
+ ansible/roles/magnum/templates/magnum-api.json.j2           | 2 +-
+ ansible/roles/magnum/templates/magnum-conductor.json.j2     | 2 +-
+ ansible/roles/manila/templates/manila-api.json.j2           | 2 +-
+ ansible/roles/manila/templates/manila-data.json.j2          | 2 +-
+ ansible/roles/manila/templates/manila-scheduler.json.j2     | 2 +-
+ ansible/roles/manila/templates/manila-share.json.j2         | 2 +-
+ ansible/roles/masakari/templates/masakari-api.json.j2       | 2 +-
+ ansible/roles/masakari/templates/masakari-engine.json.j2    | 2 +-
+ .../roles/masakari/templates/masakari-hostmonitor.json.j2   | 2 +-
+ .../masakari/templates/masakari-instancemonitor.json.j2     | 2 +-
+ ansible/roles/mistral/templates/mistral-api.json.j2         | 2 +-
+ ansible/roles/mistral/templates/mistral-engine.json.j2      | 2 +-
+ .../roles/mistral/templates/mistral-event-engine.json.j2    | 2 +-
+ ansible/roles/mistral/templates/mistral-executor.json.j2    | 2 +-
+ .../roles/neutron/templates/ironic-neutron-agent.json.j2    | 2 +-
+ ansible/roles/neutron/templates/neutron-bgp-dragent.json.j2 | 2 +-
+ ansible/roles/neutron/templates/neutron-dhcp-agent.json.j2  | 2 +-
+ ansible/roles/neutron/templates/neutron-eswitchd.json.j2    | 2 +-
+ .../neutron/templates/neutron-infoblox-ipam-agent.json.j2   | 2 +-
+ ansible/roles/neutron/templates/neutron-l3-agent.json.j2    | 2 +-
+ .../roles/neutron/templates/neutron-metadata-agent.json.j2  | 2 +-
+ .../roles/neutron/templates/neutron-metering-agent.json.j2  | 2 +-
+ ansible/roles/neutron/templates/neutron-mlnx-agent.json.j2  | 2 +-
+ .../templates/neutron-openvswitch-agent-xenapi.json.j2      | 2 +-
+ .../neutron/templates/neutron-openvswitch-agent.json.j2     | 2 +-
+ ansible/roles/neutron/templates/neutron-ovn-agent.json.j2   | 2 +-
+ .../templates/neutron-ovn-maintenance-worker.json.j2        | 2 +-
+ .../neutron/templates/neutron-ovn-metadata-agent.json.j2    | 2 +-
+ .../roles/neutron/templates/neutron-periodic-worker.json.j2 | 2 +-
+ ansible/roles/neutron/templates/neutron-rpc-server.json.j2  | 2 +-
+ ansible/roles/neutron/templates/neutron-server.json.j2      | 2 +-
+ ansible/roles/neutron/templates/neutron-sriov-agent.json.j2 | 2 +-
+ .../roles/nova-cell/templates/nova-cell-bootstrap.json.j2   | 2 +-
+ .../roles/nova-cell/templates/nova-compute-ironic.json.j2   | 2 +-
+ ansible/roles/nova-cell/templates/nova-compute.json.j2      | 2 +-
+ ansible/roles/nova-cell/templates/nova-conductor.json.j2    | 2 +-
+ ansible/roles/nova-cell/templates/nova-libvirt.json.j2      | 2 +-
+ ansible/roles/nova-cell/templates/nova-novncproxy.json.j2   | 2 +-
+ ansible/roles/nova-cell/templates/nova-serialproxy.json.j2  | 2 +-
+ .../roles/nova-cell/templates/nova-spicehtml5proxy.json.j2  | 2 +-
+ ansible/roles/nova-cell/templates/nova-ssh.json.j2          | 2 +-
+ ansible/roles/nova/templates/nova-api-bootstrap.json.j2     | 2 +-
+ ansible/roles/nova/templates/nova-api.json.j2               | 2 +-
+ ansible/roles/nova/templates/nova-scheduler.json.j2         | 2 +-
+ ansible/roles/nova/templates/nova-super-conductor.json.j2   | 2 +-
+ ansible/roles/octavia/templates/octavia-api.json.j2         | 2 +-
+ .../roles/octavia/templates/octavia-driver-agent.json.j2    | 2 +-
+ .../roles/octavia/templates/octavia-health-manager.json.j2  | 2 +-
+ .../roles/octavia/templates/octavia-housekeeping.json.j2    | 2 +-
+ ansible/roles/octavia/templates/octavia-worker.json.j2      | 2 +-
+ .../opensearch/templates/opensearch-dashboards.json.j2      | 2 +-
+ ansible/roles/opensearch/templates/opensearch.json.j2       | 2 +-
+ ansible/roles/placement/templates/placement-api.json.j2     | 2 +-
+ .../templates/prometheus-cadvisor.json.j2                   | 2 +-
+ .../templates/prometheus-node-exporter.json.j2              | 2 +-
+ .../prometheus/templates/prometheus-alertmanager.json.j2    | 2 +-
+ .../templates/prometheus-blackbox-exporter.json.j2          | 2 +-
+ .../templates/prometheus-elasticsearch-exporter.json.j2     | 2 +-
+ .../templates/prometheus-libvirt-exporter.json.j2           | 2 +-
+ .../templates/prometheus-memcached-exporter.json.j2         | 2 +-
+ .../prometheus/templates/prometheus-mysqld-exporter.json.j2 | 2 +-
+ .../templates/prometheus-openstack-exporter.json.j2         | 2 +-
+ .../roles/prometheus/templates/prometheus-server.json.j2    | 2 +-
+ ansible/roles/rabbitmq/templates/rabbitmq.json.j2           | 2 +-
+ ansible/roles/skyline/templates/skyline-apiserver.json.j2   | 2 +-
+ ansible/roles/skyline/templates/skyline-console.json.j2     | 2 +-
+ ansible/roles/tacker/templates/tacker-conductor.json.j2     | 2 +-
+ ansible/roles/tacker/templates/tacker-server.json.j2        | 2 +-
+ ansible/roles/telegraf/templates/telegraf.json.j2           | 2 +-
+ ansible/roles/trove/templates/trove-api.json.j2             | 2 +-
+ ansible/roles/trove/templates/trove-conductor.json.j2       | 2 +-
+ ansible/roles/trove/templates/trove-taskmanager.json.j2     | 2 +-
+ ansible/roles/watcher/templates/watcher-api.json.j2         | 2 +-
+ ansible/roles/watcher/templates/watcher-applier.json.j2     | 2 +-
+ ansible/roles/watcher/templates/watcher-engine.json.j2      | 2 +-
+ ansible/roles/zun/templates/zun-api.json.j2                 | 2 +-
+ ansible/roles/zun/templates/zun-cni-daemon.json.j2          | 2 +-
+ ansible/roles/zun/templates/zun-compute.json.j2             | 2 +-
+ ansible/roles/zun/templates/zun-wsproxy.json.j2             | 2 +-
+ ...y_restrictive_permissions_on_certs-a0e328cec29a4f3c.yaml | 6 ++++++
+ 139 files changed, 144 insertions(+), 139 deletions(-)
+ create mode 100644 releasenotes/notes/bug-2112280-overly_restrictive_permissions_on_certs-a0e328cec29a4f3c.yaml
+
+diff --git a/ansible/roles/aodh/templates/aodh-api.json.j2 b/ansible/roles/aodh/templates/aodh-api.json.j2
+index 844fe8db9..608627dad 100644
+--- a/ansible/roles/aodh/templates/aodh-api.json.j2
++++ b/ansible/roles/aodh/templates/aodh-api.json.j2
+@@ -32,7 +32,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/aodh/templates/aodh-evaluator.json.j2 b/ansible/roles/aodh/templates/aodh-evaluator.json.j2
+index 24dda5250..307c08be9 100644
+--- a/ansible/roles/aodh/templates/aodh-evaluator.json.j2
++++ b/ansible/roles/aodh/templates/aodh-evaluator.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/aodh/templates/aodh-listener.json.j2 b/ansible/roles/aodh/templates/aodh-listener.json.j2
+index 44f74cea9..5f3fbf982 100644
+--- a/ansible/roles/aodh/templates/aodh-listener.json.j2
++++ b/ansible/roles/aodh/templates/aodh-listener.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/aodh/templates/aodh-notifier.json.j2 b/ansible/roles/aodh/templates/aodh-notifier.json.j2
+index dcf23d1eb..e8974c4fb 100644
+--- a/ansible/roles/aodh/templates/aodh-notifier.json.j2
++++ b/ansible/roles/aodh/templates/aodh-notifier.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/barbican/templates/barbican-api.json.j2 b/ansible/roles/barbican/templates/barbican-api.json.j2
+index dade8c041..645233a28 100644
+--- a/ansible/roles/barbican/templates/barbican-api.json.j2
++++ b/ansible/roles/barbican/templates/barbican-api.json.j2
+@@ -42,7 +42,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/barbican/templates/barbican-keystone-listener.json.j2 b/ansible/roles/barbican/templates/barbican-keystone-listener.json.j2
+index 14545da03..6cb8df957 100644
+--- a/ansible/roles/barbican/templates/barbican-keystone-listener.json.j2
++++ b/ansible/roles/barbican/templates/barbican-keystone-listener.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/barbican/templates/barbican-worker.json.j2 b/ansible/roles/barbican/templates/barbican-worker.json.j2
+index cd540262f..9ff0e9996 100644
+--- a/ansible/roles/barbican/templates/barbican-worker.json.j2
++++ b/ansible/roles/barbican/templates/barbican-worker.json.j2
+@@ -18,7 +18,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/blazar/templates/blazar-api.json.j2 b/ansible/roles/blazar/templates/blazar-api.json.j2
+index 50fb62b38..57d867738 100644
+--- a/ansible/roles/blazar/templates/blazar-api.json.j2
++++ b/ansible/roles/blazar/templates/blazar-api.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/blazar/templates/blazar-manager.json.j2 b/ansible/roles/blazar/templates/blazar-manager.json.j2
+index de550dc52..fe71672ed 100644
+--- a/ansible/roles/blazar/templates/blazar-manager.json.j2
++++ b/ansible/roles/blazar/templates/blazar-manager.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/ceilometer/templates/ceilometer-central.json.j2 b/ansible/roles/ceilometer/templates/ceilometer-central.json.j2
+index dbb2e2dc0..7eddfe606 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer-central.json.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer-central.json.j2
+@@ -47,7 +47,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/ceilometer/templates/ceilometer-compute.json.j2 b/ansible/roles/ceilometer/templates/ceilometer-compute.json.j2
+index b652f7b0b..f98cdfe6e 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer-compute.json.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer-compute.json.j2
+@@ -41,7 +41,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/ceilometer/templates/ceilometer-ipmi.json.j2 b/ansible/roles/ceilometer/templates/ceilometer-ipmi.json.j2
+index fca9dbc48..a187505c8 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer-ipmi.json.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer-ipmi.json.j2
+@@ -35,7 +35,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/ceilometer/templates/ceilometer-notification.json.j2 b/ansible/roles/ceilometer/templates/ceilometer-notification.json.j2
+index 828fcfbe6..9dcffb311 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer-notification.json.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer-notification.json.j2
+@@ -47,7 +47,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/cinder/templates/cinder-api.json.j2 b/ansible/roles/cinder/templates/cinder-api.json.j2
+index 7729cf402..bbf72d39b 100644
+--- a/ansible/roles/cinder/templates/cinder-api.json.j2
++++ b/ansible/roles/cinder/templates/cinder-api.json.j2
+@@ -44,7 +44,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     {% endif %}],
+     "permissions": [
+diff --git a/ansible/roles/cinder/templates/cinder-backup.json.j2 b/ansible/roles/cinder/templates/cinder-backup.json.j2
+index 3022838ef..7e7f551a4 100644
+--- a/ansible/roles/cinder/templates/cinder-backup.json.j2
++++ b/ansible/roles/cinder/templates/cinder-backup.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/cinder/templates/cinder-scheduler.json.j2 b/ansible/roles/cinder/templates/cinder-scheduler.json.j2
+index dcc5b7fc3..ca02e9d04 100644
+--- a/ansible/roles/cinder/templates/cinder-scheduler.json.j2
++++ b/ansible/roles/cinder/templates/cinder-scheduler.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/cinder/templates/cinder-volume.json.j2 b/ansible/roles/cinder/templates/cinder-volume.json.j2
+index 7ccf1e743..f2b95887e 100644
+--- a/ansible/roles/cinder/templates/cinder-volume.json.j2
++++ b/ansible/roles/cinder/templates/cinder-volume.json.j2
+@@ -43,7 +43,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/cloudkitty/templates/cloudkitty-api.json.j2 b/ansible/roles/cloudkitty/templates/cloudkitty-api.json.j2
+index 3ba9b7221..9574bbafd 100644
+--- a/ansible/roles/cloudkitty/templates/cloudkitty-api.json.j2
++++ b/ansible/roles/cloudkitty/templates/cloudkitty-api.json.j2
+@@ -31,7 +31,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/cloudkitty/templates/cloudkitty-processor.json.j2 b/ansible/roles/cloudkitty/templates/cloudkitty-processor.json.j2
+index 5366b917b..3d71d0d0f 100644
+--- a/ansible/roles/cloudkitty/templates/cloudkitty-processor.json.j2
++++ b/ansible/roles/cloudkitty/templates/cloudkitty-processor.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/common/templates/kolla-toolbox.json.j2 b/ansible/roles/common/templates/kolla-toolbox.json.j2
+index 03c79a5cd..20922f7e1 100644
+--- a/ansible/roles/common/templates/kolla-toolbox.json.j2
++++ b/ansible/roles/common/templates/kolla-toolbox.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/cron/templates/cron.json.j2 b/ansible/roles/cron/templates/cron.json.j2
+index 3c712e8d4..963a41e94 100644
+--- a/ansible/roles/cron/templates/cron.json.j2
++++ b/ansible/roles/cron/templates/cron.json.j2
+@@ -12,7 +12,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/cyborg/templates/cyborg-agent.json.j2 b/ansible/roles/cyborg/templates/cyborg-agent.json.j2
+index 285c61b41..474396311 100644
+--- a/ansible/roles/cyborg/templates/cyborg-agent.json.j2
++++ b/ansible/roles/cyborg/templates/cyborg-agent.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/cyborg/templates/cyborg-api.json.j2 b/ansible/roles/cyborg/templates/cyborg-api.json.j2
+index 29a3f1d14..3ebdd8901 100644
+--- a/ansible/roles/cyborg/templates/cyborg-api.json.j2
++++ b/ansible/roles/cyborg/templates/cyborg-api.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/cyborg/templates/cyborg-conductor.json.j2 b/ansible/roles/cyborg/templates/cyborg-conductor.json.j2
+index a50a4e699..f205b864f 100644
+--- a/ansible/roles/cyborg/templates/cyborg-conductor.json.j2
++++ b/ansible/roles/cyborg/templates/cyborg-conductor.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/designate/templates/designate-api.json.j2 b/ansible/roles/designate/templates/designate-api.json.j2
+index b07b41dae..52bf5e80b 100644
+--- a/ansible/roles/designate/templates/designate-api.json.j2
++++ b/ansible/roles/designate/templates/designate-api.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/designate/templates/designate-backend-bind9.json.j2 b/ansible/roles/designate/templates/designate-backend-bind9.json.j2
+index bbfad04ae..0e5963220 100644
+--- a/ansible/roles/designate/templates/designate-backend-bind9.json.j2
++++ b/ansible/roles/designate/templates/designate-backend-bind9.json.j2
+@@ -28,7 +28,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/designate/templates/designate-central.json.j2 b/ansible/roles/designate/templates/designate-central.json.j2
+index 3f4f8bd03..a09e4a251 100644
+--- a/ansible/roles/designate/templates/designate-central.json.j2
++++ b/ansible/roles/designate/templates/designate-central.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/designate/templates/designate-mdns.json.j2 b/ansible/roles/designate/templates/designate-mdns.json.j2
+index 28907c9a0..29bf14f37 100644
+--- a/ansible/roles/designate/templates/designate-mdns.json.j2
++++ b/ansible/roles/designate/templates/designate-mdns.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/designate/templates/designate-producer.json.j2 b/ansible/roles/designate/templates/designate-producer.json.j2
+index e496a9d65..00f9a6130 100644
+--- a/ansible/roles/designate/templates/designate-producer.json.j2
++++ b/ansible/roles/designate/templates/designate-producer.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/designate/templates/designate-sink.json.j2 b/ansible/roles/designate/templates/designate-sink.json.j2
+index 39273e00a..427732a1e 100644
+--- a/ansible/roles/designate/templates/designate-sink.json.j2
++++ b/ansible/roles/designate/templates/designate-sink.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/designate/templates/designate-worker.json.j2 b/ansible/roles/designate/templates/designate-worker.json.j2
+index 4b4ee2dcb..c5500f795 100644
+--- a/ansible/roles/designate/templates/designate-worker.json.j2
++++ b/ansible/roles/designate/templates/designate-worker.json.j2
+@@ -38,7 +38,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/etcd/templates/etcd.json.j2 b/ansible/roles/etcd/templates/etcd.json.j2
+index 47af83cda..d488045d3 100644
+--- a/ansible/roles/etcd/templates/etcd.json.j2
++++ b/ansible/roles/etcd/templates/etcd.json.j2
+@@ -18,7 +18,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/fluentd/templates/fluentd.json.j2 b/ansible/roles/fluentd/templates/fluentd.json.j2
+index 906978f43..a593177a8 100644
+--- a/ansible/roles/fluentd/templates/fluentd.json.j2
++++ b/ansible/roles/fluentd/templates/fluentd.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/glance/templates/glance-api.json.j2 b/ansible/roles/glance/templates/glance-api.json.j2
+index 71e6a29fb..4b3d8525c 100644
+--- a/ansible/roles/glance/templates/glance-api.json.j2
++++ b/ansible/roles/glance/templates/glance-api.json.j2
+@@ -41,7 +41,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}{% if glance_backend_nvme | default(false) | bool %},
+         {
+             "source": "{{ container_config_directory }}/hostnqn",
+@@ -53,7 +53,6 @@
+             "source": "{{ container_config_directory }}/hostid",
+             "dest": "/etc/nvme/hostid",
+             "owner": "root",
+-            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/glance/templates/glance-tls-proxy.json.j2 b/ansible/roles/glance/templates/glance-tls-proxy.json.j2
+index 1eb1afacc..21f12f6c9 100644
+--- a/ansible/roles/glance/templates/glance-tls-proxy.json.j2
++++ b/ansible/roles/glance/templates/glance-tls-proxy.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/gnocchi/templates/gnocchi-api.json.j2 b/ansible/roles/gnocchi/templates/gnocchi-api.json.j2
+index 2fc22c646..1d21a900e 100644
+--- a/ansible/roles/gnocchi/templates/gnocchi-api.json.j2
++++ b/ansible/roles/gnocchi/templates/gnocchi-api.json.j2
+@@ -38,7 +38,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/gnocchi/templates/gnocchi-metricd.json.j2 b/ansible/roles/gnocchi/templates/gnocchi-metricd.json.j2
+index f9b4c6a53..8c81df9a6 100644
+--- a/ansible/roles/gnocchi/templates/gnocchi-metricd.json.j2
++++ b/ansible/roles/gnocchi/templates/gnocchi-metricd.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/gnocchi/templates/gnocchi-statsd.json.j2 b/ansible/roles/gnocchi/templates/gnocchi-statsd.json.j2
+index 0024b5405..04dd18386 100644
+--- a/ansible/roles/gnocchi/templates/gnocchi-statsd.json.j2
++++ b/ansible/roles/gnocchi/templates/gnocchi-statsd.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/grafana/templates/grafana.json.j2 b/ansible/roles/grafana/templates/grafana.json.j2
+index 8b47e25e7..f8d6c088e 100644
+--- a/ansible/roles/grafana/templates/grafana.json.j2
++++ b/ansible/roles/grafana/templates/grafana.json.j2
+@@ -47,7 +47,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/heat/templates/heat-api-cfn.json.j2 b/ansible/roles/heat/templates/heat-api-cfn.json.j2
+index 7868e4a1a..7e471f2f0 100644
+--- a/ansible/roles/heat/templates/heat-api-cfn.json.j2
++++ b/ansible/roles/heat/templates/heat-api-cfn.json.j2
+@@ -45,7 +45,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/heat/templates/heat-api.json.j2 b/ansible/roles/heat/templates/heat-api.json.j2
+index b3afb8182..c12e9be56 100644
+--- a/ansible/roles/heat/templates/heat-api.json.j2
++++ b/ansible/roles/heat/templates/heat-api.json.j2
+@@ -45,7 +45,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/heat/templates/heat-engine.json.j2 b/ansible/roles/heat/templates/heat-engine.json.j2
+index cea7c5b50..d43bccab9 100644
+--- a/ansible/roles/heat/templates/heat-engine.json.j2
++++ b/ansible/roles/heat/templates/heat-engine.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/horizon/templates/horizon.json.j2 b/ansible/roles/horizon/templates/horizon.json.j2
+index edbc335f8..0bccafd79 100644
+--- a/ansible/roles/horizon/templates/horizon.json.j2
++++ b/ansible/roles/horizon/templates/horizon.json.j2
+@@ -62,7 +62,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/ironic/templates/ironic-api.json.j2 b/ansible/roles/ironic/templates/ironic-api.json.j2
+index 7765e421f..0ff8accae 100644
+--- a/ansible/roles/ironic/templates/ironic-api.json.j2
++++ b/ansible/roles/ironic/templates/ironic-api.json.j2
+@@ -44,7 +44,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/ironic/templates/ironic-conductor.json.j2 b/ansible/roles/ironic/templates/ironic-conductor.json.j2
+index 7e109d8ea..e66ccc03b 100644
+--- a/ansible/roles/ironic/templates/ironic-conductor.json.j2
++++ b/ansible/roles/ironic/templates/ironic-conductor.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/ironic/templates/ironic-dnsmasq.json.j2 b/ansible/roles/ironic/templates/ironic-dnsmasq.json.j2
+index 379a4b701..df4302c73 100644
+--- a/ansible/roles/ironic/templates/ironic-dnsmasq.json.j2
++++ b/ansible/roles/ironic/templates/ironic-dnsmasq.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/ironic/templates/ironic-http.json.j2 b/ansible/roles/ironic/templates/ironic-http.json.j2
+index d726cd201..447115119 100644
+--- a/ansible/roles/ironic/templates/ironic-http.json.j2
++++ b/ansible/roles/ironic/templates/ironic-http.json.j2
+@@ -33,7 +33,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/ironic/templates/ironic-prometheus-exporter.json.j2 b/ansible/roles/ironic/templates/ironic-prometheus-exporter.json.j2
+index 993d4bb59..4dcecdef1 100644
+--- a/ansible/roles/ironic/templates/ironic-prometheus-exporter.json.j2
++++ b/ansible/roles/ironic/templates/ironic-prometheus-exporter.json.j2
+@@ -19,7 +19,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/keystone/templates/keystone-fernet.json.j2 b/ansible/roles/keystone/templates/keystone-fernet.json.j2
+index 7fc4c24f0..c7fd710ef 100644
+--- a/ansible/roles/keystone/templates/keystone-fernet.json.j2
++++ b/ansible/roles/keystone/templates/keystone-fernet.json.j2
+@@ -60,7 +60,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/keystone/templates/keystone-httpd.json.j2 b/ansible/roles/keystone/templates/keystone-httpd.json.j2
+index e16cf98be..b6701871a 100644
+--- a/ansible/roles/keystone/templates/keystone-httpd.json.j2
++++ b/ansible/roles/keystone/templates/keystone-httpd.json.j2
+@@ -47,7 +47,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/keystone/templates/keystone-ssh.json.j2 b/ansible/roles/keystone/templates/keystone-ssh.json.j2
+index 8defdaeee..cadf81697 100644
+--- a/ansible/roles/keystone/templates/keystone-ssh.json.j2
++++ b/ansible/roles/keystone/templates/keystone-ssh.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/keystone/templates/keystone.json.j2 b/ansible/roles/keystone/templates/keystone.json.j2
+index dda23b82b..908515f6c 100644
+--- a/ansible/roles/keystone/templates/keystone.json.j2
++++ b/ansible/roles/keystone/templates/keystone.json.j2
+@@ -84,7 +84,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/kuryr/templates/kuryr.json.j2 b/ansible/roles/kuryr/templates/kuryr.json.j2
+index 4ba23100f..5320594f9 100644
+--- a/ansible/roles/kuryr/templates/kuryr.json.j2
++++ b/ansible/roles/kuryr/templates/kuryr.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/letsencrypt/templates/letsencrypt-lego.json.j2 b/ansible/roles/letsencrypt/templates/letsencrypt-lego.json.j2
+index 0791f49c9..6a29ef0c8 100644
+--- a/ansible/roles/letsencrypt/templates/letsencrypt-lego.json.j2
++++ b/ansible/roles/letsencrypt/templates/letsencrypt-lego.json.j2
+@@ -25,7 +25,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/letsencrypt/templates/letsencrypt-webserver.json.j2 b/ansible/roles/letsencrypt/templates/letsencrypt-webserver.json.j2
+index 195c37442..a2ccedcbc 100644
+--- a/ansible/roles/letsencrypt/templates/letsencrypt-webserver.json.j2
++++ b/ansible/roles/letsencrypt/templates/letsencrypt-webserver.json.j2
+@@ -14,7 +14,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/loadbalancer/templates/haproxy-ssh/haproxy-ssh.json.j2 b/ansible/roles/loadbalancer/templates/haproxy-ssh/haproxy-ssh.json.j2
+index bf5f18de0..c61fc44d8 100644
+--- a/ansible/roles/loadbalancer/templates/haproxy-ssh/haproxy-ssh.json.j2
++++ b/ansible/roles/loadbalancer/templates/haproxy-ssh/haproxy-ssh.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/loadbalancer/templates/haproxy/haproxy.json.j2 b/ansible/roles/loadbalancer/templates/haproxy/haproxy.json.j2
+index 0850e15c7..ab19dee27 100644
+--- a/ansible/roles/loadbalancer/templates/haproxy/haproxy.json.j2
++++ b/ansible/roles/loadbalancer/templates/haproxy/haproxy.json.j2
+@@ -45,7 +45,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/loadbalancer/templates/keepalived/keepalived.json.j2 b/ansible/roles/loadbalancer/templates/keepalived/keepalived.json.j2
+index e2c7c89da..77fa1826f 100644
+--- a/ansible/roles/loadbalancer/templates/keepalived/keepalived.json.j2
++++ b/ansible/roles/loadbalancer/templates/keepalived/keepalived.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/loadbalancer/templates/proxysql/proxysql.json.j2 b/ansible/roles/loadbalancer/templates/proxysql/proxysql.json.j2
+index ae1e90856..f720f18e0 100644
+--- a/ansible/roles/loadbalancer/templates/proxysql/proxysql.json.j2
++++ b/ansible/roles/loadbalancer/templates/proxysql/proxysql.json.j2
+@@ -29,7 +29,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+         {% if database_enable_tls_backend | bool %},
+         {
+diff --git a/ansible/roles/magnum/templates/magnum-api.json.j2 b/ansible/roles/magnum/templates/magnum-api.json.j2
+index 671c12205..1e72ef921 100644
+--- a/ansible/roles/magnum/templates/magnum-api.json.j2
++++ b/ansible/roles/magnum/templates/magnum-api.json.j2
+@@ -24,7 +24,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/magnum/templates/magnum-conductor.json.j2 b/ansible/roles/magnum/templates/magnum-conductor.json.j2
+index 8d077396e..dda2902f4 100644
+--- a/ansible/roles/magnum/templates/magnum-conductor.json.j2
++++ b/ansible/roles/magnum/templates/magnum-conductor.json.j2
+@@ -24,7 +24,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/manila/templates/manila-api.json.j2 b/ansible/roles/manila/templates/manila-api.json.j2
+index cd189484c..be39b9125 100644
+--- a/ansible/roles/manila/templates/manila-api.json.j2
++++ b/ansible/roles/manila/templates/manila-api.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/manila/templates/manila-data.json.j2 b/ansible/roles/manila/templates/manila-data.json.j2
+index 6dbd175ef..45bf65de8 100644
+--- a/ansible/roles/manila/templates/manila-data.json.j2
++++ b/ansible/roles/manila/templates/manila-data.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/manila/templates/manila-scheduler.json.j2 b/ansible/roles/manila/templates/manila-scheduler.json.j2
+index 4f7c7b5af..cbae07b7f 100644
+--- a/ansible/roles/manila/templates/manila-scheduler.json.j2
++++ b/ansible/roles/manila/templates/manila-scheduler.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/manila/templates/manila-share.json.j2 b/ansible/roles/manila/templates/manila-share.json.j2
+index b304665fd..d2f469bc4 100644
+--- a/ansible/roles/manila/templates/manila-share.json.j2
++++ b/ansible/roles/manila/templates/manila-share.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/masakari/templates/masakari-api.json.j2 b/ansible/roles/masakari/templates/masakari-api.json.j2
+index b0b2ca370..80a534cb0 100644
+--- a/ansible/roles/masakari/templates/masakari-api.json.j2
++++ b/ansible/roles/masakari/templates/masakari-api.json.j2
+@@ -38,7 +38,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/masakari/templates/masakari-engine.json.j2 b/ansible/roles/masakari/templates/masakari-engine.json.j2
+index 681b3bf9a..5bc11fdf6 100644
+--- a/ansible/roles/masakari/templates/masakari-engine.json.j2
++++ b/ansible/roles/masakari/templates/masakari-engine.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/masakari/templates/masakari-hostmonitor.json.j2 b/ansible/roles/masakari/templates/masakari-hostmonitor.json.j2
+index f2c6015b4..e8e0f334a 100644
+--- a/ansible/roles/masakari/templates/masakari-hostmonitor.json.j2
++++ b/ansible/roles/masakari/templates/masakari-hostmonitor.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/masakari/templates/masakari-instancemonitor.json.j2 b/ansible/roles/masakari/templates/masakari-instancemonitor.json.j2
+index d4be66f59..20ad90ba1 100644
+--- a/ansible/roles/masakari/templates/masakari-instancemonitor.json.j2
++++ b/ansible/roles/masakari/templates/masakari-instancemonitor.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/mistral/templates/mistral-api.json.j2 b/ansible/roles/mistral/templates/mistral-api.json.j2
+index c92e8c47c..a1fb847dc 100644
+--- a/ansible/roles/mistral/templates/mistral-api.json.j2
++++ b/ansible/roles/mistral/templates/mistral-api.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/mistral/templates/mistral-engine.json.j2 b/ansible/roles/mistral/templates/mistral-engine.json.j2
+index bab45348f..e8fd904f9 100644
+--- a/ansible/roles/mistral/templates/mistral-engine.json.j2
++++ b/ansible/roles/mistral/templates/mistral-engine.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/mistral/templates/mistral-event-engine.json.j2 b/ansible/roles/mistral/templates/mistral-event-engine.json.j2
+index 67e8dc516..70426ade2 100644
+--- a/ansible/roles/mistral/templates/mistral-event-engine.json.j2
++++ b/ansible/roles/mistral/templates/mistral-event-engine.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/mistral/templates/mistral-executor.json.j2 b/ansible/roles/mistral/templates/mistral-executor.json.j2
+index e409bdab6..77d97deb5 100644
+--- a/ansible/roles/mistral/templates/mistral-executor.json.j2
++++ b/ansible/roles/mistral/templates/mistral-executor.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/ironic-neutron-agent.json.j2 b/ansible/roles/neutron/templates/ironic-neutron-agent.json.j2
+index bcec1d788..28bce9440 100644
+--- a/ansible/roles/neutron/templates/ironic-neutron-agent.json.j2
++++ b/ansible/roles/neutron/templates/ironic-neutron-agent.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-bgp-dragent.json.j2 b/ansible/roles/neutron/templates/neutron-bgp-dragent.json.j2
+index 8d25944b0..48a35bf9a 100644
+--- a/ansible/roles/neutron/templates/neutron-bgp-dragent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-bgp-dragent.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-dhcp-agent.json.j2 b/ansible/roles/neutron/templates/neutron-dhcp-agent.json.j2
+index 116585298..3148c0597 100644
+--- a/ansible/roles/neutron/templates/neutron-dhcp-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-dhcp-agent.json.j2
+@@ -29,7 +29,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-eswitchd.json.j2 b/ansible/roles/neutron/templates/neutron-eswitchd.json.j2
+index 1fba527b1..41d8b879d 100644
+--- a/ansible/roles/neutron/templates/neutron-eswitchd.json.j2
++++ b/ansible/roles/neutron/templates/neutron-eswitchd.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-infoblox-ipam-agent.json.j2 b/ansible/roles/neutron/templates/neutron-infoblox-ipam-agent.json.j2
+index b66d78a11..34efa2d43 100644
+--- a/ansible/roles/neutron/templates/neutron-infoblox-ipam-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-infoblox-ipam-agent.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-l3-agent.json.j2 b/ansible/roles/neutron/templates/neutron-l3-agent.json.j2
+index 2f9e2ab89..8f76e602d 100644
+--- a/ansible/roles/neutron/templates/neutron-l3-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-l3-agent.json.j2
+@@ -41,7 +41,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-metadata-agent.json.j2 b/ansible/roles/neutron/templates/neutron-metadata-agent.json.j2
+index 4eaef800f..e178996f4 100644
+--- a/ansible/roles/neutron/templates/neutron-metadata-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-metadata-agent.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-metering-agent.json.j2 b/ansible/roles/neutron/templates/neutron-metering-agent.json.j2
+index a2921d0c2..198ca6575 100644
+--- a/ansible/roles/neutron/templates/neutron-metering-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-metering-agent.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-mlnx-agent.json.j2 b/ansible/roles/neutron/templates/neutron-mlnx-agent.json.j2
+index c7e78ee69..a88c44190 100644
+--- a/ansible/roles/neutron/templates/neutron-mlnx-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-mlnx-agent.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-openvswitch-agent-xenapi.json.j2 b/ansible/roles/neutron/templates/neutron-openvswitch-agent-xenapi.json.j2
+index 3bb327f0f..1ea668f4d 100644
+--- a/ansible/roles/neutron/templates/neutron-openvswitch-agent-xenapi.json.j2
++++ b/ansible/roles/neutron/templates/neutron-openvswitch-agent-xenapi.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-openvswitch-agent.json.j2 b/ansible/roles/neutron/templates/neutron-openvswitch-agent.json.j2
+index 33c638547..ba0b523fd 100644
+--- a/ansible/roles/neutron/templates/neutron-openvswitch-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-openvswitch-agent.json.j2
+@@ -39,7 +39,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-ovn-agent.json.j2 b/ansible/roles/neutron/templates/neutron-ovn-agent.json.j2
+index a7534e40a..a5b5bd029 100644
+--- a/ansible/roles/neutron/templates/neutron-ovn-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-ovn-agent.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-ovn-maintenance-worker.json.j2 b/ansible/roles/neutron/templates/neutron-ovn-maintenance-worker.json.j2
+index 42937f208..f1d2c7781 100644
+--- a/ansible/roles/neutron/templates/neutron-ovn-maintenance-worker.json.j2
++++ b/ansible/roles/neutron/templates/neutron-ovn-maintenance-worker.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-ovn-metadata-agent.json.j2 b/ansible/roles/neutron/templates/neutron-ovn-metadata-agent.json.j2
+index 73d584691..1a987f6af 100644
+--- a/ansible/roles/neutron/templates/neutron-ovn-metadata-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-ovn-metadata-agent.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-periodic-worker.json.j2 b/ansible/roles/neutron/templates/neutron-periodic-worker.json.j2
+index eb3b67e9b..fa3ccb5d4 100644
+--- a/ansible/roles/neutron/templates/neutron-periodic-worker.json.j2
++++ b/ansible/roles/neutron/templates/neutron-periodic-worker.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-rpc-server.json.j2 b/ansible/roles/neutron/templates/neutron-rpc-server.json.j2
+index da9a77783..412ec7bc9 100644
+--- a/ansible/roles/neutron/templates/neutron-rpc-server.json.j2
++++ b/ansible/roles/neutron/templates/neutron-rpc-server.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-server.json.j2 b/ansible/roles/neutron/templates/neutron-server.json.j2
+index a04e9e0ce..8d27d7d69 100644
+--- a/ansible/roles/neutron/templates/neutron-server.json.j2
++++ b/ansible/roles/neutron/templates/neutron-server.json.j2
+@@ -80,7 +80,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/neutron/templates/neutron-sriov-agent.json.j2 b/ansible/roles/neutron/templates/neutron-sriov-agent.json.j2
+index 204249e13..38322559b 100644
+--- a/ansible/roles/neutron/templates/neutron-sriov-agent.json.j2
++++ b/ansible/roles/neutron/templates/neutron-sriov-agent.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova-cell/templates/nova-cell-bootstrap.json.j2 b/ansible/roles/nova-cell/templates/nova-cell-bootstrap.json.j2
+index 2d22a2d45..89b76d852 100644
+--- a/ansible/roles/nova-cell/templates/nova-cell-bootstrap.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-cell-bootstrap.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova-cell/templates/nova-compute-ironic.json.j2 b/ansible/roles/nova-cell/templates/nova-compute-ironic.json.j2
+index 2385e402d..a9832e6bd 100644
+--- a/ansible/roles/nova-cell/templates/nova-compute-ironic.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-compute-ironic.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova-cell/templates/nova-compute.json.j2 b/ansible/roles/nova-cell/templates/nova-compute.json.j2
+index 97bd5235e..400301d21 100644
+--- a/ansible/roles/nova-cell/templates/nova-compute.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-compute.json.j2
+@@ -78,7 +78,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}{% if enable_multipathd | bool %},
+         {
+             "source": "{{ container_config_directory }}/multipath.conf",
+diff --git a/ansible/roles/nova-cell/templates/nova-conductor.json.j2 b/ansible/roles/nova-cell/templates/nova-conductor.json.j2
+index 92925888f..9a4dbda1a 100644
+--- a/ansible/roles/nova-cell/templates/nova-conductor.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-conductor.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2 b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
+index 959022724..b70eac340 100644
+--- a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
+@@ -72,7 +72,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}{% if nova_qemu_wrapper_file and nova_qemu_wrapper_file.stat.exists %},
+         {
+             "source": "{{ container_config_directory }}/qemu-wrapper",
+diff --git a/ansible/roles/nova-cell/templates/nova-novncproxy.json.j2 b/ansible/roles/nova-cell/templates/nova-novncproxy.json.j2
+index 8ff5b39e6..37a7caf8a 100644
+--- a/ansible/roles/nova-cell/templates/nova-novncproxy.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-novncproxy.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova-cell/templates/nova-serialproxy.json.j2 b/ansible/roles/nova-cell/templates/nova-serialproxy.json.j2
+index 867f9615f..64819c092 100644
+--- a/ansible/roles/nova-cell/templates/nova-serialproxy.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-serialproxy.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova-cell/templates/nova-spicehtml5proxy.json.j2 b/ansible/roles/nova-cell/templates/nova-spicehtml5proxy.json.j2
+index 5585803fe..85977667c 100644
+--- a/ansible/roles/nova-cell/templates/nova-spicehtml5proxy.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-spicehtml5proxy.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova-cell/templates/nova-ssh.json.j2 b/ansible/roles/nova-cell/templates/nova-ssh.json.j2
+index be378238c..de5483bc1 100644
+--- a/ansible/roles/nova-cell/templates/nova-ssh.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-ssh.json.j2
+@@ -29,7 +29,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/nova/templates/nova-api-bootstrap.json.j2 b/ansible/roles/nova/templates/nova-api-bootstrap.json.j2
+index 2d22a2d45..89b76d852 100644
+--- a/ansible/roles/nova/templates/nova-api-bootstrap.json.j2
++++ b/ansible/roles/nova/templates/nova-api-bootstrap.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova/templates/nova-api.json.j2 b/ansible/roles/nova/templates/nova-api.json.j2
+index af6bc96b9..fcfb5e952 100644
+--- a/ansible/roles/nova/templates/nova-api.json.j2
++++ b/ansible/roles/nova/templates/nova-api.json.j2
+@@ -50,7 +50,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova/templates/nova-scheduler.json.j2 b/ansible/roles/nova/templates/nova-scheduler.json.j2
+index 9027fb7c0..3de580634 100644
+--- a/ansible/roles/nova/templates/nova-scheduler.json.j2
++++ b/ansible/roles/nova/templates/nova-scheduler.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/nova/templates/nova-super-conductor.json.j2 b/ansible/roles/nova/templates/nova-super-conductor.json.j2
+index 92925888f..9a4dbda1a 100644
+--- a/ansible/roles/nova/templates/nova-super-conductor.json.j2
++++ b/ansible/roles/nova/templates/nova-super-conductor.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/octavia/templates/octavia-api.json.j2 b/ansible/roles/octavia/templates/octavia-api.json.j2
+index f9b3ebfc5..f82e181d6 100644
+--- a/ansible/roles/octavia/templates/octavia-api.json.j2
++++ b/ansible/roles/octavia/templates/octavia-api.json.j2
+@@ -44,7 +44,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/octavia/templates/octavia-driver-agent.json.j2 b/ansible/roles/octavia/templates/octavia-driver-agent.json.j2
+index bb5e1145a..582ea2010 100644
+--- a/ansible/roles/octavia/templates/octavia-driver-agent.json.j2
++++ b/ansible/roles/octavia/templates/octavia-driver-agent.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/octavia/templates/octavia-health-manager.json.j2 b/ansible/roles/octavia/templates/octavia-health-manager.json.j2
+index a7efd9279..335b5b6ca 100644
+--- a/ansible/roles/octavia/templates/octavia-health-manager.json.j2
++++ b/ansible/roles/octavia/templates/octavia-health-manager.json.j2
+@@ -35,7 +35,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/octavia/templates/octavia-housekeeping.json.j2 b/ansible/roles/octavia/templates/octavia-housekeeping.json.j2
+index 8f80b73a9..0b4360a90 100644
+--- a/ansible/roles/octavia/templates/octavia-housekeeping.json.j2
++++ b/ansible/roles/octavia/templates/octavia-housekeeping.json.j2
+@@ -35,7 +35,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/octavia/templates/octavia-worker.json.j2 b/ansible/roles/octavia/templates/octavia-worker.json.j2
+index 02fa3be1e..9b8c5cdd8 100644
+--- a/ansible/roles/octavia/templates/octavia-worker.json.j2
++++ b/ansible/roles/octavia/templates/octavia-worker.json.j2
+@@ -35,7 +35,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/opensearch/templates/opensearch-dashboards.json.j2 b/ansible/roles/opensearch/templates/opensearch-dashboards.json.j2
+index 6cb96cb4a..a23ce317a 100644
+--- a/ansible/roles/opensearch/templates/opensearch-dashboards.json.j2
++++ b/ansible/roles/opensearch/templates/opensearch-dashboards.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/opensearch/templates/opensearch.json.j2 b/ansible/roles/opensearch/templates/opensearch.json.j2
+index 25bb7b770..bd64d0f46 100644
+--- a/ansible/roles/opensearch/templates/opensearch.json.j2
++++ b/ansible/roles/opensearch/templates/opensearch.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/placement/templates/placement-api.json.j2 b/ansible/roles/placement/templates/placement-api.json.j2
+index 29409eac3..f256a89ee 100644
+--- a/ansible/roles/placement/templates/placement-api.json.j2
++++ b/ansible/roles/placement/templates/placement-api.json.j2
+@@ -50,7 +50,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/prometheus-node-exporters/templates/prometheus-cadvisor.json.j2 b/ansible/roles/prometheus-node-exporters/templates/prometheus-cadvisor.json.j2
+index 7b00cfa5a..c4e5b3d91 100644
+--- a/ansible/roles/prometheus-node-exporters/templates/prometheus-cadvisor.json.j2
++++ b/ansible/roles/prometheus-node-exporters/templates/prometheus-cadvisor.json.j2
+@@ -6,7 +6,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }
+ {% endif %}
+     ],
+diff --git a/ansible/roles/prometheus-node-exporters/templates/prometheus-node-exporter.json.j2 b/ansible/roles/prometheus-node-exporters/templates/prometheus-node-exporter.json.j2
+index 41e8e8fea..9cf30f1b7 100644
+--- a/ansible/roles/prometheus-node-exporters/templates/prometheus-node-exporter.json.j2
++++ b/ansible/roles/prometheus-node-exporters/templates/prometheus-node-exporter.json.j2
+@@ -6,7 +6,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }
+ {% endif %}
+     ],
+diff --git a/ansible/roles/prometheus/templates/prometheus-alertmanager.json.j2 b/ansible/roles/prometheus/templates/prometheus-alertmanager.json.j2
+index 93c2767db..dcbd38706 100644
+--- a/ansible/roles/prometheus/templates/prometheus-alertmanager.json.j2
++++ b/ansible/roles/prometheus/templates/prometheus-alertmanager.json.j2
+@@ -18,7 +18,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/prometheus/templates/prometheus-blackbox-exporter.json.j2 b/ansible/roles/prometheus/templates/prometheus-blackbox-exporter.json.j2
+index 924b49550..cd6c2e0de 100644
+--- a/ansible/roles/prometheus/templates/prometheus-blackbox-exporter.json.j2
++++ b/ansible/roles/prometheus/templates/prometheus-blackbox-exporter.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/prometheus/templates/prometheus-elasticsearch-exporter.json.j2 b/ansible/roles/prometheus/templates/prometheus-elasticsearch-exporter.json.j2
+index 330743a0f..2a484d205 100644
+--- a/ansible/roles/prometheus/templates/prometheus-elasticsearch-exporter.json.j2
++++ b/ansible/roles/prometheus/templates/prometheus-elasticsearch-exporter.json.j2
+@@ -6,7 +6,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }
+ {% endif %}
+     ],
+diff --git a/ansible/roles/prometheus/templates/prometheus-libvirt-exporter.json.j2 b/ansible/roles/prometheus/templates/prometheus-libvirt-exporter.json.j2
+index 47bf22571..b4bd1cb31 100644
+--- a/ansible/roles/prometheus/templates/prometheus-libvirt-exporter.json.j2
++++ b/ansible/roles/prometheus/templates/prometheus-libvirt-exporter.json.j2
+@@ -6,7 +6,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ]
+ }
+diff --git a/ansible/roles/prometheus/templates/prometheus-memcached-exporter.json.j2 b/ansible/roles/prometheus/templates/prometheus-memcached-exporter.json.j2
+index f75fbcccb..fb3143e1f 100644
+--- a/ansible/roles/prometheus/templates/prometheus-memcached-exporter.json.j2
++++ b/ansible/roles/prometheus/templates/prometheus-memcached-exporter.json.j2
+@@ -6,7 +6,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }
+ {% endif %}
+     ],
+diff --git a/ansible/roles/prometheus/templates/prometheus-mysqld-exporter.json.j2 b/ansible/roles/prometheus/templates/prometheus-mysqld-exporter.json.j2
+index 0ab96dd6a..4a923702f 100644
+--- a/ansible/roles/prometheus/templates/prometheus-mysqld-exporter.json.j2
++++ b/ansible/roles/prometheus/templates/prometheus-mysqld-exporter.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/prometheus/templates/prometheus-openstack-exporter.json.j2 b/ansible/roles/prometheus/templates/prometheus-openstack-exporter.json.j2
+index 48bec881d..f05488c4f 100644
+--- a/ansible/roles/prometheus/templates/prometheus-openstack-exporter.json.j2
++++ b/ansible/roles/prometheus/templates/prometheus-openstack-exporter.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/prometheus/templates/prometheus-server.json.j2 b/ansible/roles/prometheus/templates/prometheus-server.json.j2
+index 4f875bf3b..394dd21c5 100644
+--- a/ansible/roles/prometheus/templates/prometheus-server.json.j2
++++ b/ansible/roles/prometheus/templates/prometheus-server.json.j2
+@@ -31,7 +31,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/rabbitmq/templates/rabbitmq.json.j2 b/ansible/roles/rabbitmq/templates/rabbitmq.json.j2
+index 8b7aa65b6..94d3105b8 100644
+--- a/ansible/roles/rabbitmq/templates/rabbitmq.json.j2
++++ b/ansible/roles/rabbitmq/templates/rabbitmq.json.j2
+@@ -53,7 +53,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/skyline/templates/skyline-apiserver.json.j2 b/ansible/roles/skyline/templates/skyline-apiserver.json.j2
+index f914d48b8..485c243b5 100644
+--- a/ansible/roles/skyline/templates/skyline-apiserver.json.j2
++++ b/ansible/roles/skyline/templates/skyline-apiserver.json.j2
+@@ -29,7 +29,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+         ],
+     "permissions": [
+diff --git a/ansible/roles/skyline/templates/skyline-console.json.j2 b/ansible/roles/skyline/templates/skyline-console.json.j2
+index 6d9e0a082..ca9837531 100644
+--- a/ansible/roles/skyline/templates/skyline-console.json.j2
++++ b/ansible/roles/skyline/templates/skyline-console.json.j2
+@@ -36,7 +36,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+         ],
+     "permissions": [
+diff --git a/ansible/roles/tacker/templates/tacker-conductor.json.j2 b/ansible/roles/tacker/templates/tacker-conductor.json.j2
+index 02cc0ef09..a103bdc80 100644
+--- a/ansible/roles/tacker/templates/tacker-conductor.json.j2
++++ b/ansible/roles/tacker/templates/tacker-conductor.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/tacker/templates/tacker-server.json.j2 b/ansible/roles/tacker/templates/tacker-server.json.j2
+index 950d63dc2..346c1879e 100644
+--- a/ansible/roles/tacker/templates/tacker-server.json.j2
++++ b/ansible/roles/tacker/templates/tacker-server.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/telegraf/templates/telegraf.json.j2 b/ansible/roles/telegraf/templates/telegraf.json.j2
+index 8e5bd71a4..dedd5c2f4 100644
+--- a/ansible/roles/telegraf/templates/telegraf.json.j2
++++ b/ansible/roles/telegraf/templates/telegraf.json.j2
+@@ -18,7 +18,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/trove/templates/trove-api.json.j2 b/ansible/roles/trove/templates/trove-api.json.j2
+index a47cfdd5a..b07c5342d 100644
+--- a/ansible/roles/trove/templates/trove-api.json.j2
++++ b/ansible/roles/trove/templates/trove-api.json.j2
+@@ -37,7 +37,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     {% endif %}],
+     "permissions": [
+diff --git a/ansible/roles/trove/templates/trove-conductor.json.j2 b/ansible/roles/trove/templates/trove-conductor.json.j2
+index f935a4bc3..0f76dcfc5 100644
+--- a/ansible/roles/trove/templates/trove-conductor.json.j2
++++ b/ansible/roles/trove/templates/trove-conductor.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/trove/templates/trove-taskmanager.json.j2 b/ansible/roles/trove/templates/trove-taskmanager.json.j2
+index 06e377173..bda194a5e 100644
+--- a/ansible/roles/trove/templates/trove-taskmanager.json.j2
++++ b/ansible/roles/trove/templates/trove-taskmanager.json.j2
+@@ -23,7 +23,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/watcher/templates/watcher-api.json.j2 b/ansible/roles/watcher/templates/watcher-api.json.j2
+index c80bb842e..03c581318 100644
+--- a/ansible/roles/watcher/templates/watcher-api.json.j2
++++ b/ansible/roles/watcher/templates/watcher-api.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/watcher/templates/watcher-applier.json.j2 b/ansible/roles/watcher/templates/watcher-applier.json.j2
+index 2c5fc7268..a0d154ca7 100644
+--- a/ansible/roles/watcher/templates/watcher-applier.json.j2
++++ b/ansible/roles/watcher/templates/watcher-applier.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/watcher/templates/watcher-engine.json.j2 b/ansible/roles/watcher/templates/watcher-engine.json.j2
+index ee8e20e00..a53c6bfef 100644
+--- a/ansible/roles/watcher/templates/watcher-engine.json.j2
++++ b/ansible/roles/watcher/templates/watcher-engine.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/zun/templates/zun-api.json.j2 b/ansible/roles/zun/templates/zun-api.json.j2
+index 18ed96172..1c34b8500 100644
+--- a/ansible/roles/zun/templates/zun-api.json.j2
++++ b/ansible/roles/zun/templates/zun-api.json.j2
+@@ -25,7 +25,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/zun/templates/zun-cni-daemon.json.j2 b/ansible/roles/zun/templates/zun-cni-daemon.json.j2
+index 3e165e06b..0ca13a6b2 100644
+--- a/ansible/roles/zun/templates/zun-cni-daemon.json.j2
++++ b/ansible/roles/zun/templates/zun-cni-daemon.json.j2
+@@ -11,7 +11,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/zun/templates/zun-compute.json.j2 b/ansible/roles/zun/templates/zun-compute.json.j2
+index c9f9a7ccd..15984851a 100644
+--- a/ansible/roles/zun/templates/zun-compute.json.j2
++++ b/ansible/roles/zun/templates/zun-compute.json.j2
+@@ -31,7 +31,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/ansible/roles/zun/templates/zun-wsproxy.json.j2 b/ansible/roles/zun/templates/zun-wsproxy.json.j2
+index 89dd398b6..c44f58b41 100644
+--- a/ansible/roles/zun/templates/zun-wsproxy.json.j2
++++ b/ansible/roles/zun/templates/zun-wsproxy.json.j2
+@@ -17,7 +17,7 @@
+             "source": "{{ container_config_directory }}/ca-certificates",
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+-            "perm": "0600"
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "permissions": [
+diff --git a/releasenotes/notes/bug-2112280-overly_restrictive_permissions_on_certs-a0e328cec29a4f3c.yaml b/releasenotes/notes/bug-2112280-overly_restrictive_permissions_on_certs-a0e328cec29a4f3c.yaml
+new file mode 100644
+index 000000000..103d24d60
+--- /dev/null
++++ b/releasenotes/notes/bug-2112280-overly_restrictive_permissions_on_certs-a0e328cec29a4f3c.yaml
+@@ -0,0 +1,6 @@
++---
++fixes:
++  - |
++    Fixes overly restrictive permissions on certificates in
++    ``/var/lib/kolla/share/ca-certificates`` path in containers that
++    require access to these certificates.
+-- 
+2.53.0
+
