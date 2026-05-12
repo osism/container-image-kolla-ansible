@@ -132,7 +132,7 @@ if [ "$OPENSTACK_VERSION" = "master" ]; then git clone https://github.com/openst
 if [ "$OPENSTACK_VERSION" != "master" ]; then git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository; fi
 
 # apply patches
-for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch"); do
+for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch" | LC_ALL=C sort); do
   echo $patchfile;
   ( cd /repository && patch --forward --batch -p1 --dry-run ) < $patchfile || exit 1
   ( cd /repository && patch --forward --batch -p1 ) < $patchfile
