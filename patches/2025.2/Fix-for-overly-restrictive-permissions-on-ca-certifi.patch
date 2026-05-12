@@ -1,4 +1,4 @@
-From 83d3e2d9fe42a36c68ae707879e33f93217a2ebc Mon Sep 17 00:00:00 2001
+From 5fa2fb465d6a5b46b54d6dcccc689fcc99f64fca Mon Sep 17 00:00:00 2001
 From: Rafal Lewandowski <rafal@stackhpc.com>
 Date: Sun, 30 Nov 2025 18:30:21 +0100
 Subject: [PATCH] Fix for overly restrictive permissions on ca-certificates
@@ -7,7 +7,9 @@ Subject: [PATCH] Fix for overly restrictive permissions on ca-certificates
 Closes-Bug: #2112280
 Change-Id: I52499bdf2b7fc70f91a4c2920749bfef83a79850
 Signed-off-by: Rafal Lewandowski <rafal@stackhpc.com>
-Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+Signed-off-by: Michal Nasiadka <mnasiadka@gmail.com>
+(cherry picked from commit e302bab31f30296f7d6f41c3d46e19cf5668b97a)
+(cherry picked from commit adec4ae2ec454f543183fcaf9dcb168e684ed927)
 ---
  ansible/roles/aodh/templates/aodh-api.json.j2               | 2 +-
  ansible/roles/aodh/templates/aodh-evaluator.json.j2         | 2 +-
@@ -42,8 +44,7 @@ Signed-off-by: Jan Horstmann <horstmann@osism.tech>
  ansible/roles/designate/templates/designate-worker.json.j2  | 2 +-
  ansible/roles/etcd/templates/etcd.json.j2                   | 2 +-
  ansible/roles/fluentd/templates/fluentd.json.j2             | 2 +-
- ansible/roles/glance/templates/glance-api.json.j2           | 3 +--
- ansible/roles/glance/templates/glance-tls-proxy.json.j2     | 2 +-
+ ansible/roles/glance/templates/glance-api.json.j2           | 2 +-
  ansible/roles/gnocchi/templates/gnocchi-api.json.j2         | 2 +-
  ansible/roles/gnocchi/templates/gnocchi-metricd.json.j2     | 2 +-
  ansible/roles/gnocchi/templates/gnocchi-statsd.json.j2      | 2 +-
@@ -61,7 +62,6 @@ Signed-off-by: Jan Horstmann <horstmann@osism.tech>
  ansible/roles/keystone/templates/keystone-httpd.json.j2     | 2 +-
  ansible/roles/keystone/templates/keystone-ssh.json.j2       | 2 +-
  ansible/roles/keystone/templates/keystone.json.j2           | 2 +-
- ansible/roles/kuryr/templates/kuryr.json.j2                 | 2 +-
  .../roles/letsencrypt/templates/letsencrypt-lego.json.j2    | 2 +-
  .../letsencrypt/templates/letsencrypt-webserver.json.j2     | 2 +-
  .../loadbalancer/templates/haproxy-ssh/haproxy-ssh.json.j2  | 2 +-
@@ -136,19 +136,14 @@ Signed-off-by: Jan Horstmann <horstmann@osism.tech>
  ansible/roles/skyline/templates/skyline-console.json.j2     | 2 +-
  ansible/roles/tacker/templates/tacker-conductor.json.j2     | 2 +-
  ansible/roles/tacker/templates/tacker-server.json.j2        | 2 +-
- ansible/roles/telegraf/templates/telegraf.json.j2           | 2 +-
  ansible/roles/trove/templates/trove-api.json.j2             | 2 +-
  ansible/roles/trove/templates/trove-conductor.json.j2       | 2 +-
  ansible/roles/trove/templates/trove-taskmanager.json.j2     | 2 +-
  ansible/roles/watcher/templates/watcher-api.json.j2         | 2 +-
  ansible/roles/watcher/templates/watcher-applier.json.j2     | 2 +-
  ansible/roles/watcher/templates/watcher-engine.json.j2      | 2 +-
- ansible/roles/zun/templates/zun-api.json.j2                 | 2 +-
- ansible/roles/zun/templates/zun-cni-daemon.json.j2          | 2 +-
- ansible/roles/zun/templates/zun-compute.json.j2             | 2 +-
- ansible/roles/zun/templates/zun-wsproxy.json.j2             | 2 +-
  ...y_restrictive_permissions_on_certs-a0e328cec29a4f3c.yaml | 6 ++++++
- 139 files changed, 144 insertions(+), 139 deletions(-)
+ 132 files changed, 137 insertions(+), 131 deletions(-)
  create mode 100644 releasenotes/notes/bug-2112280-overly_restrictive_permissions_on_certs-a0e328cec29a4f3c.yaml
 
 diff --git a/ansible/roles/aodh/templates/aodh-api.json.j2 b/ansible/roles/aodh/templates/aodh-api.json.j2
@@ -581,7 +576,7 @@ index 906978f43..a593177a8 100644
      ],
      "permissions": [
 diff --git a/ansible/roles/glance/templates/glance-api.json.j2 b/ansible/roles/glance/templates/glance-api.json.j2
-index 71e6a29fb..4b3d8525c 100644
+index 8cbf9cf2e..cfdcb0e51 100644
 --- a/ansible/roles/glance/templates/glance-api.json.j2
 +++ b/ansible/roles/glance/templates/glance-api.json.j2
 @@ -41,7 +41,7 @@
@@ -590,30 +585,9 @@ index 71e6a29fb..4b3d8525c 100644
              "owner": "root",
 -            "perm": "0600"
 +            "perm": "0644"
-         }{% endif %}{% if glance_backend_nvme | default(false) | bool %},
-         {
-             "source": "{{ container_config_directory }}/hostnqn",
-@@ -53,7 +53,6 @@
-             "source": "{{ container_config_directory }}/hostid",
-             "dest": "/etc/nvme/hostid",
-             "owner": "root",
--            "perm": "0644"
          }{% endif %}
      ],
      "permissions": [
-diff --git a/ansible/roles/glance/templates/glance-tls-proxy.json.j2 b/ansible/roles/glance/templates/glance-tls-proxy.json.j2
-index 1eb1afacc..21f12f6c9 100644
---- a/ansible/roles/glance/templates/glance-tls-proxy.json.j2
-+++ b/ansible/roles/glance/templates/glance-tls-proxy.json.j2
-@@ -17,7 +17,7 @@
-             "source": "{{ container_config_directory }}/ca-certificates",
-             "dest": "/var/lib/kolla/share/ca-certificates",
-             "owner": "root",
--            "perm": "0600"
-+            "perm": "0644"
-         }{% endif %}
-     ]
- }
 diff --git a/ansible/roles/gnocchi/templates/gnocchi-api.json.j2 b/ansible/roles/gnocchi/templates/gnocchi-api.json.j2
 index 2fc22c646..1d21a900e 100644
 --- a/ansible/roles/gnocchi/templates/gnocchi-api.json.j2
@@ -827,19 +801,6 @@ index dda23b82b..908515f6c 100644
 --- a/ansible/roles/keystone/templates/keystone.json.j2
 +++ b/ansible/roles/keystone/templates/keystone.json.j2
 @@ -84,7 +84,7 @@
-             "source": "{{ container_config_directory }}/ca-certificates",
-             "dest": "/var/lib/kolla/share/ca-certificates",
-             "owner": "root",
--            "perm": "0600"
-+            "perm": "0644"
-         }{% endif %}
-     ],
-     "permissions": [
-diff --git a/ansible/roles/kuryr/templates/kuryr.json.j2 b/ansible/roles/kuryr/templates/kuryr.json.j2
-index 4ba23100f..5320594f9 100644
---- a/ansible/roles/kuryr/templates/kuryr.json.j2
-+++ b/ansible/roles/kuryr/templates/kuryr.json.j2
-@@ -23,7 +23,7 @@
              "source": "{{ container_config_directory }}/ca-certificates",
              "dest": "/var/lib/kolla/share/ca-certificates",
              "owner": "root",
@@ -1395,7 +1356,7 @@ index 92925888f..9a4dbda1a 100644
      ],
      "permissions": [
 diff --git a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2 b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
-index 959022724..b70eac340 100644
+index e81413b35..f64098707 100644
 --- a/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
 +++ b/ansible/roles/nova-cell/templates/nova-libvirt.json.j2
 @@ -72,7 +72,7 @@
@@ -1404,9 +1365,9 @@ index 959022724..b70eac340 100644
              "owner": "root",
 -            "perm": "0600"
 +            "perm": "0644"
-         }{% endif %}{% if nova_qemu_wrapper_file and nova_qemu_wrapper_file.stat.exists %},
-         {
-             "source": "{{ container_config_directory }}/qemu-wrapper",
+         }{% endif %}
+     ]
+ }
 diff --git a/ansible/roles/nova-cell/templates/nova-novncproxy.json.j2 b/ansible/roles/nova-cell/templates/nova-novncproxy.json.j2
 index 8ff5b39e6..37a7caf8a 100644
 --- a/ansible/roles/nova-cell/templates/nova-novncproxy.json.j2
@@ -1810,19 +1771,6 @@ index 950d63dc2..346c1879e 100644
          }{% endif %}
      ],
      "permissions": [
-diff --git a/ansible/roles/telegraf/templates/telegraf.json.j2 b/ansible/roles/telegraf/templates/telegraf.json.j2
-index 8e5bd71a4..dedd5c2f4 100644
---- a/ansible/roles/telegraf/templates/telegraf.json.j2
-+++ b/ansible/roles/telegraf/templates/telegraf.json.j2
-@@ -18,7 +18,7 @@
-             "source": "{{ container_config_directory }}/ca-certificates",
-             "dest": "/var/lib/kolla/share/ca-certificates",
-             "owner": "root",
--            "perm": "0600"
-+            "perm": "0644"
-         }{% endif %}
-     ],
-     "permissions": [
 diff --git a/ansible/roles/trove/templates/trove-api.json.j2 b/ansible/roles/trove/templates/trove-api.json.j2
 index a47cfdd5a..b07c5342d 100644
 --- a/ansible/roles/trove/templates/trove-api.json.j2
@@ -1901,58 +1849,6 @@ index ee8e20e00..a53c6bfef 100644
          }{% endif %}
      ],
      "permissions": [
-diff --git a/ansible/roles/zun/templates/zun-api.json.j2 b/ansible/roles/zun/templates/zun-api.json.j2
-index 18ed96172..1c34b8500 100644
---- a/ansible/roles/zun/templates/zun-api.json.j2
-+++ b/ansible/roles/zun/templates/zun-api.json.j2
-@@ -25,7 +25,7 @@
-             "source": "{{ container_config_directory }}/ca-certificates",
-             "dest": "/var/lib/kolla/share/ca-certificates",
-             "owner": "root",
--            "perm": "0600"
-+            "perm": "0644"
-         }{% endif %}
-     ],
-     "permissions": [
-diff --git a/ansible/roles/zun/templates/zun-cni-daemon.json.j2 b/ansible/roles/zun/templates/zun-cni-daemon.json.j2
-index 3e165e06b..0ca13a6b2 100644
---- a/ansible/roles/zun/templates/zun-cni-daemon.json.j2
-+++ b/ansible/roles/zun/templates/zun-cni-daemon.json.j2
-@@ -11,7 +11,7 @@
-             "source": "{{ container_config_directory }}/ca-certificates",
-             "dest": "/var/lib/kolla/share/ca-certificates",
-             "owner": "root",
--            "perm": "0600"
-+            "perm": "0644"
-         }{% endif %}
-     ],
-     "permissions": [
-diff --git a/ansible/roles/zun/templates/zun-compute.json.j2 b/ansible/roles/zun/templates/zun-compute.json.j2
-index c9f9a7ccd..15984851a 100644
---- a/ansible/roles/zun/templates/zun-compute.json.j2
-+++ b/ansible/roles/zun/templates/zun-compute.json.j2
-@@ -31,7 +31,7 @@
-             "source": "{{ container_config_directory }}/ca-certificates",
-             "dest": "/var/lib/kolla/share/ca-certificates",
-             "owner": "root",
--            "perm": "0600"
-+            "perm": "0644"
-         }{% endif %}
-     ],
-     "permissions": [
-diff --git a/ansible/roles/zun/templates/zun-wsproxy.json.j2 b/ansible/roles/zun/templates/zun-wsproxy.json.j2
-index 89dd398b6..c44f58b41 100644
---- a/ansible/roles/zun/templates/zun-wsproxy.json.j2
-+++ b/ansible/roles/zun/templates/zun-wsproxy.json.j2
-@@ -17,7 +17,7 @@
-             "source": "{{ container_config_directory }}/ca-certificates",
-             "dest": "/var/lib/kolla/share/ca-certificates",
-             "owner": "root",
--            "perm": "0600"
-+            "perm": "0644"
-         }{% endif %}
-     ],
-     "permissions": [
 diff --git a/releasenotes/notes/bug-2112280-overly_restrictive_permissions_on_certs-a0e328cec29a4f3c.yaml b/releasenotes/notes/bug-2112280-overly_restrictive_permissions_on_certs-a0e328cec29a4f3c.yaml
 new file mode 100644
 index 000000000..103d24d60
@@ -1966,5 +1862,5 @@ index 000000000..103d24d60
 +    ``/var/lib/kolla/share/ca-certificates`` path in containers that
 +    require access to these certificates.
 -- 
-2.53.0
+2.47.3
 
