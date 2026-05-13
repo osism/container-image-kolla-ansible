@@ -78,7 +78,7 @@ index 8cbf9cf2e..71e6a29fb 100644
 @@ -42,6 +42,18 @@
              "dest": "/var/lib/kolla/share/ca-certificates",
              "owner": "root",
-             "perm": "0600"
+             "perm": "0644"
 +        }{% endif %}{% if glance_backend_nvme | default(false) | bool %},
 +        {
 +            "source": "{{ container_config_directory }}/hostnqn",
