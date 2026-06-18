@@ -1,0 +1,100 @@
+---
+# Completely remove the RabbitMQ service deployed by kolla-ansible.
+#
+# This mirrors what the upstream rabbitmq role
+# (ansible/roles/rabbitmq) creates and removes every artifact it leaves
+# behind:
+#   * the "rabbitmq" container
+#   * the named data volume (rabbitmq_datadir_volume, default "rabbitmq",
+#     mounted at /var/lib/rabbitmq/)
+#   * the host configuration directory ({{ node_config_directory }}/rabbitmq)
+#   * the rabbitmq log directory inside the kolla_logs volume
+#   * the HAProxy load-balancer configuration (services.d/rabbitmq*.cfg)
+#
+# WARNING: This is destructive. All messages, queues, vhosts and the
+# RabbitMQ cluster state are lost permanently.
+#
+# Run with:
+#   ansible-playbook kolla-purge-rabbitmq.yml -e ireallymeanit=yes
+
+- name: Confirm whether the user really wants to purge the RabbitMQ service
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_prompt:
+    - name: ireallymeanit
+      prompt: >-
+        Are you sure you want to purge the RabbitMQ service? This permanently
+        destroys all messages, queues and cluster data.
+      default: 'no'
+      private: false
+
+  tasks:
+    - name: Exit playbook, if the user did not mean to purge the RabbitMQ service
+      ansible.builtin.fail:
+        msg: >
+          "To purge the RabbitMQ service, either say 'yes' on the prompt or use
+           `-e ireallymeanit=yes` on the command line when invoking the playbook."
+      when:
+        - ireallymeanit != 'yes'
+
+- name: Purge RabbitMQ service
+  hosts: "{{ hosts_kolla_rabbitmq_group | default('rabbitmq') }}"
+  gather_facts: false
+
+  vars:
+    kolla_container_engine: "{{ kolla_container_engine | default('docker') }}"
+    node_config_directory: "{{ node_config_directory | default('/etc/kolla') }}"
+    rabbitmq_datadir_volume: "{{ rabbitmq_datadir_volume | default('rabbitmq') }}"
+
+  tasks:
+    - name: Check whether the rabbitmq container exists
+      become: true
+      ansible.builtin.command:
+        cmd: "{{ kolla_container_engine }} container inspect rabbitmq"
+      register: rabbitmq_container
+      changed_when: false
+      failed_when: false
+
+    - name: Stop and remove the rabbitmq container
+      become: true
+      ansible.builtin.command:
+        cmd: "{{ kolla_container_engine }} rm --force --volumes rabbitmq"
+      when:
+        - rabbitmq_container.rc == 0
+      changed_when: true
+
+    - name: Remove the rabbitmq data volume
+      become: true
+      ansible.builtin.command:
+        cmd: "{{ kolla_container_engine }} volume rm {{ rabbitmq_datadir_volume }}"
+      register: rabbitmq_volume_rm
+      changed_when: rabbitmq_volume_rm.rc == 0
+      failed_when:
+        - rabbitmq_volume_rm.rc != 0
+        - "'no such volume' not in (rabbitmq_volume_rm.stderr | lower)"
+        - "'no volume with name' not in (rabbitmq_volume_rm.stderr | lower)"
+
+    - name: Remove the rabbitmq configuration directory
+      become: true
+      ansible.builtin.file:
+        path: "{{ node_config_directory }}/rabbitmq"
+        state: absent
+
+    - name: Determine the kolla_logs volume mountpoint
+      become: true
+      ansible.builtin.command:
+        cmd: "{{ kolla_container_engine }} volume inspect --format '{% raw %}{{ .Mountpoint }}{% endraw %}' kolla_logs"
+      register: kolla_logs_mountpoint
+      changed_when: false
+      failed_when: false
+
+    - name: Remove the rabbitmq log directory from the kolla_logs volume
+      become: true
+      ansible.builtin.file:
+        path: "{{ kolla_logs_mountpoint.stdout }}/rabbitmq"
+        state: absent
+      when:
+        - kolla_logs_mountpoint.rc == 0
+        - kolla_logs_mountpoint.stdout | length > 0
