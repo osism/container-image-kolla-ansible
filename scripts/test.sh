@@ -34,6 +34,27 @@ fi
 
 . defaults/$OPENSTACK_VERSION.sh
 
+# Upstream kolla-ansible replaced redis with valkey at 2025.2. Pick the
+# key-value store for the release under test, along with its container name,
+# CLI binary, auth password (its secrets entry) and the enable flags. Older
+# releases stay on redis; 2025.2 and everything newer default to valkey.
+case "$OPENSTACK_VERSION" in
+    2023.*|2024.*|2025.1)
+        key_value_store=redis
+        key_value_store_container=redis
+        key_value_store_password=QHNA1SZRlOKzLADhUd5ZDgpHfQe6dNfr3bwEdY24
+        enable_redis_value=yes
+        enable_valkey_value=no
+        ;;
+    *)
+        key_value_store=valkey
+        key_value_store_container=valkey_server
+        key_value_store_password=5d13GNK2JngW3qFWZqt3n7ZSXqmZ31xiHQfoGcNU
+        enable_redis_value=no
+        enable_valkey_value=yes
+        ;;
+esac
+
 if [[ -n $DOCKER_REGISTRY ]]; then
     REPOSITORY="$DOCKER_REGISTRY/$REPOSITORY"
 fi
@@ -69,6 +90,8 @@ cp tests/environments/openstack/clouds.yml ~/.config/openstack/clouds.yml
 cp tests/environments/openstack/secure.yml ~/.config/openstack/secure.yml
 
 docker run --rm -v ${PWD}/tests:/workdir mikefarah/yq yq w --inplace /workdir/environments/kolla/configuration.yml openstack_release $OPENSTACK_VERSION
+docker run --rm -v ${PWD}/tests:/workdir mikefarah/yq yq w --inplace /workdir/environments/kolla/configuration.yml enable_redis $enable_redis_value
+docker run --rm -v ${PWD}/tests:/workdir mikefarah/yq yq w --inplace /workdir/environments/kolla/configuration.yml enable_valkey $enable_valkey_value
 
 local_address=$(ip route get 8.8.8.8 | head -1 | cut -d ' ' -f 7)
 docker run --rm -v ${PWD}/tests:/workdir mikefarah/yq yq w --inplace /workdir/inventory/host_vars/testnode.yml ansible_host $local_address
@@ -140,11 +163,11 @@ echo "TEST memcached"
 sleep 5
 echo stats | nc -q 1 192.168.50.5 11211
 
-deploy redis
-echo "TEST redis"
+deploy "$key_value_store"
+echo "TEST $key_value_store"
 sleep 5
-docker exec -it redis redis-cli -h 192.168.50.5 -a QHNA1SZRlOKzLADhUd5ZDgpHfQe6dNfr3bwEdY24 ping
-docker exec -it redis redis-cli -h 192.168.50.5 -a QHNA1SZRlOKzLADhUd5ZDgpHfQe6dNfr3bwEdY24 info replication
+docker exec -it "$key_value_store_container" "${key_value_store}-cli" -h 192.168.50.5 -a "$key_value_store_password" ping
+docker exec -it "$key_value_store_container" "${key_value_store}-cli" -h 192.168.50.5 -a "$key_value_store_password" info replication
 
 deploy openvswitch
 echo "TEST openvswitch"
