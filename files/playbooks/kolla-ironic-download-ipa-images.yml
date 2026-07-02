@@ -28,6 +28,7 @@
         dest: "{{ ironic_agent_files_directory }}/ironic/ironic-agent.initramfs"
         checksum: "{{ ironic_agent_initramfs_checksum }}"
         mode: 0644
+        timeout: 120
       when: enable_ironic_agent_download_images | bool
       environment: "{{ proxy_proxies | default({}) }}"
       register: result
@@ -41,6 +42,7 @@
         dest: "{{ ironic_agent_files_directory }}/ironic/ironic-agent.kernel"
         checksum: "{{ ironic_agent_kernel_checksum }}"
         mode: 0644
+        timeout: 120
       when: enable_ironic_agent_download_images | bool
       environment: "{{ proxy_proxies | default({}) }}"
       register: result
