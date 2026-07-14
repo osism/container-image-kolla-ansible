@@ -16,7 +16,6 @@ KEEP_PREFIX = [
     "gather-facts",
     "prune-images",
     "purge",
-    "rgw-endpoint",
     "site",
     "testbed",
     "testbed-identity",
