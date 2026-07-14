@@ -35,6 +35,7 @@
     - name: Creating the ResellerAdmin role  # noqa run-once[task] osism-fqcn
       become: true
       kolla_toolbox:
+        container_engine: "{{ kolla_container_engine | default('docker') }}"
         module_name: "os_keystone_role"
         module_args:
           name: "ResellerAdmin"
