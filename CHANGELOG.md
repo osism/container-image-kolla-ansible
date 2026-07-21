@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This file was started on May 30, 2025. Changes prior to this date are not included in the CHANGELOG.
 
+## [v0.20260615.0] - 2026-06-15
+
+### Added
+- Automatically add opened issues and pull requests to project boards (osism/container-image-kolla-ansible#895)
+- Add glance NVMe and NQN support patch for 2025.2 (osism/container-image-kolla-ansible#897)
+
+### Changed
+- Rename repository reference from cfg-generics to generics (osism/container-image-kolla-ansible#891)
+- Apply patches in a deterministic, sorted order to ensure predictable dependency handling (osism/container-image-kolla-ansible#901)
+- Increase Zuul push job timeout to 2700s to prevent spurious timeouts during collection dependency resolution (osism/container-image-kolla-ansible#904)
+- Drop patches that already merged upstream and rebase the remaining patches so they keep applying cleanly (osism/container-image-kolla-ansible#902)
+- Remove stale NOTES.md from patches/2025.2 now that the patch it documented was dropped (osism/container-image-kolla-ansible#903)
+- Drop Python library pins already covered by python-osism's install_requires, and remove the unused asn1crypto pin (osism/container-image-kolla-ansible#906)
+- Drop redundant paramiko and PyMySQL pins from requirements.txt.j2, now tracked solely via python-osism (osism/container-image-kolla-ansible#913)
+
+### Fixed
+- Correct authkey file path for corosync/pacemaker patch in 2025.1 and 2025.2 (osism/container-image-kolla-ansible#886)
+- Re-enable opensearch shard allocation after upgrade to prevent cluster staying yellow (osism/container-image-kolla-ansible#890)
+- Fix overly restrictive permissions on the ca-certificates directory via backported patch (osism/container-image-kolla-ansible#897)
+- Use the 2024.2-eol tag when cloning kolla-ansible since the stable/2024.2 branch no longer exists upstream (osism/container-image-kolla-ansible#909)
+- Designate: reject empty TSIG secrets by default (LP#1933760) (osism/container-image-kolla-ansible#1933760, osism/container-image-kolla-ansible#907)
+- Horizon healthcheck now follows the login redirect so a broken offline-compressed manifest is detected instead of silently serving HTTP 500 (osism/container-image-kolla-ansible#911)
+
+### Dependencies
+- requests 2.32.5 → 2.34.2 (osism/container-image-kolla-ansible#880, osism/container-image-kolla-ansible#887)
+- cryptography 46.0.5 → 46.0.7 (osism/container-image-kolla-ansible#881)
+- pymysql 1.1.2 → 1.1.3 (osism/container-image-kolla-ansible#893)
+- ghcr.io/astral-sh/uv 0.10.10 → 0.11.21 (osism/container-image-kolla-ansible#876, osism/container-image-kolla-ansible#888, osism/container-image-kolla-ansible#896, osism/container-image-kolla-ansible#898, osism/container-image-kolla-ansible#910, osism/container-image-kolla-ansible#912, osism/container-image-kolla-ansible#914)
+
+## [v0.20260328.0] - 2026-03-28
+
+### Added
+- Enable openvswitch_db and openvswitch_vswitchd services on octavia-health-manager nodes for 2024.2 and 2025.1 (osism/container-image-kolla-ansible#879)
+- Add support for building OpenStack 2025.2 images (osism/container-image-kolla-ansible#871)
+
+### Dependencies
+- ansible-pylibssh 1.3.0 → 1.4.0 (osism/container-image-kolla-ansible#873)
+
 ## [v0.20260319.0] - 2026-03-19
 
 ### Added
