@@ -1,0 +1,62 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 07 Aug 2026 00:00:00 +0000
+Subject: [PATCH] nova-cell: report why the Libvirt version check failed
+
+The "Get new Libvirt version" task starts a throwaway container to read
+libvirtd --version with failed_when: false, and the next task templates
+libvirt_version_new.stdout. The module only adds stdout to its result
+after the container has been waited on, so any earlier failure - image
+pull, container create, oneshot start, or an exception in the module
+itself - leaves a result carrying only msg. failed_when: false then
+reports that failure as green, and "Cache new Libvirt version" dies with
+
+  The task includes an option with an undefined variable..
+  'dict object' has no attribute 'stdout'
+
+which names the wrong task and says nothing about the actual error. The
+real error is in libvirt_version_new.msg and is only visible at -vv.
+
+Default stdout so the fact templating cannot fail, and add an explicit
+task that fails with the module's own message when no version could be
+determined. That also covers output the regex cannot parse, which would
+otherwise reach the version comparison as an empty string and produce
+the next confusing error.
+
+The condition tests the registered stdout rather than the cached fact,
+so it does not depend on how an unmatched regex_search renders (empty
+string on ansible-core 2.18, None under native Jinja).
+
+Candidate for upstreaming to kolla-ansible master and stable branches.
+---
+
+diff --git a/ansible/roles/nova-cell/tasks/version-check.yml b/ansible/roles/nova-cell/tasks/version-check.yml
+--- a/ansible/roles/nova-cell/tasks/version-check.yml
++++ b/ansible/roles/nova-cell/tasks/version-check.yml
+@@ -22,11 +22,25 @@
+ 
+     - name: Cache new Libvirt version
+       set_fact:
+-        libvirt_new_version: "{{ libvirt_version_new.stdout | regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') }}"
++        libvirt_new_version: "{{ libvirt_version_new.stdout | default('') | regex_search('[0-9]+\\.[0-9]+\\.[0-9]+') }}"
+       run_once: true
+       delegate_facts: true
+       delegate_to: "{{ groups[service.group] | first }}"
+ 
++    - name: Fail if the new Libvirt version could not be determined
++      any_errors_fatal: true
++      fail:
++        msg: >-
++          Could not determine the Libvirt version of the new nova_libvirt image
++          {{ service.image }}: the version check container produced no usable
++          version string. This is not a Libvirt downgrade, and it is not an
++          image content problem - the check itself did not complete. Error
++          reported by the container start: {{ libvirt_version_new.msg | default('none') }}
++          Container output: '{{ libvirt_version_new.stdout | default('') | trim }}'
++      when: libvirt_version_new.stdout | default('') is not search('[0-9]+\.[0-9]+\.[0-9]+')
++      run_once: true
++      delegate_to: "{{ groups[service.group] | first }}"
++
+     - name: Get nova_libvirt image info
+       include_role:
+         name: service-image-info
