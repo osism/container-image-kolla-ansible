@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This file was started on May 30, 2025. Changes prior to this date are not included in the CHANGELOG.
 
+## [v0.20260813.0] - 2026-08-13
+
+### Added
+- Add kolla-purge-rabbitmq.yml playbook to fully remove the RabbitMQ service, including its container, data volume, host config and HAProxy frontend (osism/container-image-kolla-ansible#916)
+- Keystone patch to allow multiple OIDCXForwardedHeaders options (osism/container-image-kolla-ansible#934)
+
+### Changed
+- Select valkey over redis in CI tests for OpenStack 2025.2 and newer, matching the upstream kolla-ansible switch (osism/container-image-kolla-ansible#925)
+
+### Fixed
+- Fix project-board automation for fork PRs by switching to pull_request_target and scoping the shared secret (osism/container-image-kolla-ansible#922)
+- Add missing kolla_valkey_version entry to versions.yml.j2 so a versions.valkey override is no longer silently ignored (osism/container-image-kolla-ansible#921)
+- Pin CycloneDX spec version to 1.6 for syft SBOM generation to fix DependencyTrack upload rejections (osism/container-image-kolla-ansible#923)
+- Pin missing blazar and masakari image versions in versions.yml.j2 (osism/container-image-kolla-ansible#924)
+- Pass container_engine to kolla_toolbox in kolla-rgw-endpoint.yml to fix a missing required argument error (osism/container-image-kolla-ansible#931)
+- Bound ironic IPA image downloads with a 120 second timeout to prevent multi-hour stalls on slow transfers (osism/container-image-kolla-ansible#926)
+
+### Removed
+- Drop dead chrony, monasca, zookeeper and zun version pins from versions.yml.j2 (osism/container-image-kolla-ansible#924)
+- Drop dead external Ceph keyring variables from the 2025.1 and 2025.2 overlays (osism/container-image-kolla-ansible#928)
+- Drop next-generation kolla-mariadb-ng, kolla-rabbitmq-ng and kolla-loadbalancer-ng playbooks to avoid confusion with the regular plays (osism/container-image-kolla-ansible#929)
+
+### Dependencies
+- ghcr.io/astral-sh/uv 0.11.21 → 0.11.22 (osism/container-image-kolla-ansible#917)
+- requests 2.32.5 → 2.34.2 (osism/container-image-kolla-ansible#882, osism/container-image-kolla-ansible#919)
+- cryptography 46.0.7 → 48.0.1 (osism/container-image-kolla-ansible#918)
+- yq 3.4.3 → 4.1.2 (osism/container-image-kolla-ansible#927)
+
 ## [v0.20260615.0] - 2026-06-15
 
 ### Added
