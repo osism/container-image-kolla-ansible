@@ -1,0 +1,39 @@
+From a38886c9e694ddbe771913c102f1cb3a1653a36b Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Sun, 23 Aug 2026 11:55:55 +0200
+Subject: [PATCH 17/23] nova-playbook-group-hosts-based-on-configuration
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ ansible/nova.yml | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/ansible/nova.yml b/ansible/nova.yml
+index 4f24f6e1c..f7cdb2156 100644
+--- a/ansible/nova.yml
++++ b/ansible/nova.yml
+@@ -1,4 +1,21 @@
+ ---
++- name: Group hosts based on configuration
++  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
++  gather_facts: false
++  tasks:
++    - name: Group hosts based on OpenStack release
++      group_by:
++          key: openstack_release_{{ openstack_release }}
++    - name: Group hosts based on Kolla action
++      group_by:
++          key: kolla_action_{{ kolla_action }}
++    - name: Group hosts based on enabled services
++      group_by:
++          key: '{{ item }}'
++      with_items:
++        - enable_nova_{{ enable_nova | bool }}
++  tags: always
++
+ # This playbook is for nova services. Due to support for deployment of cells,
+ # nova is separated into two roles - nova and nova-cell. This makes it more
+ # complicated than other services, as we may execute each role several times
+-- 
+2.47.3
+

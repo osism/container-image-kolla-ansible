@@ -1,0 +1,33 @@
+From 0aefc031c048cf0c00ac13aedff6d2fb8ccbdc24 Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Sun, 23 Aug 2026 11:56:43 +0200
+Subject: [PATCH 18/23] octavia-isc-dhcp-client-package
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ ansible/roles/octavia/tasks/hm-interface.yml | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/ansible/roles/octavia/tasks/hm-interface.yml b/ansible/roles/octavia/tasks/hm-interface.yml
+index 82ed4b0de..7a5027b36 100644
+--- a/ansible/roles/octavia/tasks/hm-interface.yml
++++ b/ansible/roles/octavia/tasks/hm-interface.yml
+@@ -49,6 +49,15 @@
+     -- set Interface {{ octavia_network_interface }} external-ids:iface-id={{ port_id }} \
+     -- set Interface {{ octavia_network_interface }} external-ids:skip_cleanup=true
+ 
++- name: Install isc-dhcp-client package
++  become: true
++  ansible.builtin.apt:
++    name: isc-dhcp-client
++    state: present
++    lock_timeout: "{{ apt_lock_timeout | default(300) }}"
++  when:
++    - "ansible_distribution == 'Ubuntu'"
++
+ - name: Create octavia dhclient conf
+   become: true
+   ansible.builtin.copy:
+-- 
+2.47.3
+

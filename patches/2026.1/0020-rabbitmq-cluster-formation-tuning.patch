@@ -1,0 +1,30 @@
+From a55c64291159ca0b4a3a8439b1e75d4ef3829be1 Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Sun, 23 Aug 2026 11:57:22 +0200
+Subject: [PATCH 20/23] rabbitmq-cluster-formation-tuning
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ ansible/roles/rabbitmq/templates/rabbitmq.conf.j2 | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2 b/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2
+index 1722de3e9..d56361bf7 100644
+--- a/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2
++++ b/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2
+@@ -25,6 +25,12 @@ cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config
+ cluster_formation.classic_config.nodes.{{ loop.index0 }} = rabbit@{{ hostvars[host].ansible_facts.hostname }}
+ {% endfor %}
+ 
++{% if rabbitmq_cluster_formation_tuning | default(false) | bool %}
++cluster_formation.discovery_retry_limit = {{ rabbitmq_cluster_formation_retry_limit | default(5) }}
++cluster_formation.discovery_retry_interval = {{ rabbitmq_cluster_formation_retry_interval | default(1000) }}
++cluster_formation.target_cluster_size_hint = {{ rabbitmq_cluster_formation_target_size | default(groups[role_rabbitmq_groups] | length) }}
++{% endif %}
++
+ {% if rabbitmq_enable_tls | bool %}
+ # https://www.rabbitmq.com/ssl.html
+ ssl_options.certfile = /etc/rabbitmq/certs/{{ project_name }}-cert.pem
+-- 
+2.47.3
+

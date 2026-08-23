@@ -1,0 +1,29 @@
+From 8052251fe8fa8d5dd696a84c80221ac6d0b2bd1e Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Sun, 23 Aug 2026 11:51:52 +0200
+Subject: [PATCH 10/23] horizon-always-configure-cache-backend
+
+TODO: Unsure about the intent of the patch
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ ansible/roles/horizon/templates/_9998-kolla-settings.py.j2 | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2 b/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
+index e88afbdc3..c945e48e1 100644
+--- a/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
++++ b/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
+@@ -50,6 +50,9 @@ CACHES = {
+         ],
+         'OPTIONS': {
+             'ignore_exc': True,
++            'no_delay': True,
++            'max_pool_size': 4,
++            'use_pooling': True,
+         }
+     }
+ }
+-- 
+2.47.3
+

@@ -1,0 +1,46 @@
+From b08e2443cdf3f90c4b23c9285ced35cdeb46398f Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Thu, 20 Aug 2026 18:12:02 +0200
+Subject: [PATCH 05/23] backport-894219.patch
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ ansible/roles/octavia/tasks/prepare.yml | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/ansible/roles/octavia/tasks/prepare.yml b/ansible/roles/octavia/tasks/prepare.yml
+index fb73c935e..4b92350cb 100644
+--- a/ansible/roles/octavia/tasks/prepare.yml
++++ b/ansible/roles/octavia/tasks/prepare.yml
+@@ -167,3 +167,28 @@
+   run_once: true
+   when: octavia_network_address_family == "ipv6"
+   delegate_to: "{{ groups['octavia-api'][0] }}"
++
++- name: Update loadbalancer management subnet
++  become: true
++  kolla_toolbox:
++    container_engine: "{{ kolla_container_engine }}"
++    module_name: os_subnet
++    module_args:
++      auth: "{{ octavia_user_auth }}"
++      cacert: "{{ openstack_cacert }}"
++      endpoint_type: "{{ openstack_interface }}"
++      region_name: "{{ openstack_region_name }}"
++      state: present
++      network_name: "{{ octavia_amp_network['name'] }}"
++      name: "{{ octavia_amp_network['subnet']['name'] }}"
++      cidr: "{{ octavia_amp_network['subnet']['cidr'] }}"
++      allocation_pool_start: "{{ octavia_amp_network['subnet']['allocation_pool_start'] | default(omit, true) }}"
++      allocation_pool_end: "{{ octavia_amp_network['subnet']['allocation_pool_end'] | default(omit, true) }}"
++      enable_dhcp: "{{ octavia_amp_network['subnet']['enable_dhcp'] | default(omit) }}"
++      no_gateway_ip: "{{ octavia_amp_network['subnet']['no_gateway_ip'] | default(omit) }}"
++      gateway_ip: "{{ octavia_amp_network['subnet']['gateway_ip'] | default(omit, true) }}"
++      ip_version: "{{ octavia_amp_network['subnet']['ip_version'] | default(omit) }}"
++      ipv6_address_mode: "{{ octavia_amp_network['subnet']['ipv6_address_mode'] | default(omit) }}"
++      ipv6_ra_mode: "{{ octavia_amp_network['subnet']['ipv6_ra_mode'] | default(omit) }}"
++  run_once: True
++  delegate_to: "{{ groups['octavia-api'][0] }}"
+-- 
+2.47.3
+

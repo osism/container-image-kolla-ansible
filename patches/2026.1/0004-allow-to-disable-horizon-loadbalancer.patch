@@ -1,0 +1,53 @@
+From 7d7f9e8c03b5d4497d61ee2249e6380f9ddacd39 Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Thu, 20 Aug 2026 18:11:25 +0200
+Subject: [PATCH 04/23] allow-to-disable-horizon-loadbalancer
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ ansible/roles/horizon/defaults/main.yml | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/ansible/roles/horizon/defaults/main.yml b/ansible/roles/horizon/defaults/main.yml
+index 04cd14761..8641ba3ea 100644
+--- a/ansible/roles/horizon/defaults/main.yml
++++ b/ansible/roles/horizon/defaults/main.yml
+@@ -28,7 +28,7 @@ horizon_services:
+     wsgi: "openstack_dashboard.wsgi:application"
+     haproxy:
+       horizon:
+-        enabled: "{{ enable_horizon }}"
++        enabled: "{{ haproxy_enable_horizon | default(enable_horizon) | bool }}"
+         mode: "http"
+         external: false
+         port: "{% if kolla_enable_tls_internal | bool %}{{ horizon_tls_port }}{% else %}{{ horizon_port }}{% endif %}"
+@@ -40,7 +40,7 @@ horizon_services:
+           - "option httpchk"
+         tls_backend: "{{ horizon_enable_tls_backend }}"
+       horizon_redirect:
+-        enabled: "{{ enable_horizon | bool and kolla_enable_tls_internal | bool }}"
++        enabled: "{{ haproxy_enable_horizon | default(enable_horizon) | bool and kolla_enable_tls_internal | bool }}"
+         mode: "redirect"
+         external: false
+         port: "{{ horizon_port }}"
+@@ -48,7 +48,7 @@ horizon_services:
+         frontend_redirect_extra:
+           - "{% if enable_letsencrypt == 'yes' %}use_backend acme_client_back if { path_reg ^/.well-known/acme-challenge/.+ }{% endif %}"
+       horizon_external:
+-        enabled: "{{ enable_horizon }}"
++        enabled: "{{ haproxy_enable_horizon_external | default(enable_horizon) | bool }}"
+         mode: "http"
+         external: true
+         external_fqdn: "{{ horizon_external_fqdn }}"
+@@ -61,7 +61,7 @@ horizon_services:
+           - "option httpchk"
+         tls_backend: "{{ horizon_enable_tls_backend }}"
+       horizon_external_redirect:
+-        enabled: "{{ enable_horizon | bool and kolla_enable_tls_external | bool }}"
++        enabled: "{{ haproxy_enable_horizon_external | default(enable_horizon) | bool and kolla_enable_tls_external | bool }}"
+         mode: "redirect"
+         external: true
+         external_fqdn: "{{ horizon_external_fqdn }}"
+-- 
+2.47.3
+
