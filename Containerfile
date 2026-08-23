@@ -170,8 +170,9 @@ cp -r /repository/ansible/roles/* /ansible/roles
 python3 /kolla-container-throttle.py
 for playbook in $(find /repository/ansible -maxdepth 1 -name "*.yml" | grep -v nova.yml); do echo $playbook && cp $playbook /ansible/kolla-"$(basename $playbook)"; done
 cp /repository/ansible/nova.yml /ansible/kolla-nova.yml
-cp /ansible/kolla-mariadb_backup.yml /ansible/kolla-mariadb-backup.yml
-cp /ansible/kolla-mariadb_recovery.yml /ansible/kolla-mariadb-recovery.yml
+# TODO(frickler): drop these once everything < 2026.1 is EOL
+if [ -f /ansible/kolla-mariadb_backup.yml ]; then cp /ansible/kolla-mariadb_backup.yml /ansible/kolla-mariadb-backup.yml; fi
+if [ -f /ansible/kolla-mariadb_recovery.yml ]; then cp /ansible/kolla-mariadb_recovery.yml /ansible/kolla-mariadb-recovery.yml; fi
 rm -f /ansible/kolla-kolla-host.yml /ansible/kolla-post-deploy.yml
 rm /remove-common-as-dependency.py
 rm /split-kolla-ansible-site.py
