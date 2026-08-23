@@ -1,0 +1,61 @@
+From 71a994a0811c02fd8d078478cf62634b47361d95 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 7 Aug 2026 00:00:00 +0000
+Subject: [PATCH 15/23] nova-cell: do not blame the image when the check cannot
+ run
+
+The nova_libvirt script check starts a container to look for
+/usr/local/bin/kolla_nova_libvirt_start, also with failed_when: false,
+and its assert reads nova_libvirt_script_check.stdout | default('').
+The default keeps the play from crashing, but it makes a failed check
+indistinguishable from a check that ran and found nothing: any pull,
+daemon or SDK failure is then reported as
+
+  The nova_libvirt image '...' does not contain
+  /usr/local/bin/kolla_nova_libvirt_start ... This almost always means
+  the container image has not been updated
+
+and the operator is sent off to rebuild or re-pull an image that was
+never the problem.
+
+Fail before the assert, with the module's own message, when the check
+container did not run at all. When it did run and the file is absent
+the module reports a non-zero return code together with stdout, so the
+existing assert still fires with its (then correct) message.
+
+This block exists only on the stable branches: it was added during the
+backports of "Start virtlogd in nova-libvirt and route console logs to
+it." at a reviewer's request, to catch new Kolla-Ansible code running
+against old images, and has no equivalent on master.
+
+Candidate for upstreaming to kolla-ansible stable/2025.1, stable/2025.2
+and stable/2026.1.
+---
+ ansible/roles/nova-cell/tasks/version-check.yml | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/ansible/roles/nova-cell/tasks/version-check.yml b/ansible/roles/nova-cell/tasks/version-check.yml
+index d217f88ba..613bf7cb9 100644
+--- a/ansible/roles/nova-cell/tasks/version-check.yml
++++ b/ansible/roles/nova-cell/tasks/version-check.yml
+@@ -103,6 +103,17 @@
+       run_once: true
+       delegate_to: "{{ groups[service.group] | first }}"
+ 
++    - name: Fail if the nova_libvirt image could not be inspected
++      fail:
++        msg: >-
++          Could not check the nova_libvirt image {{ service.image }} for
++          /usr/local/bin/kolla_nova_libvirt_start: the check container did not
++          run, so nothing is known about the image content. Error reported by
++          the container start: {{ nova_libvirt_script_check.msg | default('none') }}
++      when: nova_libvirt_script_check.stdout is not defined
++      run_once: true
++      delegate_to: "{{ groups[service.group] | first }}"
++
+     - name: Assert the nova_libvirt image is recent enough
+       run_once: true
+       delegate_to: "{{ groups[service.group] | first }}"
+-- 
+2.47.3
+

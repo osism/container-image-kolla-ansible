@@ -1,0 +1,45 @@
+From 40708ed7bb95c779a11f6e1e863de9547080cce6 Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Thu, 20 Aug 2026 18:13:04 +0200
+Subject: [PATCH 07/23] config-validate-without-become
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ ansible/roles/service-config-validate/defaults/main.yml  | 2 +-
+ ansible/roles/service-config-validate/tasks/validate.yml | 2 --
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/ansible/roles/service-config-validate/defaults/main.yml b/ansible/roles/service-config-validate/defaults/main.yml
+index 933689f8b..11e11b1bd 100644
+--- a/ansible/roles/service-config-validate/defaults/main.yml
++++ b/ansible/roles/service-config-validate/defaults/main.yml
+@@ -2,5 +2,5 @@
+ # Common role for config-validates.
+ 
+ # Dict of services.
+-service_config_validate_output_dir: "/var/log/kolla/config-validate"
++service_config_validate_output_dir: "/share/kolla-ansible/config-validate"
+ service_config_validate_services: {}
+diff --git a/ansible/roles/service-config-validate/tasks/validate.yml b/ansible/roles/service-config-validate/tasks/validate.yml
+index cb3ef5b89..2728dd576 100644
+--- a/ansible/roles/service-config-validate/tasks/validate.yml
++++ b/ansible/roles/service-config-validate/tasks/validate.yml
+@@ -24,7 +24,6 @@
+   changed_when: false
+ 
+ - name: "Ensure log directory exists for {{ service.container_name }}"
+-  become: true
+   ansible.builtin.file:
+     path: "{{ output_dir }}"
+     state: directory
+@@ -35,7 +34,6 @@
+   delegate_to: localhost
+ 
+ - name: "Log configuration errors for {{ service.container_name }}"
+-  become: true
+   ansible.builtin.copy:
+     content: "{{ inner_item.stderr }}"
+     dest: "{{ output_dir }}/{{ inner_item.inner_item.config | basename }}.err"
+-- 
+2.47.3
+

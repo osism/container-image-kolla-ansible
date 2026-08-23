@@ -1,0 +1,26 @@
+From c03af3b704496cebee64fa0eb3307fa6f2b96f02 Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Sun, 23 Aug 2026 11:52:42 +0200
+Subject: [PATCH 11/23] horizon-healthcheck-login-page
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ ansible/roles/horizon/defaults/main.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ansible/roles/horizon/defaults/main.yml b/ansible/roles/horizon/defaults/main.yml
+index 8641ba3ea..9250cf5b3 100644
+--- a/ansible/roles/horizon/defaults/main.yml
++++ b/ansible/roles/horizon/defaults/main.yml
+@@ -119,7 +119,7 @@ horizon_healthcheck_start_period: "{{ default_container_healthcheck_start_period
+ horizon_healthcheck_test:
+   - "CMD-SHELL"
+   - >-
+-    healthcheck_curl {{ 'https' if horizon_enable_tls_backend | bool else 'http' }}://{{
++    healthcheck_curl -L {{ 'https' if horizon_enable_tls_backend | bool else 'http' }}://{{
+     api_interface_address | put_address_in_context('url') }}:{{ horizon_listen_port }}
+ horizon_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
+ horizon_healthcheck:
+-- 
+2.47.3
+

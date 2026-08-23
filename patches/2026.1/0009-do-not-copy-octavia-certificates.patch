@@ -1,0 +1,38 @@
+From 02289d68b682e960b83c5373d2b292da19c05549 Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Sun, 23 Aug 2026 11:50:47 +0200
+Subject: [PATCH 09/23] do-not-copy-octavia-certificates
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ .../roles/octavia-certificates/tasks/main.yml   | 17 -----------------
+ 1 file changed, 17 deletions(-)
+
+diff --git a/ansible/roles/octavia-certificates/tasks/main.yml b/ansible/roles/octavia-certificates/tasks/main.yml
+index 97e995da4..9ab1af84a 100644
+--- a/ansible/roles/octavia-certificates/tasks/main.yml
++++ b/ansible/roles/octavia-certificates/tasks/main.yml
+@@ -37,20 +37,3 @@
+ 
+     - name: Import tasks from client_cert.yml
+       ansible.builtin.import_tasks: client_cert.yml
+-
+-    - name: Ensure octavia directory exists under {{ node_custom_config }}
+-      ansible.builtin.file:
+-        path: "{{ node_custom_config }}/octavia"
+-        state: "directory"
+-        mode: "0770"
+-
+-    - name: Copy the to-be-deployed keys and certs
+-      ansible.builtin.copy:
+-        src: "{{ octavia_certs_work_dir }}/{{ item.src }}"
+-        dest: "{{ node_custom_config }}/octavia/{{ item.dest }}"
+-        mode: "0600"
+-      with_items:
+-        - { src: "server_ca/server_ca.cert.pem", dest: "server_ca.cert.pem" }
+-        - { src: "server_ca/server_ca.key.pem", dest: "server_ca.key.pem" }
+-        - { src: "client_ca/client_ca.cert.pem", dest: "client_ca.cert.pem" }
+-        - { src: "client_ca/client.cert-and-key.pem", dest: "client.cert-and-key.pem" }
+-- 
+2.47.3
+

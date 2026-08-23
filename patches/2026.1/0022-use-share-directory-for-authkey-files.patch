@@ -1,0 +1,86 @@
+From 8ff8a349ce9f4ffee5494efc9c4d747773ea4ad8 Mon Sep 17 00:00:00 2001
+From: "Dr. Jens Harbott" <harbott@osism.tech>
+Date: Sun, 23 Aug 2026 11:58:16 +0200
+Subject: [PATCH 22/23] use-share-directory-for-authkey-files
+
+Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+---
+ ansible/roles/hacluster/tasks/bootstrap.yml | 22 +++++++++++++++++----
+ ansible/roles/hacluster/tasks/config.yml    |  3 +++
+ 2 files changed, 21 insertions(+), 4 deletions(-)
+
+diff --git a/ansible/roles/hacluster/tasks/bootstrap.yml b/ansible/roles/hacluster/tasks/bootstrap.yml
+index 4a8b0708d..962439381 100644
+--- a/ansible/roles/hacluster/tasks/bootstrap.yml
++++ b/ansible/roles/hacluster/tasks/bootstrap.yml
+@@ -1,7 +1,7 @@
+ ---
+-- name: Ensure config directories exist
++- name: Ensure share directories exist
+   ansible.builtin.file:
+-    path: "{{ node_custom_config }}/{{ item }}"
++    path: "/share/{{ item }}"
+     mode: "0755"
+     state: directory
+   delegate_to: localhost
+@@ -26,8 +26,22 @@
+   run_once: true
+   register: hacluster_pacemaker_authkey_file
+ 
++- name: Copy Corosync authkey file
++  copy:
++    src: "{{ node_custom_config }}/hacluster-corosync/authkey"
++  delegate_to: localhost
++  run_once: True
++  when: hacluster_corosync_authkey_file.stat.exists
++
++- name: Copy Pacemaker authkey file
++  copy:
++    src: "{{ node_custom_config }}/hacluster-pacemaker/authkey"
++  delegate_to: localhost
++  run_once: True
++  when: hacluster_pacemaker_authkey_file.stat.exists
++
+ - name: Generating Corosync authkey file
+-  ansible.builtin.command: "dd if=/dev/urandom of={{ node_custom_config }}/hacluster-corosync/authkey bs=4096 count=1"
++  ansible.builtin.command: "dd if=/dev/urandom of=/share/hacluster-corosync/authkey bs=4096 count=1"
+   delegate_to: localhost
+   changed_when: false
+   check_mode: false
+@@ -35,7 +49,7 @@
+   when: not hacluster_corosync_authkey_file.stat.exists
+ 
+ - name: Generating Pacemaker authkey file
+-  ansible.builtin.command: "dd if=/dev/urandom of={{ node_custom_config }}/hacluster-pacemaker/authkey bs=4096 count=1"
++  ansible.builtin.command: "dd if=/dev/urandom of=/share/hacluster-pacemaker/authkey bs=4096 count=1"
+   delegate_to: localhost
+   changed_when: false
+   check_mode: false
+diff --git a/ansible/roles/hacluster/tasks/config.yml b/ansible/roles/hacluster/tasks/config.yml
+index 9abd92f0f..26e6fa95c 100644
+--- a/ansible/roles/hacluster/tasks/config.yml
++++ b/ansible/roles/hacluster/tasks/config.yml
+@@ -44,6 +44,7 @@
+   with_first_found:
+     - "{{ node_custom_config }}/hacluster-corosync/{{ inventory_hostname }}/authkey"
+     - "{{ node_custom_config }}/hacluster-corosync/authkey"
++    - "/share/hacluster-corosync/authkey"
+ 
+ - name: Copying over Pacemaker authkey file
+   vars:
+@@ -57,6 +58,7 @@
+   with_first_found:
+     - "{{ node_custom_config }}/hacluster-pacemaker/{{ inventory_hostname }}/authkey"
+     - "{{ node_custom_config }}/hacluster-pacemaker/authkey"
++    - "/share/hacluster-pacemaker/authkey"
+ 
+ - name: Copying over Pacemaker authkey file into hacluster-pacemaker-remote
+   vars:
+@@ -70,3 +72,4 @@
+   with_first_found:
+     - "{{ node_custom_config }}/hacluster-pacemaker/{{ inventory_hostname }}/authkey"
+     - "{{ node_custom_config }}/hacluster-pacemaker/authkey"
++    - "/share/hacluster-pacemaker/authkey"
+-- 
+2.47.3
+

@@ -1,0 +1,46 @@
+---
+- name: Group hosts based on configuration
+  hosts:
+    - ovn-controller
+    - ovn-nb-db
+    - ovn-northd
+    - ovn-sb-db
+  gather_facts: false
+  tasks:
+    - name: Group hosts based on Kolla action
+      ansible.builtin.group_by:
+        key: kolla_action_{{ kolla_action }}
+      changed_when: false
+    - name: Group hosts based on enabled services
+      ansible.builtin.group_by:
+        key: '{{ item }}'
+      changed_when: false
+      with_items:
+        - enable_ovn_{{ enable_ovn | bool }}
+  tags: always
+
+- name: Apply role ovn-controller
+  gather_facts: no
+  hosts:
+    - ovn-controller
+    - '&enable_ovn_True'
+  serial: '{{ kolla_serial | default("0") }}'
+  roles:
+    - role: ovn-controller
+      tags:
+        - ovn
+        - ovn-controller
+
+- name: Apply role ovn-db
+  gather_facts: no
+  hosts:
+    - ovn-nb-db
+    - ovn-northd
+    - ovn-sb-db
+    - '&enable_ovn_True'
+  serial: '{{ kolla_serial | default("0") }}'
+  roles:
+    - role: ovn-db
+      tags:
+        - ovn
+        - ovn-db
