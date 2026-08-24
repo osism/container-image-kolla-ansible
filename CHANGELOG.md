@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This file was started on May 30, 2025. Changes prior to this date are not included in the CHANGELOG.
 
-## [v0.20260813.0] - 2026-08-13
+## [v0.20260814.0] - 2026-08-14
 
 ### Added
 - Add kolla-purge-rabbitmq.yml playbook to fully remove the RabbitMQ service, including its container, data volume, host config and HAProxy frontend (osism/container-image-kolla-ansible#916)
