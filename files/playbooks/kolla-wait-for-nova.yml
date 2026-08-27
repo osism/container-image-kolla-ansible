@@ -29,7 +29,4 @@
         host: "{{ api_interface_address }}"
         port: "{{ nova_api_public_port }}"
         connect_timeout: 1
-      register: check_nova_public_port
-      until: check_nova_public_port is success
-      retries: 60
-      delay: 10
+        timeout: 900
