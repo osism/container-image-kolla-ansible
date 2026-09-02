@@ -1,4 +1,18 @@
 ---
+# OSISM never runs kolla's site.yml, which opens with an import of
+# gather-facts.yml because, in its own words, "several plays below require them
+# when building their configurations". split-kolla-ansible-site.py drops that
+# import and forces gather_facts: false on every emitted play, leaving the split
+# roles to consume the shared fact cache with no fallback -- and since
+# ansible-core 2.19 namespaces cache entries per schema (s1_<host>), a kolla
+# runtime on the far side of 2.19 from the writer reads nothing at all. Restore
+# the prerequisite on the role the deploy guide makes the mandatory first one in
+# the kolla environment. gather-facts.yml is conditional ("when: not
+# ansible_facts"), so it gathers only what is genuinely missing and otherwise
+# costs one skipped task per host.
+- name: Gather facts
+  import_playbook: gather-facts.yml
+
 - name: Apply role common
   hosts: "{{ hosts_kolla_default_group|default('generic') }}"
   serial: '{{ serial | default("0") }}'
