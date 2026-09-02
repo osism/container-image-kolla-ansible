@@ -1,0 +1,13 @@
+# kolla-common.yml imports kolla-ansible's own gather-facts.yml, which lives at
+# /ansible/gather-facts.yml in the built image and never in this repository, so
+# ansible-lint's `ansible-playbook --syntax-check` cannot resolve the import and
+# reports internal-error. Ignore just that rule for these files; every other
+# rule still applies to them. ansible-lint has no mock_playbooks equivalent to
+# its mock_roles/mock_modules, and exclude_paths would drop the files from
+# linting entirely.
+files/playbooks/2023.2/kolla-common.yml internal-error
+files/playbooks/2024.1/kolla-common.yml internal-error
+files/playbooks/2024.2/kolla-common.yml internal-error
+files/playbooks/2025.1/kolla-common.yml internal-error
+files/playbooks/2025.2/kolla-common.yml internal-error
+files/playbooks/2026.1/kolla-common.yml internal-error
