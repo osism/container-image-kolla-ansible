@@ -6,7 +6,7 @@
     - name: Gather facts for all hosts
       ansible.builtin.setup:
         filter: "{{ osism_setup_filter | default('') }}"
-        gather_subset: "{{ osism_setup_gather_subset | default('') }}"
+        gather_subset: "{{ osism_setup_gather_subset | default('all') }}"
 
 - name: Gather facts for all hosts (if using --limit)
   hosts: "{{ hosts_kolla_default_group|default('generic') }}"
@@ -15,7 +15,7 @@
     - name: Gather facts for all hosts (if using --limit)
       ansible.builtin.setup:
         filter: "{{ osism_setup_filter | default('') }}"
-        gather_subset: "{{ osism_setup_gather_subset | default('') }}"
+        gather_subset: "{{ osism_setup_gather_subset | default('all') }}"
       delegate_facts: true
       delegate_to: "{{ item }}"
       with_items: "{{ groups['all'] }}"
