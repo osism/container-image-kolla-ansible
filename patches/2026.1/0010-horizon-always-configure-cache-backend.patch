@@ -1,20 +1,76 @@
-From 8052251fe8fa8d5dd696a84c80221ac6d0b2bd1e Mon Sep 17 00:00:00 2001
-From: "Dr. Jens Harbott" <harbott@osism.tech>
-Date: Sun, 23 Aug 2026 11:51:52 +0200
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 5 Sep 2026 20:00:00 +0200
 Subject: [PATCH 10/23] horizon-always-configure-cache-backend
 
-TODO: Unsure about the intent of the patch
+Restore the intent this patch had up to 2025.2 and lost when the set was
+re-derived for 2026.1.
 
-Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Up to 2025.2 the patch earned its name: _9998-kolla-settings.py.j2 only
+mutated an already-existing CACHES dict, and the patch moved those
+assignments out of the if/elif chain into a separate
+
+    {% if groups['memcached'] | length > 0 %}
+
+block, so the cache backend was configured whatever the session store was.
+
+2026.1 restructured the template to define CACHES wholesale, inside the
+same if/elif chain that selects SESSION_ENGINE:
+
+    {% if horizon_backend_database | bool %}
+    SESSION_ENGINE = '...backends.db'
+    DATABASES = { ... }
+    {% elif horizon_session_cache_backend == 'valkey' %}
+    ...
+    {% elif horizon_session_cache_backend == 'memcached' %}
+    ...
+    {% endif %}
+
+The re-derived patch only added three pymemcache options inside the
+memcached branch. With horizon_backend_database enabled the first branch
+wins, the cache branches are never reached, and no CACHES is emitted at
+all. Horizon then falls back to its own default -- PyMemcacheCache at
+127.0.0.1:11211, where nothing listens -- and every request fails with
+
+    pymemcache.exceptions.MemcacheError: All servers seem to be down right now
+
+as HTTP 500. ignore_exc is not set either, so it cannot even degrade.
+
+Decouple the two decisions the 2026.1 template conflated: the if/elif
+picks SESSION_ENGINE, and a separate block emits CACHES from
+horizon_session_cache_backend regardless of the session store.
+horizon_session_cache_backend is defined independently of
+horizon_backend_database (valkey -> memcached -> disabled), so no new
+variable is needed.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
 ---
- ansible/roles/horizon/templates/_9998-kolla-settings.py.j2 | 3 +++
- 1 file changed, 3 insertions(+)
-
 diff --git a/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2 b/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
-index e88afbdc3..c945e48e1 100644
+index e88afbdc3..6c1b25498 100644
 --- a/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
 +++ b/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
-@@ -50,6 +50,9 @@ CACHES = {
+@@ -16,8 +16,11 @@ DATABASES = {
+         'PORT': '{{ database_port }}'
+     }
+ }
+-{% elif horizon_session_cache_backend == 'valkey' %}
++{% else %}
+ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
++{% endif %}
++
++{% if horizon_session_cache_backend == 'valkey' %}
+ CACHES = {
+     'default': {
+         'BACKEND': 'django_redis.cache.RedisCache',
+@@ -39,7 +42,6 @@ CACHES = {
+     }
+ }
+ {% elif horizon_session_cache_backend == 'memcached' %}
+-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+ CACHES = {
+     'default': {
+         'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+@@ -50,6 +52,9 @@ CACHES = {
          ],
          'OPTIONS': {
              'ignore_exc': True,
