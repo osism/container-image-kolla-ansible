@@ -12,7 +12,7 @@ diff --git a/ansible/roles/octavia/tasks/prepare.yml b/ansible/roles/octavia/tas
 index fb73c935e..4b92350cb 100644
 --- a/ansible/roles/octavia/tasks/prepare.yml
 +++ b/ansible/roles/octavia/tasks/prepare.yml
-@@ -167,3 +167,28 @@
+@@ -167,3 +167,29 @@
    run_once: true
    when: octavia_network_address_family == "ipv6"
    delegate_to: "{{ groups['octavia-api'][0] }}"
@@ -24,6 +24,7 @@ index fb73c935e..4b92350cb 100644
 +    module_name: os_subnet
 +    module_args:
 +      auth: "{{ octavia_user_auth }}"
++      cloud: "{{ openstack_octavia_auth_cloud }}"
 +      cacert: "{{ openstack_cacert }}"
 +      endpoint_type: "{{ openstack_interface }}"
 +      region_name: "{{ openstack_region_name }}"
