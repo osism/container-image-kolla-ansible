@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 5 Sep 2026 18:00:00 +0200
+Subject: [PATCH 24/24] glance: set python_interpreter for uwsgi
+
+2026.1 runs glance-api under uWSGI. oslo.concurrency builds its prlimit
+wrapper as [sys.executable, '-m', 'oslo_concurrency.prlimit', ...], and
+under uWSGI sys.executable is the uwsgi binary rather than an
+interpreter, so the command becomes
+
+    uwsgi -m oslo_concurrency.prlimit --as=... -- qemu-img info ...
+
+uwsgi parses -m as one of its own options and exits with "unable to load
+configuration from oslo_concurrency.prlimit". qemu-img never runs, the
+image_conversion import task fails, and the image is left stuck in
+"queued" with nothing in the API response to say why.
+
+glance already supports the fix: image_conversion passes
+python_exec=CONF.wsgi.python_interpreter, and the option's own help text
+names this exact case -- "in some situations (for example, uwsgi)
+sys.executable may not actually point to a python interpreter and an
+alternative value must be set". It is simply never set, so it defaults
+to None and oslo.concurrency falls back to sys.executable.
+
+Stock kolla does not hit this because it sets no image_import_plugins at
+all, so image_conversion never runs. Deployments that enable conversion
+do -- which on a Ceph backend is the normal configuration, since RBD
+wants raw images for copy-on-write.
+
+Known upstream since 2017 as https://bugs.launchpad.net/glance/+bug/1712463,
+where the oslo.concurrency half was fixed in 3.25.0.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+---
+ ansible/roles/glance/templates/glance-api.conf.j2 | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/ansible/roles/glance/templates/glance-api.conf.j2 b/ansible/roles/glance/templates/glance-api.conf.j2
+index 1111111..2222222 100644
+--- a/ansible/roles/glance/templates/glance-api.conf.j2
++++ b/ansible/roles/glance/templates/glance-api.conf.j2
+@@ -86,6 +86,9 @@
+ [oslo_middleware]
+ enable_proxy_headers_parsing = true
+ 
++[wsgi]
++python_interpreter = /var/lib/kolla/venv/bin/python3
++
+ [oslo_concurrency]
+ lock_path = /var/lib/glance/tmp
+ 
