@@ -13,10 +13,85 @@
 - name: Gather facts
   import_playbook: gather-facts.yml
 
-- name: Apply role common
-  hosts: "{{ hosts_kolla_default_group|default('generic') }}"
-  serial: '{{ serial | default("0") }}'
-  roles:
-    - {role: common, tags: common}
-
+# 2026.1 dissolved the monolithic `common` role into four: logs, kolla_toolbox,
+# cron and fluentd. `roles/common/` survives holding one shared template that
+# kolla_toolbox consumes, so applying it is a no-op -- the play runs with no
+# tasks and the four services are never deployed. Observed live: mariadb's WSREP
+# sync check then fails with "kolla_toolbox container is missing or not
+# running!", because it runs its query through a container nothing created.
+#
+# Fold the four successors in here rather than making each an `osism apply`
+# target of its own. Upstream calls them as four separate site.yml plays, but
+# routing them individually would need python-osism's enums.py collections to
+# become release-aware -- they are static, so naming logs/kolla_toolbox there
+# would break `osism apply collection-infrastructure` on <= 2025.2, where those
+# playbooks do not exist. Folding keeps the release difference inside the one
+# file that is already per-release, and keeps `osism apply common` doing what
+# the deploy guide has always said it does.
+#
+# Accepted trade-off: cron and fluentd now install early and by default. Both
+# are overridable (`enable_fluentd: false`; cron has no flag upstream), and
+# OSISM offers operators no alternative to either.
+#
+# Play order, host groups and tags follow 2026.1's site.yml exactly (P1/P4).
+# The group_by play exists only for fluentd, the one successor whose host
+# selector intersects an enable_* group.
+- name: Group hosts based on configuration
+  hosts:
+    - fluentd
   gather_facts: false
+  tasks:
+    - name: Group hosts based on Kolla action
+      ansible.builtin.group_by:
+        key: "kolla_action_{{ kolla_action }}"
+      changed_when: false
+
+    - name: Group hosts based on enabled services
+      ansible.builtin.group_by:
+        key: "{{ item }}"
+      changed_when: false
+      with_items:
+        - enable_fluentd_{{ enable_fluentd | bool }}
+  tags: always
+
+- name: Apply role logs
+  hosts: kolla_logs
+  serial: '{{ kolla_serial | default("0") }}'
+  gather_facts: false
+  tags:
+    - common
+    - logs
+  roles:
+    - role: logs
+
+- name: Apply role kolla_toolbox
+  hosts:
+    - kolla_toolbox
+  serial: '{{ kolla_serial | default("0") }}'
+  gather_facts: false
+  tags:
+    - common
+    - kolla_toolbox
+  roles:
+    - role: kolla_toolbox
+
+- name: Apply role cron
+  hosts:
+    - cron
+  serial: '{{ kolla_serial | default("0") }}'
+  gather_facts: false
+  tags:
+    - cron
+  roles:
+    - role: cron
+
+- name: Apply role fluentd
+  hosts:
+    - fluentd
+    - '&enable_fluentd_True'
+  serial: '{{ kolla_serial | default("0") }}'
+  gather_facts: false
+  tags:
+    - fluentd
+  roles:
+    - role: fluentd
