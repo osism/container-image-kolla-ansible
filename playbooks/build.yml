@@ -65,9 +65,81 @@
               repository="$registry/$repository"
           fi
 
+          # NOTE: The sources that are fetched while the image is built are
+          #       resolved to commits here, so that the image records what it
+          #       contains and not only the commit of this repository. The
+          #       commits are passed into the build as well, which pins them:
+          #       without that the label and the clone in the Containerfile are
+          #       two independent resolutions of a floating ref and can differ.
+          resolve_commit () {
+              local url=$1
+              local ref=$2
+              local refs sha
+
+              # NOTE: An annotated tag resolves to the tag object and not to
+              #       a commit, so the commit is requested explicitly as
+              #       $ref^{}. That pattern matches nothing for a branch or a
+              #       lightweight tag, where $ref is the commit itself.
+              refs=$(git ls-remote "$url" "$ref" "$ref^{}")
+
+              sha=$(echo "$refs" | awk '$2 ~ /\^\{\}$/ { print $1; exit }')
+              if [[ -z $sha ]]; then
+                  sha=$(echo "$refs" | awk 'NR == 1 { print $1 }')
+              fi
+
+              if [[ -z $sha ]]; then
+                  echo "unable to resolve $ref in $url" >&2
+                  exit 1
+              fi
+
+              echo "$sha"
+          }
+
+          release_version () {
+              echo "$base_yml" | grep "^$1:" | awk -F': ' '{ print $2 }' | tr -d "\"' "
+          }
+
+          # NOTE: Mirrors the clone in the Containerfile.
+          case $openstack_version in
+              master)
+                  kolla_ansible_ref=refs/heads/master
+                  ;;
+              2024.2)
+                  kolla_ansible_ref=refs/tags/2024.2-eol
+                  ;;
+              *)
+                  kolla_ansible_ref=refs/heads/stable/$openstack_version
+                  ;;
+          esac
+
+          sha_kolla_ansible=$(resolve_commit https://github.com/openstack/kolla-ansible "$kolla_ansible_ref")
+
+          # NOTE: For a release build the OSISM sources are pinned by tags in the
+          #       release repository. For a latest build -- which is what
+          #       development and test deployments use -- they float on their
+          #       default branches, which is the case that needs this most.
+          if [[ $version != "latest" ]]; then
+              base_yml=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/base.yml)
+
+              sha_release=$(resolve_commit https://github.com/osism/release "refs/tags/kolla-ansible-$version")
+              sha_ansible_playbooks=$(resolve_commit https://github.com/osism/ansible-playbooks "refs/tags/$(release_version playbooks_version)")
+              sha_generics=$(resolve_commit https://github.com/osism/generics "refs/tags/$(release_version generics_version)")
+              sha_kolla_operations=$(resolve_commit https://github.com/osism/kolla-operations "refs/tags/$(release_version operations_version)")
+          else
+              sha_release=$(resolve_commit https://github.com/osism/release HEAD)
+              sha_ansible_playbooks=$(resolve_commit https://github.com/osism/ansible-playbooks HEAD)
+              sha_generics=$(resolve_commit https://github.com/osism/generics HEAD)
+              sha_kolla_operations=$(resolve_commit https://github.com/osism/kolla-operations HEAD)
+          fi
+
           docker buildx build \
               --build-arg "OPENSTACK_VERSION=$openstack_version" \
               --build-arg "PYTHON_VERSION=$python_version" \
+              --build-arg "SHA_ANSIBLE_PLAYBOOKS=$sha_ansible_playbooks" \
+              --build-arg "SHA_GENERICS=$sha_generics" \
+              --build-arg "SHA_KOLLA_ANSIBLE=$sha_kolla_ansible" \
+              --build-arg "SHA_KOLLA_OPERATIONS=$sha_kolla_operations" \
+              --build-arg "SHA_RELEASE=$sha_release" \
               --build-arg "VERSION=$version" \
               --label "org.opencontainers.image.created=$created" \
               --label "org.opencontainers.image.documentation=https://osism.tech/docs/" \
@@ -78,6 +150,11 @@
               --label "org.opencontainers.image.url=https://quay.io/organization/osism" \
               --label "org.opencontainers.image.vendor=OSISM GmbH" \
               --label "org.opencontainers.image.version=$version" \
+              --label "de.osism.commit.ansible_playbooks=$sha_ansible_playbooks" \
+              --label "de.osism.commit.generics=$sha_generics" \
+              --label "de.osism.commit.kolla_ansible=$sha_kolla_ansible" \
+              --label "de.osism.commit.kolla_operations=$sha_kolla_operations" \
+              --label "de.osism.commit.release=$sha_release" \
               --label "de.osism.release.openstack=$openstack_version" \
               --load \
               --tag "$revision" \
