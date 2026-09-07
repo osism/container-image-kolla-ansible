@@ -6,6 +6,15 @@ FROM ${IMAGE}:${PYTHON_VERSION}-slim-bookworm AS builder
 ARG OPENSTACK_VERSION
 ARG VERSION
 
+# NOTE: The commits the sources below are pinned to. They are resolved before
+#       the build and recorded in the de.osism.commit.* labels. Empty means
+#       unpinned, which is what a build without this plumbing gets.
+ARG SHA_ANSIBLE_PLAYBOOKS
+ARG SHA_GENERICS
+ARG SHA_KOLLA_ANSIBLE
+ARG SHA_KOLLA_OPERATIONS
+ARG SHA_RELEASE
+
 ARG USER_ID=45000
 ARG GROUP_ID=45000
 ARG GROUP_ID_DOCKER=999
@@ -93,6 +102,12 @@ if [ "$VERSION" != "latest" ]; then
   ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/latest/base.yml")" )
 fi
 
+# pin the sources to the commits recorded in the labels
+if [ -n "$SHA_RELEASE" ]; then ( cd /release || exit; git checkout "$SHA_RELEASE" ); fi
+if [ -n "$SHA_ANSIBLE_PLAYBOOKS" ]; then ( cd /playbooks || exit; git checkout "$SHA_ANSIBLE_PLAYBOOKS" ); fi
+if [ -n "$SHA_GENERICS" ]; then ( cd /generics || exit; git checkout "$SHA_GENERICS" ); fi
+if [ -n "$SHA_KOLLA_OPERATIONS" ]; then ( cd /operations || exit; git checkout "$SHA_KOLLA_OPERATIONS" ); fi
+
 # add inventory files
 mkdir -p /ansible/inventory.generics /ansible/inventory
 cp /generics/inventory/50-ceph /ansible/inventory.generics/50-ceph
@@ -135,6 +150,9 @@ elif [ "$OPENSTACK_VERSION" = "2024.2" ]; then
 else
   git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository
 fi
+
+# pin the source to the commit recorded in the labels
+if [ -n "$SHA_KOLLA_ANSIBLE" ]; then ( cd /repository || exit; git checkout "$SHA_KOLLA_ANSIBLE" ); fi
 
 # apply patches
 for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch" | LC_ALL=C sort); do
