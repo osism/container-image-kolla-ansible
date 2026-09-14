@@ -56,6 +56,8 @@ also corroborates. Neither is something more name matching would fix.
 
 Reading host_ip needs the detail listing, so the query asks for it; the
 summary listing returns host_ip unset.
+Upstream-Status: Pending
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/936785 (introduced the compute_id delivery this fixes, bug 2051011; merged)
 ---
 
 Not part of the upstream commit message: this patch is an upstreaming

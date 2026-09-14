@@ -4,6 +4,7 @@ Date: Sun, 23 Aug 2026 11:57:22 +0200
 Subject: [PATCH 20/23] rabbitmq-cluster-formation-tuning
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Pending
 ---
  ansible/roles/rabbitmq/templates/rabbitmq.conf.j2 | 6 ++++++
  1 file changed, 6 insertions(+)

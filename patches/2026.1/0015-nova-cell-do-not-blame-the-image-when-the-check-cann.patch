@@ -30,6 +30,7 @@ against old images, and has no equivalent on master.
 
 Candidate for upstreaming to kolla-ansible stable/2025.1, stable/2025.2
 and stable/2026.1.
+Upstream-Status: Pending
 ---
  ansible/roles/nova-cell/tasks/version-check.yml | 11 +++++++++++
  1 file changed, 11 insertions(+)

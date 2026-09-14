@@ -27,6 +27,8 @@ so even an oversized log is rotated on the first run, and the space
 needed for a rotation no longer depends on the size of the log.
 
 Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/984200 (reworks the fluentd output that writes the HAProxy log; rename rotation stays safe if it merges)
 ---
  ansible/roles/common/templates/cron-logrotate-haproxy.conf.j2 | 1 +
  1 file changed, 1 insertion(+)
