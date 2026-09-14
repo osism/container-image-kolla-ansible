@@ -4,6 +4,8 @@ Date: Sun, 23 Aug 2026 11:56:43 +0200
 Subject: [PATCH 18/23] octavia-isc-dhcp-client-package
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Pending
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/987123 (drops dhclient for dhcpcd, which would make this patch pointless; open, CR+1)
 ---
  ansible/roles/octavia/tasks/hm-interface.yml | 9 +++++++++
  1 file changed, 9 insertions(+)
