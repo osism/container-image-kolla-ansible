@@ -9,6 +9,7 @@ prometheus.yml.j2 template to be less strict. Previously we were using
 
 Closes-Bug: #2098511
 Change-Id: I3ac18bd12ed1dceef206040b3e793faa79717a19
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/941635 merged 2025-02-20]
 ---
 
 diff --git a/ansible/roles/prometheus/templates/prometheus.yml.j2 b/ansible/roles/prometheus/templates/prometheus.yml.j2
