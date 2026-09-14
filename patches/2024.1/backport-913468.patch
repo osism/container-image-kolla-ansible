@@ -7,6 +7,7 @@ The tftp server is reachable on the ironic_tftp_listen_address
 address.
 
 Change-Id: I07b0d4a9da439954f982d19f472f6440b08ae3f8
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/913468 merged 2025-04-18]
 ---
 
 diff --git a/ansible/roles/ironic/templates/ironic-dnsmasq.conf.j2 b/ansible/roles/ironic/templates/ironic-dnsmasq.conf.j2

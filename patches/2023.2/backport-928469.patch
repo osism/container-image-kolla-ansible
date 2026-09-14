@@ -4,6 +4,7 @@ Date: Fri, 06 Sep 2024 21:11:31 +0200
 Subject: [PATCH] manila: add missing become to "Copying over existing policy file" task
 
 Change-Id: If78f944ea8d63f3d37398f72e9a432cc22eb5c6e
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/928469 merged 2025-04-18]
 ---
 
 diff --git a/ansible/roles/manila/tasks/config.yml b/ansible/roles/manila/tasks/config.yml

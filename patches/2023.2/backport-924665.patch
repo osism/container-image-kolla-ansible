@@ -4,6 +4,7 @@ Date: Mon, 22 Jul 2024 19:15:21 +0200
 Subject: [PATCH] common: support custom cron-logrotate-global.conf
 
 Change-Id: Ia94cc960abff2850e64d60ac997e8a2e249e4ac4
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/924665 merged 2024-12-16]
 ---
 
 diff --git a/ansible/roles/common/tasks/config.yml b/ansible/roles/common/tasks/config.yml
