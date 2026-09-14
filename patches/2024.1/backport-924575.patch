@@ -1,3 +1,6 @@
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/924575 merged 2026-04-17]
+Related: https://review.opendev.org/c/openstack/kolla/+/924302 (companion image change, merged)
+
 commit 608000db490e87d8c7bcd99031e1359f5787fbb9
 Author: Maximilian Stinsky <maximilian.stinsky-damke@wiit.cloud>
 Date:   Fri Jul 19 12:35:19 2024 +0200
