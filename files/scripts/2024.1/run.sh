@@ -60,6 +60,7 @@ if [[ -e $ENVIRONMENTS_DIRECTORY/$SUB/.lock ]]; then
 fi
 
 cd $ENVIRONMENTS_DIRECTORY/$SUB
+require_vault_password
 
 export IFS=","
 for service in $services; do
