@@ -1,0 +1,10 @@
+---
+- name: Check carried patch headers against upstream
+  hosts: all
+
+  tasks:
+    - name: Verify Upstream-Status claims against Gerrit
+      ansible.builtin.command:
+        cmd: python3 scripts/check_patch_headers.py --verify
+        chdir: "{{ zuul.project.src_dir }}"
+      changed_when: false
