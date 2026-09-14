@@ -12,6 +12,7 @@ Similar to the service-stop role, this adds a start.yml file for all
 roles which runs the role accordingly.
 
 Change-Id: I6fd880ca0f596bc1f4de54d89a1872be4c778f32
+Upstream-Status: Submitted [https://review.opendev.org/c/openstack/kolla-ansible/+/932311]
 ---
 
 diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
