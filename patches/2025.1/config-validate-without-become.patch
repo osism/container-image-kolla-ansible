@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [osism-specific: writes to /share, drops become]
+
 --- a/ansible/roles/service-config-validate/defaults/main.yml
 +++ b/ansible/roles/service-config-validate/defaults/main.yml
 @@ -2,5 +2,5 @@

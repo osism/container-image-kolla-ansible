@@ -4,6 +4,7 @@ Date: Sun, 23 Aug 2026 11:58:16 +0200
 Subject: [PATCH 22/23] use-share-directory-for-authkey-files
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Inappropriate [osism-specific: hacluster authkeys live in /share]
 ---
  ansible/roles/hacluster/tasks/bootstrap.yml | 22 +++++++++++++++++----
  ansible/roles/hacluster/tasks/config.yml    |  3 +++

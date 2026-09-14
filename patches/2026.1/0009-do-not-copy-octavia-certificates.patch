@@ -4,6 +4,7 @@ Date: Sun, 23 Aug 2026 11:50:47 +0200
 Subject: [PATCH 09/23] do-not-copy-octavia-certificates
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Inappropriate [osism-specific: the target location is read-only in our image]
 ---
  .../roles/octavia-certificates/tasks/main.yml   | 17 -----------------
  1 file changed, 17 deletions(-)

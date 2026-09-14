@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [osism-specific: OSISM's own nova playbook handling]
+
 --- a/ansible/nova.yml
 +++ b/ansible/nova.yml
 @@ -1,4 +1,21 @@

@@ -4,6 +4,7 @@ Date: Sun, 23 Aug 2026 11:53:26 +0200
 Subject: [PATCH 12/23] hosts-kolla-loadbalancer
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Inappropriate [osism-specific: configurable loadbalancer inventory group for sub-environments]
 ---
  ansible/roles/loadbalancer/defaults/main.yml  |  8 +-
  ansible/roles/loadbalancer/tasks/main.yml     |  2 +-
