@@ -1,0 +1,64 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Sun, 14 Sep 2026 12:00:00 +0200
+Subject: [PATCH 25/25] uwsgi: restore deprecation-warning suppression
+
+Up to 2025.2 the carried patch disable-python-deprecation-warnings-wsgi
+added
+
+    SetEnv PYTHONWARNINGS "ignore"
+
+to the eight mod_wsgi vhost templates OSISM deploys behind Apache
+(aodh, cloudkitty, gnocchi, heat x2, keystone, masakari, zun), gated on
+kolla_disable_python_deprecation_warnings.
+
+2026.1 migrates those services from mod_wsgi to uWSGI and deletes every
+wsgi-<service>.conf.j2 the patch edited, so the patch was correctly
+dropped from patches/2026.1 -- but nothing took its place. The services
+still run Python; only the Apache layer that carried the setting is
+gone. osism/defaults all/099-kolla.yml still sets
+
+    kolla_disable_python_deprecation_warnings: "yes"
+
+and on 2026.1 nothing reads it, so deprecation warnings are back in
+those services' logs while the flag reads as still effective. Found by
+kolla_retired_patch_orphan in osism/release.
+
+Restore the behaviour at the layer that replaced mod_wsgi. All uWSGI
+services share one template, service-uwsgi-config/templates/uwsgi.ini.j2,
+so the one hunk here replaces the eight the old patch carried, and the
+gate variable and its semantics are unchanged -- an operator who set the
+flag keeps the behaviour across the upgrade without touching anything.
+
+The scope widens as a side effect: the shared template backs 22 roles at
+2026.1 (aodh, barbican, blazar, cinder, cloudkitty, cyborg, designate,
+glance, gnocchi, heat, horizon, ironic, keystone, magnum, manila,
+masakari, mistral, neutron, nova, octavia, placement, trove) rather than
+the original eight. That is the flag doing what its name says; all seven
+services from the old set that still exist at 2026.1 are covered (zun
+was removed upstream).
+
+env= is uWSGI's own mechanism for the worker environment, applied before
+the application is loaded, which is what PYTHONWARNINGS needs. There is
+no non-patch route: 2026.1 exposes no per-service extra-environment
+variable and uwsgi.ini.j2 has no env hook.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+---
+ .../roles/service-uwsgi-config/templates/uwsgi.ini.j2  | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/ansible/roles/service-uwsgi-config/templates/uwsgi.ini.j2 b/ansible/roles/service-uwsgi-config/templates/uwsgi.ini.j2
+index e8873eefc..096a00dbe 100644
+--- a/ansible/roles/service-uwsgi-config/templates/uwsgi.ini.j2
++++ b/ansible/roles/service-uwsgi-config/templates/uwsgi.ini.j2
+@@ -6,6 +6,9 @@ chunked-input-limit = {{ service_uwsgi_config_chunked_input_limit }}
+ {% endif %}
+ die-on-term = true
+ enable-threads = true
++{% if kolla_disable_python_deprecation_warnings | default(false) | bool %}
++env = PYTHONWARNINGS=ignore
++{% endif %}
+ exit-on-reload = false
+ hook-master-start = unix_signal:15 gracefully_kill_them_all
+ {% if service_uwsgi_config_tls_backend | bool %}
