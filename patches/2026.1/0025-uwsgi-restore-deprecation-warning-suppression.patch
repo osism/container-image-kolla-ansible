@@ -44,6 +44,7 @@ no non-patch route: 2026.1 exposes no per-service extra-environment
 variable and uwsgi.ini.j2 has no env hook.
 
 Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending [needs generalising: gated on kolla_disable_python_deprecation_warnings, an OSISM-only variable declared nowhere upstream]
 ---
  .../roles/service-uwsgi-config/templates/uwsgi.ini.j2  | 3 +++
  1 file changed, 3 insertions(+)
