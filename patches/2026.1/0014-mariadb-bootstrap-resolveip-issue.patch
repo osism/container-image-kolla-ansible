@@ -4,6 +4,7 @@ Date: Sun, 23 Aug 2026 11:55:02 +0200
 Subject: [PATCH 14/23] mariadb-bootstrap-resolveip-issue
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Inappropriate [osism-specific: depends on OSISM managing /etc/hosts]
 ---
  ansible/roles/mariadb/defaults/main.yml | 1 +
  1 file changed, 1 insertion(+)
