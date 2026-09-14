@@ -12,6 +12,8 @@ appear.
 
 Change-Id: Ica364f2815a828fd120738b641a9c89976e1cc73
 Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+Upstream-Status: Pending [commit prepared with a Change-Id but never pushed to Gerrit]
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/987123 (rewrites the same unit file to use dhcpcd; open, CR+1)
 ---
  ansible/roles/octavia/templates/octavia-interface.service.j2 | 1 +
  1 file changed, 1 insertion(+)
