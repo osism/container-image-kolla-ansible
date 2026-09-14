@@ -85,6 +85,14 @@
     max: 1
 
 - job:
+    name: container-image-kolla-ansible-patch-headers
+    run: playbooks/patch-headers.yml
+
+- job:
+    name: container-image-kolla-ansible-patch-headers-upstream
+    run: playbooks/patch-headers-upstream.yml
+
+- job:
     name: container-image-kolla-ansible-build
     pre-run: playbooks/pre.yml
     run: playbooks/build.yml
@@ -190,6 +198,7 @@
     check:
       jobs:
         - ansible-lint
+        - container-image-kolla-ansible-patch-headers
         - flake8
         - hadolint
         - python-black
@@ -201,6 +210,8 @@
     periodic-daily:
       jobs:
         - ansible-lint
+        - container-image-kolla-ansible-patch-headers
+        - container-image-kolla-ansible-patch-headers-upstream
         - flake8
         - hadolint
         - python-black
