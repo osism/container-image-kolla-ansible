@@ -5,6 +5,7 @@ Subject: [PATCH 01/23] Add glance NVMe NQN and ID
 
 Change-Id: I496316eecb12486ac8f83da72201be80098f4920
 Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+Upstream-Status: Pending [commit prepared with a Change-Id but never pushed to Gerrit]
 ---
  ansible/roles/glance/defaults/main.yml        |  4 +--
  ansible/roles/glance/tasks/config.yml         | 26 +++++++++++++++++++
