@@ -1,3 +1,5 @@
+Upstream-Status: Pending
+
 --- a/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2
 +++ b/ansible/roles/rabbitmq/templates/rabbitmq.conf.j2
 @@ -20,6 +20,12 @@ cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config
