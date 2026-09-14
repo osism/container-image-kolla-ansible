@@ -1,3 +1,5 @@
+Upstream-Status: Pending [needs generalising: gated on kolla_disable_python_deprecation_warnings, an OSISM-only variable declared nowhere upstream]
+
 --- a/ansible/roles/aodh/templates/wsgi-aodh.conf.j2
 +++ b/ansible/roles/aodh/templates/wsgi-aodh.conf.j2
 @@ -35,4 +35,7 @@ LogLevel info
