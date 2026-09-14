@@ -4,6 +4,7 @@ Date: Wed, 24 Apr 2024 16:22:58 +0200
 Subject: [PATCH] Skyline: use an external object store (Swift) in the dashboard
 
 Change-Id: I0247877c245f12994ffab983a624844e1238de9b
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/916972 merged 2024-11-27]
 ---
 
 diff --git a/ansible/roles/skyline/defaults/main.yml b/ansible/roles/skyline/defaults/main.yml
