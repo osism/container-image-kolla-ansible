@@ -13,6 +13,8 @@ Closes-Bug: #2093328
 
 Change-Id: I3bc6ce3599df6d0c208baf2ceee10c223471ca49
 Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+Upstream-Status: Submitted [https://review.opendev.org/c/openstack/kolla-ansible/+/939212]
+Bug: https://bugs.launchpad.net/kolla-ansible/+bug/2093328
 ---
  .../roles/ovn-controller/handlers/main.yml    |  5 ++++
  ansible/roles/ovn-controller/tasks/config.yml | 23 +++++++++++++++++++
