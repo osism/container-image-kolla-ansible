@@ -1,3 +1,5 @@
+Upstream-Status: Pending
+
 --- a/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
 +++ b/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
 @@ -18,8 +18,17 @@ DATABASES = {

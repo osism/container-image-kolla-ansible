@@ -1,3 +1,6 @@
+Upstream-Status: Pending
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/987123 (drops dhclient for dhcpcd, which would make this patch pointless; open, CR+1)
+
 --- a/ansible/roles/octavia/tasks/hm-interface.yml
 +++ b/ansible/roles/octavia/tasks/hm-interface.yml
 @@ -52,6 +52,15 @@

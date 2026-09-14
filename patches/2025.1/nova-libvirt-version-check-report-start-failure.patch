@@ -28,6 +28,7 @@ so it does not depend on how an unmatched regex_search renders (empty
 string on ansible-core 2.18, None under native Jinja).
 
 Candidate for upstreaming to kolla-ansible master and stable branches.
+Upstream-Status: Pending
 ---
 
 diff --git a/ansible/roles/nova-cell/tasks/version-check.yml b/ansible/roles/nova-cell/tasks/version-check.yml
