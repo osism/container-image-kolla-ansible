@@ -44,6 +44,7 @@ horizon_backend_database (valkey -> memcached -> disabled), so no new
 variable is needed.
 
 Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending
 ---
 diff --git a/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2 b/ansible/roles/horizon/templates/_9998-kolla-settings.py.j2
 index e88afbdc3..6c1b25498 100644

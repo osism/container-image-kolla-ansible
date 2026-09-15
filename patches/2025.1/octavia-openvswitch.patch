@@ -1,3 +1,5 @@
+Upstream-Status: Pending
+
 --- a/ansible/roles/openvswitch/defaults/main.yml
 +++ b/ansible/roles/openvswitch/defaults/main.yml
 @@ -12,6 +12,7 @@ openvswitch_services:

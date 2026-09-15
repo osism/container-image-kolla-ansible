@@ -9,6 +9,8 @@ for MariaDB connections from HAProxy to ProxySQL.
 
 Depends-On: https://review.opendev.org/c/openstack/kolla/+/928956
 Change-Id: I42ba4fb83b5bb31058e888f0d39d47c27b844de5
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/913724 merged 2024-10-22]
+Related: https://review.opendev.org/c/openstack/kolla/+/928956 (companion image change, merged)
 ---
 
 diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml

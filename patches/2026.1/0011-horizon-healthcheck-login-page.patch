@@ -4,6 +4,8 @@ Date: Sun, 23 Aug 2026 11:52:42 +0200
 Subject: [PATCH 11/23] horizon-healthcheck-login-page
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Pending
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/1000345 (upstream fix for the same problem, open, no votes)
 ---
  ansible/roles/horizon/defaults/main.yml | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

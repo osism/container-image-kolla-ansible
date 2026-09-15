@@ -4,6 +4,7 @@ Date: Thu, 20 Aug 2026 18:13:04 +0200
 Subject: [PATCH 07/23] config-validate-without-become
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Inappropriate [osism-specific: writes to /share, drops become]
 ---
  ansible/roles/service-config-validate/defaults/main.yml  | 2 +-
  ansible/roles/service-config-validate/tasks/validate.yml | 2 --

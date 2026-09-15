@@ -8,6 +8,7 @@ not be hardcoded in the letsencrypt-webserver.conf.j2 template.
 
 Signed-off-by: Christian Berendt <berendt@osism.tech>
 Change-Id: If75524642bd998a8fa1cad4c5a2fe1c77c520248
+Upstream-Status: Submitted [https://review.opendev.org/c/openstack/kolla-ansible/+/963262]
 ---
  .../roles/letsencrypt/templates/letsencrypt-webserver.conf.j2 | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

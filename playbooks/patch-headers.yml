@@ -1,0 +1,21 @@
+---
+- name: Check carried patch headers
+  hosts: all
+
+  tasks:
+    - name: Validate Upstream-Status headers
+      ansible.builtin.command:
+        cmd: python3 scripts/check_patch_headers.py
+        chdir: "{{ zuul.project.src_dir }}"
+      changed_when: false
+
+    - name: Report carried patch status
+      ansible.builtin.command:
+        cmd: python3 scripts/check_patch_headers.py --report
+        chdir: "{{ zuul.project.src_dir }}"
+      changed_when: false
+      register: patch_header_report
+
+    - name: Show carried patch status
+      ansible.builtin.debug:
+        msg: "{{ patch_header_report.stdout_lines }}"

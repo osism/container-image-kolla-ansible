@@ -6,6 +6,7 @@ Subject: [PATCH] ironic: add missing ironic_database_shard_id parameter
 Without this parameter, it is not possible to use ProxySQL for Ironic.
 
 Change-Id: Iee8fa9d94e5ed5bfab794db2d35d75a96d8a7600
+Upstream-Status: Submitted [https://review.opendev.org/c/openstack/kolla-ansible/+/913449]
 ---
 
 diff --git a/ansible/roles/ironic/defaults/main.yml b/ansible/roles/ironic/defaults/main.yml

@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [osism-specific: hacluster authkeys live in /share]
+
 diff --git a/ansible/roles/hacluster/tasks/bootstrap.yml b/ansible/roles/hacluster/tasks/bootstrap.yml
 index baf83bbc9..8663a6db9 100644
 --- a/ansible/roles/hacluster/tasks/bootstrap.yml
