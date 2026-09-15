@@ -1,0 +1,58 @@
+From 85006f377f524fbeb3ff6e2b6d11e8244a4cbf02 Mon Sep 17 00:00:00 2001
+From: Freerk-Ole Zakfeld <fzakfeld@scaleuptech.com>
+Date: Tue, 15 Sep 2026 13:13:05 +0200
+Subject: [PATCH 3/3] Add `grafana_environment` option to grafana role.
+
+Support an optional `grafana_environment`, allowing the
+configuration of the environment inside the container.
+This is required for configuring an outbound HTTPS proxy.
+
+Change-Id: Ief5e22788045a25eeeb809931bc136de81d095ed
+Signed-off-by: Freerk-Ole Zakfeld <fzakfeld@scaleuptech.com>
+---
+ ansible/roles/grafana/defaults/main.yml | 2 ++
+ ansible/roles/grafana/handlers/main.yml | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/ansible/roles/grafana/defaults/main.yml b/ansible/roles/grafana/defaults/main.yml
+index a007505b2..8ecffaf59 100644
+--- a/ansible/roles/grafana/defaults/main.yml
++++ b/ansible/roles/grafana/defaults/main.yml
+@@ -7,6 +7,7 @@ grafana_services:
+     image: "{{ grafana_image_full }}"
+     volumes: "{{ grafana_default_volumes + grafana_extra_volumes }}"
+     dimensions: "{{ grafana_dimensions }}"
++    environment: "{{ grafana_environment }}"
+     healthcheck: "{{ grafana_healthcheck }}"
+     haproxy:
+       grafana_server:
+@@ -114,6 +115,7 @@ grafana_dimensions: "{{ default_container_dimensions }}"
+ grafana_default_volumes:
+   - "{{ node_config_directory }}/grafana/:{{ container_config_directory }}/:ro"
+   - "kolla_logs:/var/log/kolla/"
++grafana_environment: {}
+ grafana_extra_volumes: "{{ default_extra_volumes }}"
+
+ grafana_start_first_node_delay: 10
+diff --git a/ansible/roles/grafana/handlers/main.yml b/ansible/roles/grafana/handlers/main.yml
+index 7e66df2da..665b6e7f5 100644
+--- a/ansible/roles/grafana/handlers/main.yml
++++ b/ansible/roles/grafana/handlers/main.yml
+@@ -12,6 +12,7 @@
+     image: "{{ service.image }}"
+     volumes: "{{ service.volumes }}"
+     dimensions: "{{ service.dimensions }}"
++    environment: "{{ service.environment | default(omit) }}"
+     healthcheck: "{{ service.healthcheck | default(omit) }}"
+   when:
+     - inventory_hostname == groups[service.group] | first
+@@ -48,6 +49,7 @@
+     image: "{{ service.image }}"
+     volumes: "{{ service.volumes }}"
+     dimensions: "{{ service.dimensions }}"
++    environment: "{{ service.environment | default(omit) }}"
+     healthcheck: "{{ service.healthcheck | default(omit) }}"
+   when:
+     - inventory_hostname != groups[service.group] | first
+--
+2.39.3 (Apple Git-145)
