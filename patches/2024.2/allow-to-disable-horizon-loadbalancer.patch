@@ -1,3 +1,5 @@
+Upstream-Status: Pending
+
 --- a/ansible/roles/horizon/defaults/main.yml
 +++ b/ansible/roles/horizon/defaults/main.yml
 @@ -28,7 +28,7 @@ horizon_services:

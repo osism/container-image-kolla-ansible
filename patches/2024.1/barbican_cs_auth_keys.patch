@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [osism-specific: OSISM's barbican auth key handling]
+
 --- a/ansible/roles/barbican/defaults/main.yml
 +++ b/ansible/roles/barbican/defaults/main.yml
 @@ -4,6 +4,8 @@ barbican_services:

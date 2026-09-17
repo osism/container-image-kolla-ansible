@@ -4,6 +4,7 @@ Date: Thu, 20 Aug 2026 18:11:25 +0200
 Subject: [PATCH 04/23] allow-to-disable-horizon-loadbalancer
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Pending
 ---
  ansible/roles/horizon/defaults/main.yml | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)

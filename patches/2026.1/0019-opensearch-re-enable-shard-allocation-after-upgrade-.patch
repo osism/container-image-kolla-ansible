@@ -36,6 +36,8 @@ attached.
 
 AI-assisted: Claude Code
 Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Submitted [https://review.opendev.org/c/openstack/kolla-ansible/+/988776]
+Bug: https://bugs.launchpad.net/kolla-ansible/+bug/2085943
 ---
  ansible/roles/opensearch/handlers/main.yml | 25 ++++++++++++++++++++++
  1 file changed, 25 insertions(+)

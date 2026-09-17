@@ -5,6 +5,7 @@ Subject: [PATCH] Add NVMe hostid
 
 Change-Id: I3db3347cc7bf59c833ed57bd46c112ff41942edb
 Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+Upstream-Status: Pending [commit prepared with a Change-Id but never pushed to Gerrit]
 ---
  ansible/roles/cinder/tasks/config.yml               | 13 +++++++++++++
  .../roles/cinder/templates/cinder-volume.json.j2    |  6 ++++++

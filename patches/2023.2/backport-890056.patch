@@ -7,6 +7,7 @@ Also rename task to "Copying over custom pipeline.yaml file" for
 clarity.
 
 Change-Id: I04e3eb9620830a15781f9bab2549b557a9d1d9cb
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/890056 merged 2024-05-16]
 ---
 
 diff --git a/ansible/roles/ceilometer/tasks/config.yml b/ansible/roles/ceilometer/tasks/config.yml
