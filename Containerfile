@@ -90,23 +90,30 @@ useradd -l -g dragon -G docker -u "$USER_ID" -m -d /ansible dragon
 # prepare release repository
 git clone https://github.com/osism/release /release
 
+# kolla-operations is only read where kolla-operations.patch applies; it is
+# retired from 2025.1 on
+case "$OPENSTACK_VERSION" in
+  2023.2|2024.1|2024.2) kolla_operations=true ;;
+  *) kolla_operations=false ;;
+esac
+
 # prepare project repository
 git clone https://github.com/osism/ansible-playbooks /playbooks
 git clone https://github.com/osism/generics /generics
-git clone https://github.com/osism/kolla-operations /operations
+if [ "$kolla_operations" = true ]; then git clone https://github.com/osism/kolla-operations /operations; fi
 
 if [ "$VERSION" != "latest" ]; then
   ( cd /release || exit; git fetch --all --force; git checkout "kolla-ansible-$VERSION" )
   ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/latest/base.yml")" )
   ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/latest/base.yml")" )
-  ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/latest/base.yml")" )
+  if [ "$kolla_operations" = true ]; then ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/latest/base.yml")" ); fi
 fi
 
 # pin the sources to the commits recorded in the labels
 if [ -n "$SHA_RELEASE" ]; then ( cd /release || exit; git checkout "$SHA_RELEASE" ); fi
 if [ -n "$SHA_ANSIBLE_PLAYBOOKS" ]; then ( cd /playbooks || exit; git checkout "$SHA_ANSIBLE_PLAYBOOKS" ); fi
 if [ -n "$SHA_GENERICS" ]; then ( cd /generics || exit; git checkout "$SHA_GENERICS" ); fi
-if [ -n "$SHA_KOLLA_OPERATIONS" ]; then ( cd /operations || exit; git checkout "$SHA_KOLLA_OPERATIONS" ); fi
+if [ "$kolla_operations" = true ] && [ -n "$SHA_KOLLA_OPERATIONS" ]; then ( cd /operations || exit; git checkout "$SHA_KOLLA_OPERATIONS" ); fi
 
 # add inventory files
 mkdir -p /ansible/inventory.generics /ansible/inventory

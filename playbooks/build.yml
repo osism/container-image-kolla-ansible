@@ -114,6 +114,14 @@
 
           sha_kolla_ansible=$(resolve_commit https://github.com/openstack/kolla-ansible "$kolla_ansible_ref")
 
+          # kolla-operations is only read where kolla-operations.patch applies;
+          # it is retired from 2025.1 on
+          case "$openstack_version" in
+              2023.2|2024.1|2024.2) kolla_operations=true ;;
+              *) kolla_operations=false ;;
+          esac
+          operations_args=()
+
           # NOTE: For a release build the OSISM sources are pinned by tags in the
           #       release repository. For a latest build -- which is what
           #       development and test deployments use -- they float on their
@@ -124,21 +132,32 @@
               sha_release=$(resolve_commit https://github.com/osism/release "refs/tags/kolla-ansible-$version")
               sha_ansible_playbooks=$(resolve_commit https://github.com/osism/ansible-playbooks "refs/tags/$(release_version playbooks_version)")
               sha_generics=$(resolve_commit https://github.com/osism/generics "refs/tags/$(release_version generics_version)")
-              sha_kolla_operations=$(resolve_commit https://github.com/osism/kolla-operations "refs/tags/$(release_version operations_version)")
+              if [[ $kolla_operations == true ]]; then
+                  sha_kolla_operations=$(resolve_commit https://github.com/osism/kolla-operations "refs/tags/$(release_version operations_version)")
+              fi
           else
               sha_release=$(resolve_commit https://github.com/osism/release HEAD)
               sha_ansible_playbooks=$(resolve_commit https://github.com/osism/ansible-playbooks HEAD)
               sha_generics=$(resolve_commit https://github.com/osism/generics HEAD)
-              sha_kolla_operations=$(resolve_commit https://github.com/osism/kolla-operations HEAD)
+              if [[ $kolla_operations == true ]]; then
+                  sha_kolla_operations=$(resolve_commit https://github.com/osism/kolla-operations HEAD)
+              fi
+          fi
+
+          if [[ $kolla_operations == true ]]; then
+              operations_args=(
+                  --build-arg "SHA_KOLLA_OPERATIONS=$sha_kolla_operations"
+                  --label "de.osism.commit.kolla_operations=$sha_kolla_operations"
+              )
           fi
 
           docker buildx build \
+              "${operations_args[@]}" \
               --build-arg "OPENSTACK_VERSION=$openstack_version" \
               --build-arg "PYTHON_VERSION=$python_version" \
               --build-arg "SHA_ANSIBLE_PLAYBOOKS=$sha_ansible_playbooks" \
               --build-arg "SHA_GENERICS=$sha_generics" \
               --build-arg "SHA_KOLLA_ANSIBLE=$sha_kolla_ansible" \
-              --build-arg "SHA_KOLLA_OPERATIONS=$sha_kolla_operations" \
               --build-arg "SHA_RELEASE=$sha_release" \
               --build-arg "VERSION=$version" \
               --label "org.opencontainers.image.created=$created" \
@@ -153,7 +172,6 @@
               --label "de.osism.commit.ansible_playbooks=$sha_ansible_playbooks" \
               --label "de.osism.commit.generics=$sha_generics" \
               --label "de.osism.commit.kolla_ansible=$sha_kolla_ansible" \
-              --label "de.osism.commit.kolla_operations=$sha_kolla_operations" \
               --label "de.osism.commit.release=$sha_release" \
               --label "de.osism.release.openstack=$openstack_version" \
               --load \
