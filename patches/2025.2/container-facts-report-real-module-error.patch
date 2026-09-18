@@ -1,0 +1,49 @@
+From 44c2793d5334a72d995db39c43e24518d53cb3bb Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 18 Sep 2026 09:38:56 +0200
+Subject: [PATCH] Report the real error when a container facts lookup fails
+
+The failure handler in kolla_container_facts is
+
+    module.fail_json(changed=True, msg=repr(format_exc()),
+                     **getattr(cfw, 'result', {}))
+
+and ContainerFactsWorker.__init__ seeds self.result with
+dict(changed=False). So changed arrives twice, once as the explicit
+keyword and once from the ** expansion, and fail_json raises
+
+    TypeError: AnsibleModule.fail_json() got multiple values for
+    keyword argument 'changed'
+
+before it writes any JSON. The module produces no stdout at all and
+Ansible reports "MODULE FAILURE: No start of json char found", while the
+exception the handler was built to report survives only inside
+module_stderr, several frames down.
+
+Drop the explicit changed=True. The worker's own result dict already
+carries changed, so the expansion supplies it, and the real traceback
+reaches the operator.
+
+This became reachable in commit 19af5826f, which renamed
+ContainerFactsWorker.results to result. Before that the getattr lookup
+for 'result' found nothing, returned an empty dict, and nothing
+collided.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+---
+ ansible/library/kolla_container_facts.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ansible/library/kolla_container_facts.py b/ansible/library/kolla_container_facts.py
+index 47d5351c0..509a18ec3 100644
+--- a/ansible/library/kolla_container_facts.py
++++ b/ansible/library/kolla_container_facts.py
+@@ -256,7 +256,7 @@ def main():
+         result = bool(getattr(cfw, module.params.get('action'))())
+         module.exit_json(result=result, **cfw.result)
+     except Exception:
+-        module.fail_json(changed=True, msg=repr(format_exc()),
++        module.fail_json(msg=repr(format_exc()),
+                          **getattr(cfw, 'result', {}))
+ 
+ 
