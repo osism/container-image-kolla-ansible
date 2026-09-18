@@ -1,0 +1,59 @@
+From 6abbbb2ae110293398361c82a5634b279e326264 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 18 Sep 2026 09:38:34 +0200
+Subject: [PATCH] Do not let an unrelated container removal fail a facts lookup
+
+kolla_container_facts with action=get_containers inspects every
+container on the host before it applies the name filter, and it inspects
+them twice: containers.list() already issues one inspect per container,
+and the explicit container.reload() repeats all of them. A container
+removed during either pass raises docker.errors.NotFound and aborts the
+task, even when the caller asked about a single unrelated service.
+
+In practice that means one short-lived container exiting with --rm can
+break a service deploy. Observed in CI on the first task of the rabbitmq
+role, where it left RabbitMQ undeployed and the deployment failed
+downstream of it.
+
+Filter by name before reloading, so only containers the caller asked
+about are inspected a second time; pass ignore_removed=True so a removal
+during list() drops that container rather than raising; and catch
+NotFound around the reload, since ignore_removed does not reach it. A
+container that no longer exists has no facts, so skipping it is the
+correct result rather than an error.
+
+The reload is kept rather than dropped. It is redundant on docker, where
+containers.list() returns fully inspected objects, but not on podman: on
+the libpod path podman-py returns sparse objects, attrs["State"] is a
+plain string there, and the State.Health lookup below would raise
+AttributeError without the reload.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+---
+ ansible/library/kolla_container_facts.py | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/ansible/library/kolla_container_facts.py b/ansible/library/kolla_container_facts.py
+index 053b2ef5e..47d5351c0 100644
+--- a/ansible/library/kolla_container_facts.py
++++ b/ansible/library/kolla_container_facts.py
+@@ -138,12 +138,17 @@ class ContainerFactsWorker():
+         names = self.params.get('name')
+         self.result['containers'] = dict()
+ 
+-        containers = self.client.containers.list()
++        containers = self.client.containers.list(ignore_removed=True)
+         for container in containers:
+-            container.reload()
+             container_name = container.name
+             if names and container_name not in names:
+                 continue
++            try:
++                container.reload()
++            except self.containerError.NotFound:
++                # The container was removed between listing and inspecting
++                # it. It is gone, so it has no facts to report.
++                continue
+             # NOTE(r-krcek): For performance reasons don't include
+             # healthcheck logs. It can contain MBs worth of data!
+             container.attrs["State"].get("Health", dict()).pop("Log", None)
