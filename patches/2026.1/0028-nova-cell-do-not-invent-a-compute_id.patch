@@ -1,0 +1,115 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Wed, 23 Sep 2026 00:00:00 +0000
+Subject: [PATCH] nova-cell: do not invent a compute_id
+
+Stop the compute_id delivery from destroying the node identity of a
+compute that is already registered, which leaves nova-compute unable to
+start -- on every affected host at once, since the cause is a name
+comparison that misses the same way everywhere.
+
+The delivery, added for bug 2051011, falls back to
+`hypervisor_nodename | to_uuid` whenever the hypervisor lookup returns
+nothing. That value is a UUIDv5 of the node name and bears no relation to
+the compute_nodes.uuid an already-registered host owns, so delivering it
+to a host that is not new makes nova-compute refuse to start:
+
+    nova.exception.DuplicateRecord: Unable to create duplicate record for
+    compute node <host>:<generated uuid>
+    nova.exception.InvalidConfiguration: Duplicate compute node record
+    found for host <host> node <host>
+
+The lookup matches hypervisor names against ansible_facts.nodename, and
+the two sides are not computed the same way. nodename is platform.node(),
+the raw short hostname. The libvirt driver reports
+virConnectGetHostname(), which canonicalises a short, non-localhost name
+through getaddrinfo(AI_CANONNAME) and returns the FQDN wherever one
+resolves. On a deployment whose hosts resolve to an FQDN the match fails
+for every compute at once, and every compute is then handed an identity
+that is not its own.
+
+The fallback is not needed. A compute that has never registered takes its
+identity from nova, which generates and persists one on first start (see
+nova/virt/node.py, get_local_node_uuid). The only reason to write
+anything was that nova-compute.json copies compute_id unconditionally and
+set_configs fails on a missing source; making that entry conditional
+removes the need.
+
+So: drop the generated UUID; remove a stale compute_id when nothing
+matched, so one written by an earlier run is not re-delivered; and report
+the case where a cloud has hypervisors but none for this host, which is
+either a genuinely new compute or the name divergence described above.
+---
+diff --git a/ansible/roles/nova-cell/tasks/config.yml b/ansible/roles/nova-cell/tasks/config.yml
+index 2abcf1822..3bf29f775 100644
+--- a/ansible/roles/nova-cell/tasks/config.yml
++++ b/ansible/roles/nova-cell/tasks/config.yml
+@@ -100,15 +100,42 @@
+         - hypervisors.resources | length > 0
+         - matched_hypervisors | length == 1
+ 
+-    # If the host was never registered, create a new hypervisor id and copy as compute_id
+-    - name: Generate a new UUID then copy to compute_id
+-      ansible.builtin.copy:
+-        content: "{{ hypervisor_nodename | to_uuid }}"
+-        dest: "{{ node_config_directory }}/nova-compute/compute_id"
+-        mode: "0660"
++    # No hypervisor matched this host. Deliver nothing: nova generates and
++    # persists its own node identity on first start, so a host that has never
++    # registered needs no compute_id from here. Inventing one is not safe -- a
++    # UUID derived from the node name bears no relation to the compute_nodes.uuid
++    # an already-registered host owns, and delivering it makes nova-compute
++    # refuse to start with "Duplicate compute node record found".
++    - name: Drop a stale compute_id when no hypervisor matched
++      ansible.builtin.file:
++        path: "{{ node_config_directory }}/nova-compute/compute_id"
++        state: absent
+       become: true
+       when: hypervisors.resources | length == 0 or matched_hypervisors | length == 0
+ 
++    # A cloud that already has hypervisors but none for this host is the case
++    # worth naming: either the compute is genuinely new, or its
++    # hypervisor_hostname differs from ansible_facts.nodename -- commonly an FQDN
++    # from DNS against the short kernel name, which diverge because libvirt
++    # canonicalises the hostname and Ansible does not.
++    - name: Report that no hypervisor matched this host
++      ansible.builtin.debug:
++        msg: >-
++          No hypervisor is named '{{ hypervisor_nodename }}', but this cloud has
++          {{ hypervisors.resources | length }}. If this compute is not new, its
++          hypervisor_hostname differs from ansible_facts.nodename and no
++          compute_id can be derived; nova-compute keeps the identity it already
++          holds.
++      when:
++        - hypervisors.resources | length > 0
++        - matched_hypervisors | default([]) | length == 0
++
++    - name: Record whether a compute_id is delivered for this host
++      ansible.builtin.set_fact:
++        nova_compute_id_delivered: >-
++          {{ hypervisors.resources | length > 0
++             and matched_hypervisors | default([]) | length == 1 }}
++
+ - name: Copying over config.json files for services
+   become: true
+   template:
+diff --git a/ansible/roles/nova-cell/templates/nova-compute.json.j2 b/ansible/roles/nova-cell/templates/nova-compute.json.j2
+index cba0462af..8d11be7bd 100644
+--- a/ansible/roles/nova-cell/templates/nova-compute.json.j2
++++ b/ansible/roles/nova-cell/templates/nova-compute.json.j2
+@@ -6,13 +6,13 @@
+             "dest": "/etc/nova/nova.conf",
+             "owner": "nova",
+             "perm": "0600"
+-        },
++        }{% if nova_compute_id_delivered | default(false) | bool %},
+         {
+             "source": "{{ container_config_directory }}/compute_id",
+             "dest": "/var/lib/nova/compute_id",
+             "owner": "nova",
+             "perm": "0600"
+-        }{% if nova_policy_file is defined %},
++        }{% endif %}{% if nova_policy_file is defined %},
+         {
+             "source": "{{ container_config_directory }}/{{ nova_policy_file }}",
+             "dest": "/etc/nova/{{ nova_policy_file }}",
