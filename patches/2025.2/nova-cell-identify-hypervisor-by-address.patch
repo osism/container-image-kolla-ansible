@@ -1,0 +1,120 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Wed, 24 Sep 2026 00:00:00 +0000
+Subject: [PATCH] nova-cell: identify the hypervisor by address
+
+Make the compute_id restore work on deployments where it currently never
+fires, and repair hosts whose identity was overwritten by the removed
+fallback.
+
+Where a compute's name canonicalises to an FQDN the lookup misses on
+every host, so no compute_id is delivered and a reprovisioned compute is
+never restored -- the purpose the task was added for. The miss happens
+because the lookup compares ansible_facts.nodename, which is
+platform.node() and so the raw short hostname, against
+hypervisor_hostname, which for the libvirt driver comes from
+virConnectGetHostname() and is canonicalised through
+getaddrinfo(AI_CANONNAME).
+
+Names are a poor key here in general. Several distinct machines can
+present the same name to any one name-based comparison, so a lookup that
+finds exactly one record has still not established that the record
+belongs to this host. Matching on the service host (nova's CONF.host)
+instead moves the problem rather than solving it: CONF.host can be set
+explicitly, and a host that sets it can then be matched to a different
+host's record.
+
+Match on the address instead. A hypervisor reports host_ip, which nova
+takes from CONF.my_ip and kolla renders from api_interface_address --
+the value this role already has for the host it is configuring. Two
+computes cannot share a management address in a working deployment,
+which is the uniqueness names never had.
+
+The name is still used, but only to corroborate: a record at this
+address whose hypervisor_hostname is neither nodename nor nodename as
+its first label is rejected. That covers an address inherited from a
+decommissioned host whose record still exists -- unless that record's
+name happens to corroborate too, which corroboration cannot detect.
+Corroboration can only reject, never select, so a wrong rejection costs
+a missed restore and never a wrong identity.
+
+Ambiguity is judged on the address alone, before the name is consulted.
+Corroborating first would let two records at this address be reduced to
+one, hiding the ambiguity from the assertion that exists to catch it.
+
+Where identification fails -- the address overridden, the host renamed,
+the record absent -- nothing is delivered and nova keeps whatever
+identity it holds. Delivering nothing is only a safe outcome once the
+lookup no longer falls back to `hypervisor_nodename | to_uuid` when it
+matches nothing; this change depends on that fallback having been
+removed.
+
+The scope is a deployment assumption, not a heuristic: that CONF.my_ip
+is the address kolla renders from api_interface_address, and that a
+management address is not reassigned to a different machine whose name
+also corroborates. Neither is something more name matching would fix.
+
+Reading host_ip needs the detail listing, so the query asks for it; the
+summary listing returns host_ip unset.
+---
+
+Not part of the upstream commit message: this patch is an upstreaming
+candidate, to be proposed to kolla-ansible master and the stable branches
+and dropped here once it merges. It applies on top of
+nova-cell-do-not-invent-a-compute-id.patch and requires it.
+
+--- a/ansible/roles/nova-cell/tasks/config.yml
++++ b/ansible/roles/nova-cell/tasks/config.yml
+@@ -67,28 +67,44 @@
+           endpoint_type: "{{ openstack_interface }}"
+           service: "compute"
+           type: "hypervisor"
++          parameters:
++            details: true
+       register: hypervisors
+       check_mode: false
+       become: true
+       delegate_to: "{{ groups[nova_cell_conductor_group][0] }}"
+ 
+-    - name: Match current hypervisor
++    - name: Find the hypervisor at this host's address
+       ansible.builtin.set_fact:
+-        matched_hypervisors: >-
+-          {{ hypervisors.resources | selectattr('name', 'equalto', hypervisor_nodename) }}
++        hypervisors_at_address: >-
++          {{ hypervisors.resources | selectattr('host_ip', 'equalto', api_interface_address) | list }}
+       when: hypervisors.resources | length > 0
+ 
++    # Ambiguity is judged on the address alone, before the name is consulted.
++    # Corroborating first could reduce two records at this address to one and
++    # hide the ambiguity from this assertion.
+     - name: Assert that only one hypervisor was matched
+       ansible.builtin.assert:
+         that:
+-          - matched_hypervisors | length == 1
++          - hypervisors_at_address | length == 1
+         fail_msg: |
+-          "Found multiple compute services with same host name, please check your Nova "
+-          "compute agents list and fix it. The query with hypervisor name "
+-          "'{{ hypervisor_nodename }}' returned following: {{ matched_hypervisors }}"
++          "More than one hypervisor reports the address of this host "
++          "('{{ api_interface_address }}'), so its compute_id cannot be determined "
++          "and none is delivered. Check the Nova compute agents list for stale "
++          "records. Matched: {{ hypervisors_at_address }}"
+       when:
+         - hypervisors.resources | length > 0
+-        - matched_hypervisors | length > 0
++        - hypervisors_at_address | length > 0
++
++    # The name can only reject, never select: a record at this host's address
++    # whose hypervisor_hostname is unrelated to it is not this host's record.
++    - name: Corroborate the hypervisor by name
++      ansible.builtin.set_fact:
++        matched_hypervisors: >-
++          {{ hypervisors_at_address
++             | selectattr('name', 'match', (hypervisor_nodename | regex_escape) ~ '(\.|$)')
++             | list }}
++      when: hypervisors.resources | length > 0
+ 
+     - name: Copy the matched hypervisor UUID to compute_id
+       ansible.builtin.copy:
