@@ -1,0 +1,45 @@
+---
+# Report the host that "osism apply mariadb-backup" writes archives to, as
+# resolved by the mariadb role itself. Changes nothing.
+- name: Report the MariaDB backup host
+  hosts: mariadb
+  gather_facts: false
+  tasks:
+    # Brings the role defaults into scope at role-default precedence, so
+    # inventory and extra-vars overrides still win. No role task runs.
+    - name: Load mariadb role defaults
+      ansible.builtin.import_role:
+        name: mariadb
+      when: false
+
+    # Same grouping as the role's main.yml; mariadb_backup_host refers to it.
+    - name: Group MariaDB hosts based on shards
+      ansible.builtin.add_host:
+        name: "{{ item }}"
+        groups: "{{ hostvars[item]['mariadb_shard_group'] }}"
+      loop: "{{ groups['mariadb'] }}"
+      changed_when: false
+
+    # Role defaults are not visible through hostvars, so each host records
+    # what it resolved for the report below.
+    - name: Record the resolved backup host
+      ansible.builtin.set_fact:
+        mariadb_backup_host_resolved: "{{ mariadb_backup_host }}"
+
+    # The condition of the backup task in the role's backup.yml.
+    - name: Mark the host the backup runs on
+      ansible.builtin.set_fact:
+        mariadb_backup_host_selected: true
+      when:
+        - inventory_hostname == mariadb_backup_host
+        - mariadb_backup_possible | bool
+
+    # Every shard resolves a host, but only one in the default shard is
+    # backed up. An empty mariadb_backup_host means no backup is taken.
+    - name: Show MariaDB backup host  # noqa run-once[task]
+      vars:
+        _selected: "{{ ansible_play_hosts_all | map('extract', hostvars) | selectattr('mariadb_backup_host_selected', 'defined') | map(attribute='inventory_hostname') | list }}"
+        _resolved: "{{ ansible_play_hosts_all | map('extract', hostvars, 'mariadb_backup_host_resolved') | unique | list }}"
+      ansible.builtin.debug:
+        msg: "mariadb_backup_host={{ _selected | join(',') }} resolved={{ _resolved | join(',') }}"
+      run_once: true

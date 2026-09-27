@@ -26,6 +26,7 @@ mock_roles:
   - ensure-docker
   - ironic
   - iscsi
+  - mariadb
   - nova-cell
   - opensearch
   - ovn-controller
