@@ -30,6 +30,7 @@ for 'result' found nothing, returned an empty dict, and nothing
 collided.
 
 Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending
 ---
  ansible/library/kolla_container_facts.py | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
