@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This file was started on May 30, 2025. Changes prior to this date are not included in the CHANGELOG.
 
+## [v0.20261001.0] - 2026-10-01
+
+### Added
+- Add 2026.1 build pipeline, playbooks and patches, and mark mariadb, nova and rabbitmq as unsupported roles for the split site processing (osism/container-image-kolla-ansible#942)
+- Label built images with the resolved commits of kolla-ansible, release, ansible-playbooks, generics and kolla-operations sources (osism/container-image-kolla-ansible#949)
+- Fail early with a clear error when no Ansible Vault password file is available instead of continuing with a missing file (osism/container-image-kolla-ansible#957)
+- Add a playbook reporting which host receives "osism apply mariadb-backup" archives (osism/container-image-kolla-ansible#965)
+
+### Changed
+- Drop the letsencrypt 2026.1 patch guarding the ACME route on a bool, now merged upstream (osism/container-image-kolla-ansible#959)
+
+### Fixed
+- Wait-for-keystone and wait-for-nova: bound the port wait with a 900s timeout instead of an effective 5+ hour retry loop (osism/container-image-kolla-ansible#943)
+- Glance: set python_interpreter for uwsgi on 2026.1 to fix image conversion getting stuck in queued state (osism/container-image-kolla-ansible#948)
+- Derive enable_* group_by items from each play's hosts selector instead of the role name, fixing undefined variable failures for cron, ovn-controller, ovn-db, prometheus-node-exporters and other roles (osism/container-image-kolla-ansible#946)
+- Restore the Horizon cache backend configuration on 2026.1, fixing HTTP 500 errors caused by an unreachable default memcached host (osism/container-image-kolla-ansible#950)
+- Set a valid default for gather_subset in the kolla-facts playbook (osism/container-image-kolla-ansible#945)
+- Gather facts before applying the common role in kolla-common to avoid empty fact caches across mixed ansible-core versions (osism/container-image-kolla-ansible#945)
+- Deploy the logs, kolla_toolbox, cron and fluentd roles that replaced the common role on 2026.1, fixing missing containers and MariaDB WSREP sync failures (osism/container-image-kolla-ansible#947)
+- Pass the cloud parameter to the octavia loadbalancer subnet update task on 2026.1, fixing a missing auth_url error (osism/container-image-kolla-ansible#951)
+- Restore the underscored mariadb-backup/mariadb-recovery playbook names on 2026.1 (osism/container-image-kolla-ansible#952)
+- Restore Python deprecation warning suppression for uWSGI-based services on 2026.1 (osism/container-image-kolla-ansible#954)
+- Guard the Let's Encrypt ACME challenge route with a boolean check on 2026.1, fixing certificate acquisition failures (osism/container-image-kolla-ansible#953)
+- Prevent container facts lookups from failing when an unrelated container is removed mid-walk and ensure the real module error is reported on failure (osism/container-image-kolla-ansible#960)
+- Stop nova-cell from overwriting a registered compute's identity with an invented compute_id by matching hypervisors by address instead of name (osism/container-image-kolla-ansible#963, osism/container-image-kolla-ansible#964)
+
+### Removed
+- Drop the redundant Skyline TLS backport patch on 2025.1 now that the fix has landed upstream (osism/container-image-kolla-ansible#955)
+- Retire kolla-operations plumbing from 2025.1 onward, since the patch it depends on no longer applies (osism/container-image-kolla-ansible#961)
+
+### Dependencies
+- cryptography 50.0.0 → 50.0.1 (osism/container-image-kolla-ansible#944)
+- yq 4.1.2 → 4.4.0 (osism/container-image-kolla-ansible#962, osism/container-image-kolla-ansible#966)
+
 ## [v0.20260814.0] - 2026-08-14
 
 ### Added
