@@ -1,3 +1,7 @@
+Upstream-Status: Pending [bundled - split needed: the grafana part is submitted as 921097, the prometheus part is osism-specific]
+Bug: https://bugs.launchpad.net/kolla-ansible/+bug/2068002
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/921097 (the grafana part, open since 2024-06)
+
 diff --git a/ansible/roles/grafana/defaults/main.yml b/ansible/roles/grafana/defaults/main.yml
 index cce9562fe..5e30660ce 100644
 --- a/ansible/roles/grafana/defaults/main.yml

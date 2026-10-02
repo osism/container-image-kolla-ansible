@@ -29,6 +29,7 @@ plain string there, and the State.Health lookup below would raise
 AttributeError without the reload.
 
 Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending
 ---
  ansible/library/kolla_container_facts.py | 9 +++++++--
  1 file changed, 7 insertions(+), 2 deletions(-)

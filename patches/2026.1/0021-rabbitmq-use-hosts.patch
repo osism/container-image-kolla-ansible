@@ -4,6 +4,7 @@ Date: Sun, 23 Aug 2026 11:57:43 +0200
 Subject: [PATCH 21/23] rabbitmq-use-hosts
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Inappropriate [osism-specific: depends on OSISM managing /etc/hosts]
 ---
  ansible/roles/rabbitmq/templates/erl_inetrc.j2 | 2 ++
  1 file changed, 2 insertions(+)

@@ -9,6 +9,7 @@ hard stop must be performed so that the master HAProxy/ProxySQL
 container with the faulty configuration is not also stopped and restarted.
 
 Change-Id: I82b2003e90993df5227c58b5511adcc391742bda
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/921071 merged 2025-02-03]
 ---
 
 diff --git a/ansible/roles/loadbalancer/handlers/main.yml b/ansible/roles/loadbalancer/handlers/main.yml

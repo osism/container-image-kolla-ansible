@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [osism-specific: hacluster authkeys live in /share]
+
 --- a/ansible/roles/hacluster/tasks/bootstrap.yml
 +++ b/ansible/roles/hacluster/tasks/bootstrap.yml
 @@ -1,7 +1,7 @@

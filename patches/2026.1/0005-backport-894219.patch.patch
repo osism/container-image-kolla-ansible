@@ -4,6 +4,8 @@ Date: Thu, 20 Aug 2026 18:12:02 +0200
 Subject: [PATCH 05/23] backport-894219.patch
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Pending [copied from DNM review 894219; never proposed upstream]
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/894219 (DNM, abandoned in practice since 2023-10-18)
 ---
  ansible/roles/octavia/tasks/prepare.yml | 25 +++++++++++++++++++++++++
  1 file changed, 25 insertions(+)

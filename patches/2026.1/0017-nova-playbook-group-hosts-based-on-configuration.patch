@@ -4,6 +4,7 @@ Date: Sun, 23 Aug 2026 11:55:55 +0200
 Subject: [PATCH 17/23] nova-playbook-group-hosts-based-on-configuration
 
 Signed-off-by: Dr. Jens Harbott <harbott@osism.tech>
+Upstream-Status: Inappropriate [osism-specific: OSISM's own nova playbook handling]
 ---
  ansible/nova.yml | 17 +++++++++++++++++
  1 file changed, 17 insertions(+)

@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [osism-specific: configurable loadbalancer inventory group for sub-environments]
+
 diff --git a/ansible/roles/loadbalancer/defaults/main.yml b/ansible/roles/loadbalancer/defaults/main.yml
 index 787ae7cb2..ab3c5c1be 100644
 --- a/ansible/roles/loadbalancer/defaults/main.yml

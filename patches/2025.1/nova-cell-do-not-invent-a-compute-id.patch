@@ -39,6 +39,8 @@ So: drop the generated UUID; remove a stale compute_id when nothing
 matched, so one written by an earlier run is not re-delivered; and report
 the case where a cloud has hypervisors but none for this host, which is
 either a genuinely new compute or the name divergence described above.
+Upstream-Status: Pending
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/936785 (introduced the compute_id delivery this fixes, bug 2051011; merged)
 ---
 diff --git a/ansible/roles/nova-cell/tasks/config.yml b/ansible/roles/nova-cell/tasks/config.yml
 index 2abcf1822..3bf29f775 100644

@@ -31,6 +31,8 @@ Known upstream since 2017 as https://bugs.launchpad.net/glance/+bug/1712463,
 where the oslo.concurrency half was fixed in 3.25.0.
 
 Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending
+Bug: https://bugs.launchpad.net/glance/+bug/1712463 (glance; In Progress upstream since 2017)
 ---
  ansible/roles/glance/templates/glance-api.conf.j2 | 3 +++
  1 file changed, 3 insertions(+)

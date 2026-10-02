@@ -5,6 +5,7 @@ Subject: [PATCH 03/23] Add option to deploy qemu wrapper script
 
 Change-Id: Id6d98ee763689889c3da4a55bc1b4bfd64627416
 Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+Upstream-Status: Pending [commit prepared with a Change-Id but never pushed to Gerrit]
 ---
  ansible/roles/nova-cell/tasks/config.yml      |  6 ++++++
  .../roles/nova-cell/tasks/qemu_wrapper.yml    | 19 +++++++++++++++++++

@@ -13,6 +13,9 @@ References:
 * https://bugs.launchpad.net/skyline-apiserver/+bug/1951437
 
 Change-Id: I597c8f1f609580cfc8c29efbc79ada312e667441
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/953750 merged 2026-03-16]
+Bug: https://bugs.launchpad.net/skyline-apiserver/+bug/1951437
+Related: https://review.opendev.org/c/openstack/skyline-apiserver/+/941715 (the fix in skyline-apiserver itself, merged)
 ---
 
 diff --git a/ansible/roles/skyline/templates/nginx.conf.j2 b/ansible/roles/skyline/templates/nginx.conf.j2

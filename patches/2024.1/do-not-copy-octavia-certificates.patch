@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [osism-specific: the target location is read-only in our image]
+
 --- a/ansible/roles/octavia-certificates/tasks/main.yml
 +++ b/ansible/roles/octavia-certificates/tasks/main.yml
 @@ -32,20 +32,4 @@

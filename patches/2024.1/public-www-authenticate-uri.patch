@@ -12,6 +12,7 @@ endpoint instead, see also [0].
 [0] https://opendev.org/openstack/keystonemiddleware/src/branch/master/keystonemiddleware/auth_token/_opts.py#L31-L50
 
 Change-Id: Ic99804967b5a62b5a9e39486749474520734ba48
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/938324 merged 2025-01-17]
 ---
 diff --git a/ansible/roles/aodh/templates/aodh.conf.j2 b/ansible/roles/aodh/templates/aodh.conf.j2
 index 7aa1d664f..266b51d8c 100644

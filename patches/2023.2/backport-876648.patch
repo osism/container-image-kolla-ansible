@@ -8,6 +8,7 @@ to explicitly disable the ironic-dnsmasq service. By default,
 the parameter is set to the value of enable_ironic
 
 Change-Id: Icf94e5d6980ff238eac90e4f8cd8e530477a9c5b
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/876648 merged 2024-12-16]
 ---
 
 diff --git a/ansible/group_vars/all.yml b/ansible/group_vars/all.yml
