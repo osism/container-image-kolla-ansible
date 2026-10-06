@@ -1,0 +1,42 @@
+From ca9c2f5a65beabe5ac02ad204fa707887a23976e Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Tue, 6 Oct 2026 14:43:36 +0200
+Subject: [PATCH] cron: rotate HAProxy logs by renaming them
+
+The global logrotate configuration rotates every log with copytruncate:
+logrotate copies the file to .1 and then truncates the original. The
+copy needs free space equal to the size of the log. When the log is
+larger than the free space, the copy fails with ENOSPC, logrotate
+removes the partial copy and leaves the original untouched. The log
+never shrinks, and each daily run fills the disk to 100% while it
+copies. This is the state a host reaches after its HAProxy log has
+grown unrotated for a long time, and the state in which rotation is
+needed most.
+
+copytruncate exists for writers that keep their log file open. The
+HAProxy log is not written by such a process. HAProxy sends its log
+via syslog to fluentd, and fluentd's file output writes
+/var/log/kolla/haproxy/haproxy_latest.log with append enabled, which
+opens the file, appends a chunk and closes it again on every flush
+(File.open with a block in out_file.rb). The haproxy container does not
+mount kolla_logs. Nothing else holds the file open, so after a rename
+fluentd creates a new file on its next flush.
+
+Use nocopytruncate for the HAProxy logs. Renaming needs no free space,
+so even an oversized log is rotated on the first run, and the space
+needed for a rotation no longer depends on the size of the log.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+---
+ ansible/roles/cron/templates/cron-logrotate-haproxy.conf.j2 | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/ansible/roles/cron/templates/cron-logrotate-haproxy.conf.j2 b/ansible/roles/cron/templates/cron-logrotate-haproxy.conf.j2
+index 3e89a2e75..a9dead996 100644
+--- a/ansible/roles/cron/templates/cron-logrotate-haproxy.conf.j2
++++ b/ansible/roles/cron/templates/cron-logrotate-haproxy.conf.j2
+@@ -1,3 +1,4 @@
+ "/var/log/kolla/haproxy/*.log"
+ {
++    nocopytruncate
+ }
