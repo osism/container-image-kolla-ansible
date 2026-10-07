@@ -43,7 +43,6 @@ COPY --link files/scripts/split-kolla-ansible-site.py /split-kolla-ansible-site.
 
 COPY --link files/ansible.cfg /etc/ansible/ansible.cfg
 COPY --link files/ara.env /ansible/ara.env
-COPY --link files/requirements.yml /ansible/galaxy/requirements.yml
 
 COPY --link files/sbom.yml* /
 
@@ -124,6 +123,7 @@ cp /generics/inventory/51-kolla /ansible/inventory.generics/51-kolla
 
 # run preparations
 mkdir -p /ansible/galaxy /ansible/group_vars/all
+python3 /src/render-ansible-requirements.py
 python3 /src/render-python-requirements.py
 python3 /src/render-versions.py
 
@@ -172,7 +172,8 @@ done
 ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/roles
 ln -s /usr/share/ansible/roles /ansible/galaxy
 
-ansible-galaxy collection install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/collections
+ansible-galaxy collection install -v -f --no-deps -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/collections
+python3 /src/check-collection-dependencies.py
 ln -s /usr/share/ansible/collections /ansible/collections
 
 # install mitogen ansible plugin

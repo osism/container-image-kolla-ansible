@@ -1,0 +1,26 @@
+---
+# Ansible collections installed into the image. Their versions are pinned
+# in ansible_collections of osism/release latest/base.yml.
+#
+# The image installs these with --no-deps, so this list must be closed
+# under dependencies: add a collection's dependencies here as well, and
+# pin them in osism/release. check-collection-dependencies.py fails the
+# build if one is missing.
+
+- ansible.mysql
+- ansible.netcommon
+- ansible.posix
+- ansible.utils
+- community.crypto
+- community.docker
+- community.general
+- community.grafana
+- community.hashi_vault
+- community.library_inventory_filtering_v1
+- community.mysql
+- community.network
+- community.rabbitmq
+- containers.podman
+- netbox.netbox
+- openstack.cloud
+- osism.commons
