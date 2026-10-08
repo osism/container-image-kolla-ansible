@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This file was started on May 30, 2025. Changes prior to this date are not included in the CHANGELOG.
 
+## [v0.20261008.0] - 2026-10-08
+
+### Added
+- Document Upstream-Status header convention for carried patches and add a checker script to validate, report on, and verify them against Gerrit (osism/container-image-kolla-ansible#956)
+- Add CI jobs to validate carried patch headers and verify Upstream-Status claims against Gerrit on a daily schedule (osism/container-image-kolla-ansible#956)
+
+### Changed
+- Annotate carried and backport patches with Upstream-Status, Bug, and Related headers, classifying each as Submitted, Pending, or Inappropriate, and recording review and merge dates for merged-upstream backports (osism/container-image-kolla-ansible#956)
+
+### Fixed
+- Rotate HAProxy logs by renaming instead of copytruncate to prevent disk space exhaustion when logs grow large before rotation (osism/container-image-kolla-ansible#969)
+
+### Dependencies
+- cryptography 50.0.1 → 50.0.2 (osism/container-image-kolla-ansible#968)
+
 ## [v0.20261001.0] - 2026-10-01
 
 ### Added
