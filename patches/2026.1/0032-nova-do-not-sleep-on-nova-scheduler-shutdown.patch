@@ -1,0 +1,54 @@
+From 0028e43c9c0af25027e0fb4bde3f9288e3cc7700 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 9 Oct 2026 21:18:56 +0200
+Subject: [PATCH] nova: do not sleep on nova-scheduler shutdown
+
+On 2026.1, SchedulerManager.graceful_shutdown() sleeps for
+manager_shutdown_timeout (160s by default) as a stand-in for task
+tracking. The scheduler has nothing to wait for at that point:
+select_destinations runs inside the RPC dispatch, and Service.stop()
+has already drained in-flight dispatches with rpc_server.wait() before
+it calls graceful_shutdown().
+
+The sleep hurts on reload. refresh_scheduler_cell_cache.yml sends
+SIGHUP to nova_scheduler on all scheduler hosts at once, on every nova
+deploy and reconfigure. With the oslo.service threading backend,
+cotyledon turns that SIGHUP into a stop and respawn of every worker.
+Each worker stops consuming first and then sleeps, so the scheduler
+topic has no consumer for about 160s and select_destinations calls
+made in that window can time out.
+
+Set manager_shutdown_timeout = 0 for nova-scheduler only. The option
+also controls the shutdown wait of nova-compute and nova-conductor,
+where it lets in-progress operations such as live migrations finish,
+so those keep the default. Operators can override the value in
+nova/nova-scheduler.conf.
+
+Nova master replaces the sleep with task tracking, where the option
+becomes the timeout for in-progress tasks and 0 would skip that wait.
+The patch is therefore limited to 2026.1. Drop it if task tracking or
+another fix for the sleep reaches stable/2026.1.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending
+Related: https://review.opendev.org/c/openstack/nova/+/996299 (nova master task tracking; drop this patch if it reaches stable/2026.1)
+Related: https://review.opendev.org/c/openstack/nova/+/1000211 (nova master executor shutdown, same series)
+---
+ ansible/roles/nova/templates/nova.conf.j2 | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ansible/roles/nova/templates/nova.conf.j2 b/ansible/roles/nova/templates/nova.conf.j2
+index 89eb4fe52..e17e53c65 100644
+--- a/ansible/roles/nova/templates/nova.conf.j2
++++ b/ansible/roles/nova/templates/nova.conf.j2
+@@ -12,6 +12,10 @@ log_file = /var/log/kolla/nova/nova-metadata.log
+ log_dir = /var/log/kolla/nova
+ {% endif %}
+ 
++{% if service_name == "nova-scheduler" %}
++manager_shutdown_timeout = 0
++{% endif %}
++
+ state_path = /var/lib/nova
+ allow_resize_to_same_host = true
+ 
