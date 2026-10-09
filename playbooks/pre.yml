@@ -11,6 +11,8 @@
       ansible.builtin.apt:
         name:
           - python3-docker
+          # The pip module below imports packaging on the system Python.
+          - python3-packaging
           - python3-requests
 
     - name: Install dtrack-auditor package
