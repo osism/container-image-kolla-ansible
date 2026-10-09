@@ -1,0 +1,422 @@
+From c92833c06887d11faab77455abff2ab28906ae2d Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 9 Oct 2026 14:03:07 +0200
+Subject: [PATCH] rabbitmq: set prefetch count without stream fanout
+
+Every service template sets rabbit_qos_prefetch_count only inside the
+om_enable_rabbitmq_stream_fanout block. With stream fanout disabled the
+option is not rendered at all, and services fall back to the
+oslo.messaging default of 0, which means an unlimited prefetch: one
+consumer channel can take every ready message of a quorum queue, so
+load is not spread across workers and in-flight messages pile up in a
+single consumer. om_rabbitmq_qos_prefetch_count has no effect.
+
+The prefetch count is a consumer setting and applies to quorum and
+classic queues alike, independent of how fanout is implemented. Render
+it unconditionally, next to rabbit_quorum_queue.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending
+Bug: https://bugs.launchpad.net/kolla-ansible/+bug/2167251
+---
+ ansible/roles/aodh/templates/aodh.conf.j2              | 2 +-
+ ansible/roles/barbican/templates/barbican.conf.j2      | 2 +-
+ ansible/roles/blazar/templates/blazar.conf.j2          | 2 +-
+ ansible/roles/ceilometer/templates/ceilometer.conf.j2  | 2 +-
+ ansible/roles/cinder/templates/cinder.conf.j2          | 2 +-
+ ansible/roles/cloudkitty/templates/cloudkitty.conf.j2  | 2 +-
+ ansible/roles/cyborg/templates/cyborg.conf.j2          | 2 +-
+ ansible/roles/designate/templates/designate.conf.j2    | 2 +-
+ ansible/roles/glance/templates/glance-api.conf.j2      | 2 +-
+ ansible/roles/heat/templates/heat.conf.j2              | 2 +-
+ ansible/roles/ironic/templates/ironic.conf.j2          | 2 +-
+ ansible/roles/keystone/templates/keystone.conf.j2      | 2 +-
+ ansible/roles/magnum/templates/magnum.conf.j2          | 2 +-
+ ansible/roles/manila/templates/manila.conf.j2          | 2 +-
+ ansible/roles/masakari/templates/masakari.conf.j2      | 2 +-
+ ansible/roles/mistral/templates/mistral.conf.j2        | 2 +-
+ ansible/roles/neutron/templates/neutron.conf.j2        | 2 +-
+ ansible/roles/nova-cell/templates/nova.conf.j2         | 2 +-
+ ansible/roles/nova/templates/nova.conf.j2              | 2 +-
+ ansible/roles/octavia/templates/octavia.conf.j2        | 2 +-
+ ansible/roles/tacker/templates/tacker.conf.j2          | 2 +-
+ ansible/roles/trove/templates/trove-guestagent.conf.j2 | 2 +-
+ ansible/roles/trove/templates/trove.conf.j2            | 2 +-
+ ansible/roles/watcher/templates/watcher.conf.j2        | 2 +-
+ ansible/roles/zun/templates/zun.conf.j2                | 2 +-
+ 25 files changed, 25 insertions(+), 25 deletions(-)
+
+diff --git a/ansible/roles/aodh/templates/aodh.conf.j2 b/ansible/roles/aodh/templates/aodh.conf.j2
+index c9c180385..d5122acb9 100644
+--- a/ansible/roles/aodh/templates/aodh.conf.j2
++++ b/ansible/roles/aodh/templates/aodh.conf.j2
+@@ -74,9 +74,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/barbican/templates/barbican.conf.j2 b/ansible/roles/barbican/templates/barbican.conf.j2
+index 6f023bd59..6258da11e 100644
+--- a/ansible/roles/barbican/templates/barbican.conf.j2
++++ b/ansible/roles/barbican/templates/barbican.conf.j2
+@@ -91,9 +91,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/blazar/templates/blazar.conf.j2 b/ansible/roles/blazar/templates/blazar.conf.j2
+index 633a0a3af..e6d7d654b 100644
+--- a/ansible/roles/blazar/templates/blazar.conf.j2
++++ b/ansible/roles/blazar/templates/blazar.conf.j2
+@@ -62,9 +62,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/ceilometer/templates/ceilometer.conf.j2 b/ansible/roles/ceilometer/templates/ceilometer.conf.j2
+index b4359f1b1..bdb101073 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer.conf.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer.conf.j2
+@@ -28,9 +28,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/cinder/templates/cinder.conf.j2 b/ansible/roles/cinder/templates/cinder.conf.j2
+index 92cd83a88..cbeaa979f 100644
+--- a/ansible/roles/cinder/templates/cinder.conf.j2
++++ b/ansible/roles/cinder/templates/cinder.conf.j2
+@@ -81,9 +81,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/cloudkitty/templates/cloudkitty.conf.j2 b/ansible/roles/cloudkitty/templates/cloudkitty.conf.j2
+index 05b653951..393e773c7 100644
+--- a/ansible/roles/cloudkitty/templates/cloudkitty.conf.j2
++++ b/ansible/roles/cloudkitty/templates/cloudkitty.conf.j2
+@@ -55,9 +55,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/cyborg/templates/cyborg.conf.j2 b/ansible/roles/cyborg/templates/cyborg.conf.j2
+index b19ca67e0..be79283aa 100644
+--- a/ansible/roles/cyborg/templates/cyborg.conf.j2
++++ b/ansible/roles/cyborg/templates/cyborg.conf.j2
+@@ -77,9 +77,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/designate/templates/designate.conf.j2 b/ansible/roles/designate/templates/designate.conf.j2
+index 2ec55f827..75e676600 100644
+--- a/ansible/roles/designate/templates/designate.conf.j2
++++ b/ansible/roles/designate/templates/designate.conf.j2
+@@ -100,9 +100,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/glance/templates/glance-api.conf.j2 b/ansible/roles/glance/templates/glance-api.conf.j2
+index f87d942eb..1e65b2f6f 100644
+--- a/ansible/roles/glance/templates/glance-api.conf.j2
++++ b/ansible/roles/glance/templates/glance-api.conf.j2
+@@ -109,9 +109,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/heat/templates/heat.conf.j2 b/ansible/roles/heat/templates/heat.conf.j2
+index 3c6f7af72..2064d8af9 100644
+--- a/ansible/roles/heat/templates/heat.conf.j2
++++ b/ansible/roles/heat/templates/heat.conf.j2
+@@ -82,9 +82,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/ironic/templates/ironic.conf.j2 b/ansible/roles/ironic/templates/ironic.conf.j2
+index fb68c11b9..6cc336216 100644
+--- a/ansible/roles/ironic/templates/ironic.conf.j2
++++ b/ansible/roles/ironic/templates/ironic.conf.j2
+@@ -53,9 +53,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/keystone/templates/keystone.conf.j2 b/ansible/roles/keystone/templates/keystone.conf.j2
+index e1b440d48..d599e6312 100644
+--- a/ansible/roles/keystone/templates/keystone.conf.j2
++++ b/ansible/roles/keystone/templates/keystone.conf.j2
+@@ -70,9 +70,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/magnum/templates/magnum.conf.j2 b/ansible/roles/magnum/templates/magnum.conf.j2
+index b07f45280..948de6028 100644
+--- a/ansible/roles/magnum/templates/magnum.conf.j2
++++ b/ansible/roles/magnum/templates/magnum.conf.j2
+@@ -134,9 +134,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/manila/templates/manila.conf.j2 b/ansible/roles/manila/templates/manila.conf.j2
+index cadde4c0a..ba7aa5245 100644
+--- a/ansible/roles/manila/templates/manila.conf.j2
++++ b/ansible/roles/manila/templates/manila.conf.j2
+@@ -64,9 +64,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/masakari/templates/masakari.conf.j2 b/ansible/roles/masakari/templates/masakari.conf.j2
+index d3f6a8721..18a8a5083 100644
+--- a/ansible/roles/masakari/templates/masakari.conf.j2
++++ b/ansible/roles/masakari/templates/masakari.conf.j2
+@@ -65,9 +65,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/mistral/templates/mistral.conf.j2 b/ansible/roles/mistral/templates/mistral.conf.j2
+index 548200bb2..716efdcf2 100644
+--- a/ansible/roles/mistral/templates/mistral.conf.j2
++++ b/ansible/roles/mistral/templates/mistral.conf.j2
+@@ -80,9 +80,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/neutron/templates/neutron.conf.j2 b/ansible/roles/neutron/templates/neutron.conf.j2
+index 0c5323d7e..8a373efd7 100644
+--- a/ansible/roles/neutron/templates/neutron.conf.j2
++++ b/ansible/roles/neutron/templates/neutron.conf.j2
+@@ -116,9 +116,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/nova-cell/templates/nova.conf.j2 b/ansible/roles/nova-cell/templates/nova.conf.j2
+index 6e8877950..5c6f087c6 100644
+--- a/ansible/roles/nova-cell/templates/nova.conf.j2
++++ b/ansible/roles/nova-cell/templates/nova.conf.j2
+@@ -181,9 +181,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/nova/templates/nova.conf.j2 b/ansible/roles/nova/templates/nova.conf.j2
+index 89eb4fe52..347d17552 100644
+--- a/ansible/roles/nova/templates/nova.conf.j2
++++ b/ansible/roles/nova/templates/nova.conf.j2
+@@ -149,9 +149,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/octavia/templates/octavia.conf.j2 b/ansible/roles/octavia/templates/octavia.conf.j2
+index 9f251ffa9..e5882b599 100644
+--- a/ansible/roles/octavia/templates/octavia.conf.j2
++++ b/ansible/roles/octavia/templates/octavia.conf.j2
+@@ -140,9 +140,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/tacker/templates/tacker.conf.j2 b/ansible/roles/tacker/templates/tacker.conf.j2
+index de1d38a72..d4f779916 100644
+--- a/ansible/roles/tacker/templates/tacker.conf.j2
++++ b/ansible/roles/tacker/templates/tacker.conf.j2
+@@ -76,9 +76,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/trove/templates/trove-guestagent.conf.j2 b/ansible/roles/trove/templates/trove-guestagent.conf.j2
+index c3333f6c8..b6043a66c 100644
+--- a/ansible/roles/trove/templates/trove-guestagent.conf.j2
++++ b/ansible/roles/trove/templates/trove-guestagent.conf.j2
+@@ -20,9 +20,9 @@ username = {{ trove_keystone_user }}
+ use_queue_manager = true
+ heartbeat_in_pthread = false
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/trove/templates/trove.conf.j2 b/ansible/roles/trove/templates/trove.conf.j2
+index c3d7052f2..c1a6ce32d 100644
+--- a/ansible/roles/trove/templates/trove.conf.j2
++++ b/ansible/roles/trove/templates/trove.conf.j2
+@@ -81,9 +81,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/watcher/templates/watcher.conf.j2 b/ansible/roles/watcher/templates/watcher.conf.j2
+index 74ed796d6..46e744645 100644
+--- a/ansible/roles/watcher/templates/watcher.conf.j2
++++ b/ansible/roles/watcher/templates/watcher.conf.j2
+@@ -67,9 +67,9 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
+ 
+diff --git a/ansible/roles/zun/templates/zun.conf.j2 b/ansible/roles/zun/templates/zun.conf.j2
+index 2322dac7a..e0aa99061 100644
+--- a/ansible/roles/zun/templates/zun.conf.j2
++++ b/ansible/roles/zun/templates/zun.conf.j2
+@@ -137,8 +137,8 @@ ssl = true
+ ssl_ca_file = {{ om_rabbitmq_cacert }}
+ {% endif %}
+ rabbit_quorum_queue = true
++rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% if om_enable_rabbitmq_stream_fanout | bool %}
+ rabbit_stream_fanout = true
+-rabbit_qos_prefetch_count = {{ om_rabbitmq_qos_prefetch_count }}
+ {% endif %}
+ rabbit_transient_quorum_queue = true
