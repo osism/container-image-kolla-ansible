@@ -9,13 +9,11 @@ This file was started on May 30, 2025. Changes prior to this date are not includ
 
 ## [v0.20261011.0] - 2026-10-11
 
-### Added
-- Install python3-packaging so the pip module's dependency check succeeds on the debian-trixie base image (osism/container-image-kolla-ansible#973)
-
 ### Changed
 - Install pinned Ansible collections without resolving the dependency graph against Galaxy, cutting build time (osism/container-image-kolla-ansible#970)
 
 ### Fixed
+- Install python3-packaging so the pip module's dependency check succeeds on the debian-trixie nodeset (osism/container-image-kolla-ansible#973)
 - Carry a patch to stop nova-scheduler from sleeping on shutdown, avoiding scheduler queue outages during reconfiguration (osism/container-image-kolla-ansible#974)
 - Carry a patch to render the RabbitMQ prefetch count even when stream fanout is disabled, so unlimited prefetch no longer overloads a single consumer (osism/container-image-kolla-ansible#972)
 - Render kolla_httpd_version, kolla_hacluster_version, kolla_hacluster_corosync_version, kolla_ovsdpdk_version, kolla_prometheus_openstack_network_exporter_version and kolla_prometheus_valkey_exporter_version from the SBOM, fixing requests for non-existent image tags (osism/container-image-kolla-ansible#975)
