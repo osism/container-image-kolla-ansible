@@ -8,10 +8,14 @@ entries.
 
 import argparse
 import datetime
+import http.client
 import json
 import pathlib
 import re
+import socket
 import sys
+import time
+import urllib.error
 import urllib.request
 from collections import Counter
 
@@ -35,6 +39,10 @@ DIFF_START_RE = re.compile(r"^(diff --git |Index: |--- \S|\+\+\+ \S)")
 DEFAULT_STALE_DAYS = 180
 
 GERRIT = "https://review.opendev.org"
+GERRIT_ATTEMPTS = 4
+GERRIT_TIMEOUT = 10
+# What the proxy in front of Gerrit answers while Gerrit is down or restarting.
+GERRIT_TRANSIENT = (502, 503, 504)
 
 REVIEW_URL_RE = re.compile(r"https?://\S*?/(?P<number>\d+)\b")
 BACKPORT_CLAIM_RE = re.compile(
@@ -246,14 +254,79 @@ def report(root, stale_days):
             print("  %s" % name)
 
 
+def connect(address, timeout, source_address=None):
+    """socket.create_connection, but log every address that fails.
+
+    The stock one raises only the last address's error, which hides which
+    address family a stalled connection was on.
+    """
+    host, port = address
+    error = OSError("no address for %s" % host)
+    for family, kind, proto, _, addr in socket.getaddrinfo(
+        host, port, 0, socket.SOCK_STREAM
+    ):
+        sock = None
+        start = time.monotonic()
+        try:
+            sock = socket.socket(family, kind, proto)
+            sock.settimeout(timeout)
+            sock.connect(addr)
+            return sock
+        except OSError as exc:
+            if sock is not None:
+                sock.close()
+            print(
+                "  connect to %s failed after %.1fs: %r"
+                % (addr[0], time.monotonic() - start, exc),
+                file=sys.stderr,
+            )
+            error = exc
+    raise error
+
+
+class LoggedHTTPSConnection(http.client.HTTPSConnection):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Private, but the only hook http.client offers for opening the socket.
+        self._create_connection = connect
+
+
+class LoggedHTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(LoggedHTTPSConnection, req)
+
+
+OPENER = urllib.request.build_opener(LoggedHTTPSHandler)
+
+
 def gerrit_get(path):
     """Fetch and decode one Gerrit REST response.
+
+    A dropped connection, a truncated body or a gateway error is retried with
+    backoff, so one stall does not sink the whole run. Any other HTTP error
+    status is Gerrit's answer and is not.
 
     Gerrit prefixes every JSON body with a )]}' guard line that has to go
     before the rest will parse.
     """
-    with urllib.request.urlopen(GERRIT + path, timeout=30) as response:
-        body = response.read().decode()
+    for attempt in range(1, GERRIT_ATTEMPTS + 1):
+        try:
+            with OPENER.open(GERRIT + path, timeout=GERRIT_TIMEOUT) as response:
+                body = response.read().decode()
+            break
+        except urllib.error.HTTPError as exc:
+            if exc.code not in GERRIT_TRANSIENT:
+                raise
+            error = exc
+        except (OSError, http.client.HTTPException) as exc:
+            error = exc
+        print(
+            "GET %s attempt %d/%d failed: %s" % (path, attempt, GERRIT_ATTEMPTS, error),
+            file=sys.stderr,
+        )
+        if attempt == GERRIT_ATTEMPTS:
+            raise error
+        time.sleep(2**attempt)
     return json.loads(body.split("\n", 1)[1])
 
 
