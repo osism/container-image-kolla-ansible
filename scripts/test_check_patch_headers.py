@@ -462,3 +462,117 @@ class TestBackportRedundancy:
             "stable/2024.2",
             "unmaintained/2024.2",
         }
+
+
+class TestGerritGet:
+    """A dropped connection is retried; an answer from Gerrit is not."""
+
+    class Response:
+        def __init__(self, body):
+            self.body = body
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            return self.body.encode()
+
+    def opener(self, monkeypatch, outcomes):
+        calls = []
+
+        def open_(url, timeout):
+            calls.append(url)
+            outcome = outcomes.pop(0)
+            if isinstance(outcome, Exception):
+                raise outcome
+            return self.Response(outcome)
+
+        monkeypatch.setattr(chk.OPENER, "open", open_)
+        monkeypatch.setattr(chk.time, "sleep", lambda seconds: None)
+        return calls
+
+    def test_a_transport_error_is_retried(self, monkeypatch, capsys):
+        timeout = chk.urllib.error.URLError(TimeoutError("timed out"))
+        calls = self.opener(monkeypatch, [timeout, ')]}\'\n{"status": "NEW"}'])
+        assert chk.gerrit_get("/changes/1") == {"status": "NEW"}
+        assert len(calls) == 2
+        assert "/changes/1 attempt 1/4 failed" in capsys.readouterr().err
+
+    def test_it_gives_up_after_the_last_attempt(self, monkeypatch):
+        error = chk.urllib.error.URLError(TimeoutError("timed out"))
+        calls = self.opener(monkeypatch, [error] * 4)
+        with pytest.raises(chk.urllib.error.URLError):
+            chk.gerrit_get("/changes/1")
+        assert len(calls) == 4
+
+    def test_a_truncated_response_is_retried(self, monkeypatch):
+        truncated = chk.http.client.IncompleteRead(b"", 10)
+        calls = self.opener(monkeypatch, [truncated, ")]}'\n[]"])
+        assert chk.gerrit_get("/changes/?q=change:I1") == []
+        assert len(calls) == 2
+
+    @pytest.mark.parametrize("code", [502, 503, 504])
+    def test_a_gateway_error_is_retried(self, monkeypatch, code):
+        error = chk.urllib.error.HTTPError(
+            chk.GERRIT + "/changes/1", code, "Bad Gateway", None, None
+        )
+        calls = self.opener(monkeypatch, [error, ')]}\'\n{"status": "NEW"}'])
+        assert chk.gerrit_get("/changes/1") == {"status": "NEW"}
+        assert len(calls) == 2
+
+    def test_an_http_error_is_not_retried(self, monkeypatch):
+        error = chk.urllib.error.HTTPError(
+            chk.GERRIT + "/changes/1", 404, "Not Found", None, None
+        )
+        calls = self.opener(monkeypatch, [error])
+        with pytest.raises(chk.urllib.error.HTTPError):
+            chk.gerrit_get("/changes/1")
+        assert len(calls) == 1
+
+
+class TestConnect:
+    """Each failed address is logged, so a stall shows which family it hit."""
+
+    @staticmethod
+    def closed_port():
+        with chk.socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            return sock.getsockname()[1]
+
+    def test_every_failed_address_is_logged(self, monkeypatch, capsys):
+        port = self.closed_port()
+        entry = (chk.socket.AF_INET, chk.socket.SOCK_STREAM, 6, "", ("127.0.0.1", port))
+        monkeypatch.setattr(chk.socket, "getaddrinfo", lambda *args: [entry, entry])
+        with pytest.raises(ConnectionRefusedError):
+            chk.connect(("review.example", port), 5)
+        assert capsys.readouterr().err.count("connect to 127.0.0.1 failed") == 2
+
+    def test_an_unsupported_family_falls_through(self, monkeypatch, capsys):
+        with chk.socket.socket() as server:
+            server.bind(("127.0.0.1", 0))
+            server.listen()
+            v6 = (chk.socket.AF_INET6, chk.socket.SOCK_STREAM, 6, "", ("::1", 0, 0, 0))
+            v4 = (chk.socket.AF_INET, chk.socket.SOCK_STREAM, 6, "")
+            v4 += (server.getsockname(),)
+            real = chk.socket.socket
+
+            def no_ipv6(family, *args):
+                if family == chk.socket.AF_INET6:
+                    raise OSError(97, "Address family not supported by protocol")
+                return real(family, *args)
+
+            monkeypatch.setattr(chk.socket, "getaddrinfo", lambda *args: [v6, v4])
+            monkeypatch.setattr(chk.socket, "socket", no_ipv6)
+            chk.connect(server.getsockname(), 5).close()
+        assert "connect to ::1 failed" in capsys.readouterr().err
+
+    def test_a_working_address_is_returned_silently(self, capsys):
+        with chk.socket.socket() as server:
+            server.bind(("127.0.0.1", 0))
+            server.listen()
+            sock = chk.connect(server.getsockname(), 5)
+            sock.close()
+        assert capsys.readouterr().err == ""
