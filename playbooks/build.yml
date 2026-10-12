@@ -34,35 +34,7 @@
 
           created=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           revision=$(git rev-parse --short HEAD)
-
-          # NOTE: For builds for a specific release, the OpenStack version is taken
-          #       from the release repository.
-          if [[ $version != "latest" ]]; then
-              filename=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/openstack.yml)
-              openstack_version=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/$filename | grep "openstack_version:" | awk -F': ' '{ print $2 }' | tr -d '"')
-
-              # Check if kolla-ansible-$version.yml exists in next directory
-              next_file_url="https://raw.githubusercontent.com/osism/release/main/next/kolla-ansible-$version.yml"
-              if curl -f -s "$next_file_url" >/dev/null 2>&1; then
-                  # File exists, extract openstack_sbom value
-                  sbom_version=$(curl -L "$next_file_url" | grep "openstack_sbom:" | awk -F': ' '{ print $2 }' | tr -d '"' | tr -d ' ')
-              else
-                  # File doesn't exist, use the same version
-                  {% raw %}
-                  sbom_version="${version:1:${#version}-1}"
-                  {% endraw %}
-              fi
-
-              docker create --name sbom $registry/kolla/release/$openstack_version/sbom:$sbom_version nologin
-              docker cp sbom:/images.yml files/sbom.yml
-              docker rm sbom
-          fi
-
-          . defaults/${openstack_version}.sh
-
-          if [[ -n $registry ]]; then
-              repository="$registry/$repository"
-          fi
+          revision_full=$(git rev-parse HEAD)
 
           # NOTE: The sources that are fetched while the image is built are
           #       resolved to commits here, so that the image records what it
@@ -98,6 +70,52 @@
               echo "$base_yml" | grep "^$1:" | awk -F': ' '{ print $2 }' | tr -d "\"' "
           }
 
+          # NOTE: For builds for a specific release, the release tag is
+          #       resolved to a commit first and every file of the release
+          #       repository is read through that commit, so a tag moved
+          #       during the build cannot mix two states. The OpenStack
+          #       version is taken from it.
+          sbom_args=()
+          if [[ $version != "latest" ]]; then
+              sha_release=$(resolve_commit https://github.com/osism/release "refs/tags/kolla-ansible-$version")
+              release_url=https://raw.githubusercontent.com/osism/release/$sha_release/latest
+              filename=$(curl -fsSL "$release_url/openstack.yml")
+              openstack_version=$(curl -fsSL "$release_url/$filename" | grep "openstack_version:" | awk -F': ' '{ print $2 }' | tr -d '"')
+              base_yml=$(curl -fsSL "$release_url/base.yml")
+
+              # NOTE: next/ is an override added after tagging, so it is read
+              #       from main and not from the release commit.
+              next_file_url="https://raw.githubusercontent.com/osism/release/main/next/kolla-ansible-$version.yml"
+              if curl -f -s "$next_file_url" >/dev/null 2>&1; then
+                  # File exists, extract openstack_sbom value
+                  sbom_version=$(curl -fsSL "$next_file_url" | grep "openstack_sbom:" | awk -F': ' '{ print $2 }' | tr -d '"' | tr -d ' ')
+              else
+                  # File doesn't exist, use the same version
+                  {% raw %}
+                  sbom_version="${version:1:${#version}-1}"
+                  {% endraw %}
+              fi
+
+              # NOTE: The SBOM is resolved to a digest once and fetched by it,
+              #       so the label names the SBOM the image contains even if
+              #       its version is pushed again meanwhile.
+              sbom_repository=$registry/kolla/release/$openstack_version/sbom
+              sbom_digest=sha256:$(docker buildx imagetools inspect --raw "$sbom_repository:$sbom_version" | sha256sum | cut -d' ' -f1)
+              docker create --name sbom "$sbom_repository@$sbom_digest" nologin
+              docker cp sbom:/images.yml files/sbom.yml
+              docker rm sbom
+              sbom_args=(
+                  --label "de.osism.sbom=$sbom_version"
+                  --label "de.osism.sbom.digest=$sbom_digest"
+              )
+          fi
+
+          . defaults/${openstack_version}.sh
+
+          if [[ -n $registry ]]; then
+              repository="$registry/$repository"
+          fi
+
           # NOTE: Mirrors the clone in the Containerfile.
           case $openstack_version in
               master)
@@ -126,9 +144,6 @@
           #       development and test deployments use -- they float on their
           #       default branches, which is the case that needs this most.
           if [[ $version != "latest" ]]; then
-              base_yml=$(curl -L https://raw.githubusercontent.com/osism/release/kolla-ansible-$version/latest/base.yml)
-
-              sha_release=$(resolve_commit https://github.com/osism/release "refs/tags/kolla-ansible-$version")
               sha_ansible_playbooks=$(resolve_commit https://github.com/osism/ansible-playbooks "refs/tags/$(release_version playbooks_version)")
               sha_generics=$(resolve_commit https://github.com/osism/generics "refs/tags/$(release_version generics_version)")
               if [[ $kolla_operations == true ]]; then
@@ -150,18 +165,32 @@
               )
           fi
 
+          # NOTE: The base image is pinned by digest the same way.
+          base_image=$(awk -F= '$1 == "ARG BASE_IMAGE" { print $2; exit }' Containerfile)
+          base_tag=$(awk -F= '$1 == "ARG BASE_TAG" { print $2; exit }' Containerfile)
+          if [[ -z $base_image || -z $base_tag ]]; then
+              echo "no ARG BASE_IMAGE or BASE_TAG in the Containerfile" >&2
+              exit 1
+          fi
+          base_name=$base_image:$base_tag
+          base_digest=sha256:$(docker buildx imagetools inspect --raw "$base_name" | sha256sum | cut -d' ' -f1)
+
           docker buildx build \
               "${operations_args[@]}" \
+              "${sbom_args[@]}" \
+              --build-arg "BASE_TAG=$base_tag@$base_digest" \
               --build-arg "OPENSTACK_VERSION=$openstack_version" \
               --build-arg "SHA_ANSIBLE_PLAYBOOKS=$sha_ansible_playbooks" \
               --build-arg "SHA_GENERICS=$sha_generics" \
               --build-arg "SHA_KOLLA_ANSIBLE=$sha_kolla_ansible" \
               --build-arg "SHA_RELEASE=$sha_release" \
               --build-arg "VERSION=$version" \
+              --label "org.opencontainers.image.base.digest=$base_digest" \
+              --label "org.opencontainers.image.base.name=$base_name" \
               --label "org.opencontainers.image.created=$created" \
               --label "org.opencontainers.image.documentation=https://osism.tech/docs/" \
               --label "org.opencontainers.image.licenses=ASL 2.0" \
-              --label "org.opencontainers.image.revision=$revision" \
+              --label "org.opencontainers.image.revision=$revision_full" \
               --label "org.opencontainers.image.source=https://github.com/osism/container-image-kolla-ansible" \
               --label "org.opencontainers.image.title=kolla-ansible" \
               --label "org.opencontainers.image.url=https://quay.io/organization/osism" \
