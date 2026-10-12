@@ -1,6 +1,6 @@
-ARG IMAGE=registry.osism.tech/dockerhub/python
-
-FROM ${IMAGE}:3.13-slim-bookworm AS builder
+ARG BASE_IMAGE=registry.osism.tech/dockerhub/python
+ARG BASE_TAG=3.13-slim-bookworm
+FROM ${BASE_IMAGE}:${BASE_TAG} AS builder
 
 ARG OPENSTACK_VERSION
 ARG VERSION
@@ -256,9 +256,7 @@ RUN python3 /src/render-playbooks.py
 
 USER dragon
 
-ARG IMAGE=registry.osism.tech/dockerhub/python
-
-FROM ${IMAGE}:3.13-slim-bookworm
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 COPY --link --from=builder / /
 
