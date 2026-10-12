@@ -6,7 +6,6 @@
 
   environment:
     openstack_version: "{{ version_openstack | default('master') }}"
-    python_version: "{{ version_python | default('3.13') }}"
     registry: "{{ docker_registry | default('osism.harbor.regio.digital') }}"
     repository: "{{ docker_namespace | default('osism') }}/kolla-ansible"
     version: "{{ zuul['tag'] | default('latest') }}"
@@ -154,7 +153,6 @@
           docker buildx build \
               "${operations_args[@]}" \
               --build-arg "OPENSTACK_VERSION=$openstack_version" \
-              --build-arg "PYTHON_VERSION=$python_version" \
               --build-arg "SHA_ANSIBLE_PLAYBOOKS=$sha_ansible_playbooks" \
               --build-arg "SHA_GENERICS=$sha_generics" \
               --build-arg "SHA_KOLLA_ANSIBLE=$sha_kolla_ansible" \
