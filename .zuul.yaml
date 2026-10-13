@@ -91,6 +91,14 @@
 - job:
     name: container-image-kolla-ansible-patch-headers-upstream
     run: playbooks/patch-headers-upstream.yml
+    vars:
+      # Probe the Gerrit host in the base job's pre/post network snapshots
+      # too. The list replaces the role default, so it repeats those
+      # targets.
+      diagnose_network_targets:
+        - tarballs.opendev.org
+        - galaxy.ansible.com
+        - review.opendev.org
 
 - job:
     name: container-image-kolla-ansible-build
