@@ -255,22 +255,31 @@ def report(root, stale_days):
 
 
 def connect(address, timeout, source_address=None):
-    """socket.create_connection, but log every address that fails.
+    """socket.create_connection, but log what it resolved and tried.
 
     The stock one raises only the last address's error, which hides which
-    address family a stalled connection was on.
+    address family a stalled connection was on. The resolved list shows
+    whether a family was missing from the answer rather than unreachable,
+    and the address that connected shows which family a passing run used.
     """
     host, port = address
     error = OSError("no address for %s" % host)
-    for family, kind, proto, _, addr in socket.getaddrinfo(
-        host, port, 0, socket.SOCK_STREAM
-    ):
+    infos = socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM)
+    print(
+        "  %s resolved to %s" % (host, ", ".join(info[4][0] for info in infos) or "-"),
+        file=sys.stderr,
+    )
+    for family, kind, proto, _, addr in infos:
         sock = None
         start = time.monotonic()
         try:
             sock = socket.socket(family, kind, proto)
             sock.settimeout(timeout)
             sock.connect(addr)
+            print(
+                "  connect to %s ok after %.1fs" % (addr[0], time.monotonic() - start),
+                file=sys.stderr,
+            )
             return sock
         except OSError as exc:
             if sock is not None:
