@@ -569,10 +569,19 @@ class TestConnect:
             chk.connect(server.getsockname(), 5).close()
         assert "connect to ::1 failed" in capsys.readouterr().err
 
-    def test_a_working_address_is_returned_silently(self, capsys):
+    def test_the_resolved_and_connected_addresses_are_logged(self, capsys):
         with chk.socket.socket() as server:
             server.bind(("127.0.0.1", 0))
             server.listen()
             sock = chk.connect(server.getsockname(), 5)
             sock.close()
-        assert capsys.readouterr().err == ""
+        err = capsys.readouterr().err
+        assert "127.0.0.1 resolved to 127.0.0.1" in err
+        assert "connect to 127.0.0.1 ok after" in err
+        assert "failed" not in err
+
+    def test_an_empty_answer_is_logged(self, monkeypatch, capsys):
+        monkeypatch.setattr(chk.socket, "getaddrinfo", lambda *args: [])
+        with pytest.raises(OSError, match="no address for review.example"):
+            chk.connect(("review.example", 443), 5)
+        assert "review.example resolved to -" in capsys.readouterr().err
