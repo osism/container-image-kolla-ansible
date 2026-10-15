@@ -1,0 +1,185 @@
+From 6cfab04f09c778139a122d7cf9058c02f8560a5d Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Thu, 15 Oct 2026 19:39:24 +0200
+Subject: [PATCH] ceilometer: export polled metrics to Prometheus
+
+Ceilometer's polling agents can serve the samples they poll in
+Prometheus format ([polling] enable_prometheus_exporter), but nothing in
+kolla-ansible configures that or scrapes it. A deployment with
+Prometheus gets no ceilometer metrics without overlays for both the
+agents and the Prometheus config.
+
+Add enable_ceilometer_prometheus_exporter, on by default when both
+ceilometer and Prometheus are enabled. It makes the central and
+compute polling agents listen on their API address and adds a
+ceilometer scrape job for those hosts.
+
+Both agents share one port, ceilometer_prometheus_exporter_port, 9181
+by default: the one the Prometheus default port allocations list for
+an OpenStack Ceilometer exporter. The agents' own default, 9101, is
+already taken by the HAProxy exporter endpoint on hosts that run
+HAProxy. A host that runs both agents cannot use one port for both, so
+each agent has its own variable, ceilometer_central_prometheus_exporter_port
+and ceilometer_compute_prometheus_exporter_port, defaulting to the
+shared one. The scrape job takes each target's port from the agent's
+variable of that host, so moving one agent on such a host is a
+host_vars override. A deploy that would put both agents of a host on
+the same port fails with a message naming the variables, instead of
+leaving one agent in a restart loop on an address in use.
+
+The IPMI agent does not export: it runs next to the compute agent on
+every host of its group, so it could never share the port and would
+need a second one allocated.
+
+When neither gnocchi, the pushgateway publisher nor a custom
+pipeline.yaml provides a publisher, the polling agents still send
+every sample to the notification agent, which has no sink for them,
+and notifications.sample grows without bound. Set [polling]
+enable_notifications = false for the central, compute and IPMI agents
+in that case, whether or not the exporter is enabled. The check for a
+custom pipeline.yaml moves ahead of the ceilometer.conf task so the
+template can use it.
+
+The precheck that demands a publisher accepts the exporter as well.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending
+---
+ ansible/group_vars/all/ceilometer.yml         |  7 +++++
+ ansible/roles/ceilometer/tasks/config.yml     | 28 +++++++++++++++----
+ ansible/roles/ceilometer/tasks/precheck.yml   |  4 +--
+ .../ceilometer/templates/ceilometer.conf.j2   | 19 +++++++++++++
+ .../prometheus/templates/prometheus.yml.j2    | 15 ++++++++++
+ 5 files changed, 65 insertions(+), 8 deletions(-)
+
+diff --git a/ansible/group_vars/all/ceilometer.yml b/ansible/group_vars/all/ceilometer.yml
+index 0b178a470..14c277943 100644
+--- a/ansible/group_vars/all/ceilometer.yml
++++ b/ansible/group_vars/all/ceilometer.yml
+@@ -2,3 +2,10 @@
+ enable_ceilometer: false
+ enable_ceilometer_ipmi: false
+ enable_ceilometer_prometheus_pushgateway: false
++enable_ceilometer_prometheus_exporter: "{{ enable_ceilometer | bool and enable_prometheus | bool }}"
++
++ceilometer_prometheus_exporter_port: "9181"
++# Both agents export on the shared port. A host that runs both needs one of
++# them moved.
++ceilometer_central_prometheus_exporter_port: "{{ ceilometer_prometheus_exporter_port }}"
++ceilometer_compute_prometheus_exporter_port: "{{ ceilometer_prometheus_exporter_port }}"
+diff --git a/ansible/roles/ceilometer/tasks/config.yml b/ansible/roles/ceilometer/tasks/config.yml
+index 431a104b4..6e2022e4d 100644
+--- a/ansible/roles/ceilometer/tasks/config.yml
++++ b/ansible/roles/ceilometer/tasks/config.yml
+@@ -170,6 +170,28 @@
+   become: true
+   with_dict: "{{ ceilometer_services | select_services_enabled_and_mapped_to_host }}"
+ 
++- name: Check the Prometheus exporter ports of the polling agents
++  ansible.builtin.assert:
++    that:
++      - ceilometer_central_prometheus_exporter_port | string != ceilometer_compute_prometheus_exporter_port | string
++    fail_msg: >-
++      {{ inventory_hostname }} runs both the central and the compute polling
++      agent, and both would export to Prometheus on port
++      {{ ceilometer_compute_prometheus_exporter_port }}. Set
++      ceilometer_central_prometheus_exporter_port or
++      ceilometer_compute_prometheus_exporter_port to another port for this
++      host.
++  when:
++    - enable_ceilometer_prometheus_exporter | bool
++    - ceilometer_services['ceilometer-central'] | service_enabled_and_mapped_to_host
++    - ceilometer_services['ceilometer-compute'] | service_enabled_and_mapped_to_host
++
++- name: Check custom pipeline.yaml exists
++  ansible.builtin.stat:
++    path: "{{ node_custom_config }}/ceilometer/pipeline.yaml"
++  delegate_to: localhost
++  register: ceilometer_pipeline_file
++
+ - name: Copying over ceilometer.conf
+   vars:
+     service_name: "{{ item.key }}"
+@@ -231,12 +253,6 @@
+   become: true
+   when: service | service_enabled_and_mapped_to_host
+ 
+-- name: Check custom pipeline.yaml exists
+-  ansible.builtin.stat:
+-    path: "{{ node_custom_config }}/ceilometer/pipeline.yaml"
+-  delegate_to: localhost
+-  register: ceilometer_pipeline_file
+-
+ - name: Copying over custom pipeline.yaml file
+   vars:
+     services_require_pipeline:
+diff --git a/ansible/roles/ceilometer/tasks/precheck.yml b/ansible/roles/ceilometer/tasks/precheck.yml
+index 054778a97..42b98f4ed 100644
+--- a/ansible/roles/ceilometer/tasks/precheck.yml
++++ b/ansible/roles/ceilometer/tasks/precheck.yml
+@@ -9,7 +9,7 @@
+ - name: Checking Ceilometer publishers
+   ansible.builtin.assert:
+     that:
+-      - not (enable_ceilometer | bool) or enable_gnocchi | bool or enable_ceilometer_prometheus_pushgateway | bool
+-    msg: "At least one Ceilometer publisher must be enabled"
++      - not (enable_ceilometer | bool) or enable_gnocchi | bool or enable_ceilometer_prometheus_pushgateway | bool or enable_ceilometer_prometheus_exporter | bool
++    msg: "At least one Ceilometer publisher or the Prometheus exporter must be enabled"
+   run_once: true
+   changed_when: false
+diff --git a/ansible/roles/ceilometer/templates/ceilometer.conf.j2 b/ansible/roles/ceilometer/templates/ceilometer.conf.j2
+index bdb101073..88964199b 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer.conf.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer.conf.j2
+@@ -17,6 +17,25 @@ auth_type = password
+ interface = internal
+ cafile = {{ openstack_cacert }}
+ 
++{% set ceilometer_exporter_ports = {
++       'ceilometer-central': ceilometer_central_prometheus_exporter_port,
++       'ceilometer-compute': ceilometer_compute_prometheus_exporter_port} %}
++{% set ceilometer_exports = enable_ceilometer_prometheus_exporter | bool and service_name in ceilometer_exporter_ports %}
++{# Without a publisher nothing consumes the samples a polling agent sends to
++   the notification agent, so they pile up in notifications.sample. #}
++{% set ceilometer_unpublished = service_name in ['ceilometer-central', 'ceilometer-compute', 'ceilometer-ipmi']
++       and not (enable_gnocchi | bool or enable_ceilometer_prometheus_pushgateway | bool or ceilometer_pipeline_file.stat.exists) %}
++{% if ceilometer_exports or ceilometer_unpublished %}
++[polling]
++{%   if ceilometer_exports %}
++enable_prometheus_exporter = true
++prometheus_listen_addresses = {{ api_interface_address | put_address_in_context('url') }}:{{ ceilometer_exporter_ports[service_name] }}
++{%   endif %}
++{%   if ceilometer_unpublished %}
++enable_notifications = false
++{%   endif %}
++
++{% endif %}
+ [oslo_messaging_notifications]
+ transport_url = {{ notify_transport_url }}
+ 
+diff --git a/ansible/roles/prometheus/templates/prometheus.yml.j2 b/ansible/roles/prometheus/templates/prometheus.yml.j2
+index 94dc84ac2..5a3f7b0ae 100644
+--- a/ansible/roles/prometheus/templates/prometheus.yml.j2
++++ b/ansible/roles/prometheus/templates/prometheus.yml.j2
+@@ -256,6 +256,21 @@ scrape_configs:
+ {%     endfor %}
+ {% endif %}
+ 
++{% if enable_ceilometer_prometheus_exporter | bool %}
++  - job_name: ceilometer
++    static_configs:
++{%     for group, port_var in [('ceilometer-central', 'ceilometer_central_prometheus_exporter_port'), ('ceilometer-compute', 'ceilometer_compute_prometheus_exporter_port')] %}
++{%         for host in groups[group] %}
++      - targets:
++        - '{{ 'api' | kolla_address(host, override_var='prometheus_target_address') | put_address_in_context('url') }}:{{ hostvars[host][port_var] }}'
++{%             if hostvars[host].prometheus_instance_label | default(false, true) %}
++        labels:
++          instance: "{{ hostvars[host].prometheus_instance_label }}"
++{%             endif %}
++{%         endfor %}
++{%     endfor %}
++{% endif %}
++
+ {% if enable_prometheus_proxysql_exporter | bool %}
+   - job_name: proxysql
+     static_configs:
