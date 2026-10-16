@@ -1,0 +1,67 @@
+From fd6689af0cf0b634153a5d951da4b21c0c8541c3 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Fri, 16 Oct 2026 18:37:22 +0200
+Subject: [PATCH] octavia: Set bind_ip only for the health manager
+
+All Octavia services render the same octavia.conf template, and its
+[health_manager] section sets bind_ip from
+octavia_network_interface_address, the host's address on
+octavia_network_interface. With octavia_network_type tenant that
+interface is o-hm0, which the role creates only on
+octavia-health-manager hosts. (With the provider type it defaults to
+api_interface, which every host has.)
+
+The sample inventories put every Octavia service in the same group, so
+the lookup succeeds with that placement. An inventory that runs
+octavia-api (or the worker, housekeeping or driver agent) on a host
+outside octavia-health-manager fails in the config step for that host:
+
+  The filter plugin 'kolla_address' failed: Interface 'o-hm0' not
+  present on host '<host>'
+
+Only the health manager reads bind_ip, so render it only for that
+service. controller_ip_port_list, which octavia-api and the worker do
+read, already looks up each health manager's address by host and is
+unchanged. The health manager's configuration stays the same.
+
+Change-Id: Ic8f7b3f4c3f3d29d276f1cdc18f5d6d36866097a
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending [commit prepared with a Change-Id, not yet submitted to Gerrit]
+Related: https://review.opendev.org/c/openstack/kolla-ansible/+/604043 (changes heartbeat_key on the adjacent line; open since 2018, last updated 2021)
+---
+ ansible/roles/octavia/templates/octavia.conf.j2        |  2 ++
+ ...a-bind-ip-health-manager-only-41fc75f2385b47fd.yaml | 10 ++++++++++
+ 2 files changed, 12 insertions(+)
+ create mode 100644 releasenotes/notes/octavia-bind-ip-health-manager-only-41fc75f2385b47fd.yaml
+
+diff --git a/ansible/roles/octavia/templates/octavia.conf.j2 b/ansible/roles/octavia/templates/octavia.conf.j2
+index 8e4050692..40f208492 100644
+--- a/ansible/roles/octavia/templates/octavia.conf.j2
++++ b/ansible/roles/octavia/templates/octavia.conf.j2
+@@ -77,7 +77,9 @@ memcached_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_addres
+ 
+ [health_manager]
+ bind_port = {{ octavia_health_manager_port }}
++{% if service_name == 'octavia-health-manager' %}
+ bind_ip = {{ octavia_network_interface_address }}
++{% endif %}
+ heartbeat_key = insecure
+ controller_ip_port_list = {% for host in groups['octavia-health-manager'] %}{{ 'octavia_network' | kolla_address(host) | put_address_in_context('url') }}:{{ octavia_health_manager_port }}{% if not loop.last %},{% endif %}{% endfor %}
+ 
+diff --git a/releasenotes/notes/octavia-bind-ip-health-manager-only-41fc75f2385b47fd.yaml b/releasenotes/notes/octavia-bind-ip-health-manager-only-41fc75f2385b47fd.yaml
+new file mode 100644
+index 000000000..e323bbca1
+--- /dev/null
++++ b/releasenotes/notes/octavia-bind-ip-health-manager-only-41fc75f2385b47fd.yaml
+@@ -0,0 +1,10 @@
++---
++fixes:
++  - |
++    The ``bind_ip`` option of the ``[health_manager]`` section in
++    ``octavia.conf`` is now only set for the ``octavia-health-manager``
++    service. Previously every Octavia service looked up the address of
++    ``octavia_network_interface``, so deploying ``octavia-api`` (or another
++    Octavia service) on a host outside the ``octavia-health-manager`` group
++    failed when that interface, e.g. ``o-hm0``, existed only on the health
++    manager hosts.
