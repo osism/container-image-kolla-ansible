@@ -129,10 +129,6 @@ python3 /src/render-versions.py
 # install required python packages
 uv pip install --no-cache --system -r /requirements.txt
 
-# set ansible version in the motd
-ansible_version=$(python3 -c 'import ansible; print(ansible.release.__version__)')
-sed -i -e "s/ANSIBLE_VERSION/$ansible_version/" /etc/motd
-
 # create required directories
 mkdir -p \
   /ansible \
@@ -186,6 +182,11 @@ ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
 uv pip install --no-cache --system -r /repository/requirements.txt
 uv pip install --no-cache --system /repository
 python3 /src/check-python-requirements.py
+
+# set ansible version in the motd, now that the installs are done
+ansible_version=$(python3 -c 'import ansible; print(ansible.release.__version__)')
+sed -i -e "s/ANSIBLE_VERSION/$ansible_version/" /etc/motd
+
 python3 /remove-common-as-dependency.py
 python3 /split-kolla-ansible-site.py
 cp -r /repository/ansible/action_plugins/* /ansible/action_plugins
