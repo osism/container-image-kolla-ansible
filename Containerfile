@@ -185,6 +185,7 @@ rm /mitogen.tar.gz
 ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
 uv pip install --no-cache --system -r /repository/requirements.txt
 uv pip install --no-cache --system /repository
+python3 /src/check-python-requirements.py
 python3 /remove-common-as-dependency.py
 python3 /split-kolla-ansible-site.py
 cp -r /repository/ansible/action_plugins/* /ansible/action_plugins
