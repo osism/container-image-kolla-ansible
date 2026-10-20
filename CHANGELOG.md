@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This file was started on May 30, 2025. Changes prior to this date are not included in the CHANGELOG.
 
+## [v0.20261019.0] - 2026-10-19
+
+### Added
+- Fail the build when a package pinned in /requirements.txt is replaced by a later install, naming the package, the pin and the installed version (osism/container-image-kolla-ansible#983)
+- Label a release build's image with the SBOM and base image it was built from, pinned by digest, resolving the release tag to a commit before reading any of its files (osism/container-image-kolla-ansible#978)
+
+### Changed
+- Log DNS resolution and connection attempts in check_patch_headers, and probe review.opendev.org in the patch-headers-upstream Zuul job, to diagnose Gerrit connectivity failures (osism/container-image-kolla-ansible#979)
+
+### Fixed
+- Retry dropped Gerrit calls in check_patch_headers with backoff, so a single stalled connection no longer fails the patch-headers-upstream job (osism/container-image-kolla-ansible#976)
+- Render octavia bind_ip only for the health manager service, fixing a config failure when octavia-api runs on a host without the o-hm0 interface (osism/container-image-kolla-ansible#982)
+- Write the installed ansible-core version to the motd after kolla-ansible's own requirements are installed, instead of before (osism/container-image-kolla-ansible#983)
+- Backport mariadb healthcheck start_period 120s to 2026.1, 2025.2 and 2025.1, fixing a race where joining nodes are reported unhealthy before the monitor user exists (osism/container-image-kolla-ansible#984)
+
+### Removed
+- Unused PYTHON_VERSION build argument, since no Zuul job sets it (osism/container-image-kolla-ansible#978)
+
+### Dependencies
+- yq 4.4.0 → 4.4.5 (osism/container-image-kolla-ansible#980)
+
 ## [v0.20261011.0] - 2026-10-11
 
 ### Changed
