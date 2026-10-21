@@ -1,0 +1,192 @@
+From e06ea9195b2229e6d17c6b4eca4ca1b85de296a7 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Wed, 21 Oct 2026 16:20:37 +0200
+Subject: [PATCH 37/38] ceilometer: always render polling.yaml
+
+Without a custom polling.yaml the polling agents use the one in the
+image, and the only way to change the meters or the interval is a
+custom polling.yaml, which replaces the whole file for every agent.
+
+A custom file is also hard to get rid of. kolla_set_configs copies the
+files listed in config.json on every start but never deletes one, so
+after the custom file is removed, the copy stays in the container until
+the container is recreated.
+
+Render polling.yaml from a template for every ceilometer service
+unless {{ node_custom_config }}/ceilometer/polling.yaml exists, which
+is still copied as it is, and always list polling.yaml in config.json.
+The rendered file replaces whatever a custom file left behind.
+
+The template has one source with the meters and the interval of the
+polling.yaml in the image, so what is polled does not change. Each
+agent ignores the meters of other namespaces. The meters are
+ceilometer_polling_meters_compute and ceilometer_polling_meters_central,
+ceilometer_polling_meters_extra adds meters, and the interval is
+ceilometer_polling_interval.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending [not yet proposed]
+---
+ ansible/roles/ceilometer/defaults/main.yml    | 24 +++++++++++++++++++
+ ansible/roles/ceilometer/tasks/config.yml     | 12 ++++++----
+ .../templates/ceilometer-central.json.j2      |  4 ++--
+ .../templates/ceilometer-compute.json.j2      |  4 ++--
+ .../templates/ceilometer-ipmi.json.j2         |  4 ++--
+ .../templates/ceilometer-notification.json.j2 |  4 ++--
+ .../ceilometer/templates/polling.yaml.j2      |  8 +++++++
+ 7 files changed, 48 insertions(+), 12 deletions(-)
+ create mode 100644 ansible/roles/ceilometer/templates/polling.yaml.j2
+
+diff --git a/ansible/roles/ceilometer/defaults/main.yml b/ansible/roles/ceilometer/defaults/main.yml
+index 86f04b271..d17507b76 100644
+--- a/ansible/roles/ceilometer/defaults/main.yml
++++ b/ansible/roles/ceilometer/defaults/main.yml
+@@ -175,6 +175,30 @@ ceilometer_source_version: "{{ kolla_source_version }}"
+ ceilometer_custom_meters_local_folder: "meters.d"
+ ceilometer_dynamic_pollsters_local_folder: "pollsters.d"
+ 
++# polling.yaml for all ceilometer services, unless
++# {{ node_custom_config }}/ceilometer/polling.yaml exists. Each agent polls
++# only the meters of its own namespace and ignores the others.
++ceilometer_polling_interval: 300
++ceilometer_polling_meters_compute:
++  - power.state
++  - cpu
++  - memory.available
++  - memory.usage
++  - network.incoming.bytes
++  - network.incoming.packets
++  - network.outgoing.bytes
++  - network.outgoing.packets
++  - disk.device.read.bytes
++  - disk.device.read.requests
++  - disk.device.write.bytes
++  - disk.device.write.requests
++ceilometer_polling_meters_central:
++  - volume.size
++  - volume.snapshot.size
++  - volume.backup.size
++ceilometer_polling_meters_extra: []
++ceilometer_polling_meters: "{{ ceilometer_polling_meters_compute + ceilometer_polling_meters_central + ceilometer_polling_meters_extra }}"
++
+ ####################
+ # Keystone
+ ####################
+diff --git a/ansible/roles/ceilometer/tasks/config.yml b/ansible/roles/ceilometer/tasks/config.yml
+index 431a104b4..c00be762e 100644
+--- a/ansible/roles/ceilometer/tasks/config.yml
++++ b/ansible/roles/ceilometer/tasks/config.yml
+@@ -109,11 +109,15 @@
+     - ceilometer_polling_file.stat.exists
+   with_dict: "{{ ceilometer_services | select_services_enabled_and_mapped_to_host }}"
+ 
+-- name: Set ceilometer polling file's path
+-  ansible.builtin.set_fact:
+-    ceilometer_polling_file_path: "{{ ceilometer_polling_file.stat.path }}"
++- name: Copying over default polling.yaml
++  ansible.builtin.template:
++    src: "polling.yaml.j2"
++    dest: "{{ node_config_directory }}/{{ item.key }}/polling.yaml"
++    mode: "0660"
++  become: true
+   when:
+-    - ceilometer_polling_file.stat.exists
++    - not ceilometer_polling_file.stat.exists
++  with_dict: "{{ ceilometer_services | select_services_enabled_and_mapped_to_host }}"
+ 
+ - name: Check custom gnocchi_resources.yaml exists
+   ansible.builtin.stat:
+diff --git a/ansible/roles/ceilometer/templates/ceilometer-central.json.j2 b/ansible/roles/ceilometer/templates/ceilometer-central.json.j2
+index 7eddfe606..ee43cd297 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer-central.json.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer-central.json.j2
+@@ -6,13 +6,13 @@
+             "dest": "/etc/ceilometer/ceilometer.conf",
+             "owner": "ceilometer",
+             "perm": "0600"
+-        }{% if ceilometer_polling_file_path is defined %},
++        },
+         {
+             "source": "{{ container_config_directory }}/polling.yaml",
+             "dest": "/etc/ceilometer/polling.yaml",
+             "owner": "ceilometer",
+             "perm": "0600"
+-        }{% endif %}{% if ceilometer_gnocchi_resources_file_path is defined %},
++        }{% if ceilometer_gnocchi_resources_file_path is defined %},
+         {
+             "source": "{{ container_config_directory }}/gnocchi_resources.yaml",
+             "dest": "/etc/ceilometer/gnocchi_resources.yaml",
+diff --git a/ansible/roles/ceilometer/templates/ceilometer-compute.json.j2 b/ansible/roles/ceilometer/templates/ceilometer-compute.json.j2
+index f98cdfe6e..15025b0f8 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer-compute.json.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer-compute.json.j2
+@@ -6,13 +6,13 @@
+             "dest": "/etc/ceilometer/ceilometer.conf",
+             "owner": "ceilometer",
+             "perm": "0600"
+-        }{% if ceilometer_polling_file_path is defined %},
++        },
+         {
+             "source": "{{ container_config_directory }}/polling.yaml",
+             "dest": "/etc/ceilometer/polling.yaml",
+             "owner": "ceilometer",
+             "perm": "0600"
+-        }{% endif %}{% if ceilometer_gnocchi_resources_file_path is defined %},
++        }{% if ceilometer_gnocchi_resources_file_path is defined %},
+         {
+             "source": "{{ container_config_directory }}/gnocchi_resources.yaml",
+             "dest": "/etc/ceilometer/gnocchi_resources.yaml",
+diff --git a/ansible/roles/ceilometer/templates/ceilometer-ipmi.json.j2 b/ansible/roles/ceilometer/templates/ceilometer-ipmi.json.j2
+index a187505c8..27cc2de42 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer-ipmi.json.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer-ipmi.json.j2
+@@ -6,13 +6,13 @@
+             "dest": "/etc/ceilometer/ceilometer.conf",
+             "owner": "ceilometer",
+             "perm": "0600"
+-        }{% if ceilometer_polling_file_path is defined %},
++        },
+         {
+             "source": "{{ container_config_directory }}/polling.yaml",
+             "dest": "/etc/ceilometer/polling.yaml",
+             "owner": "ceilometer",
+             "perm": "0600"
+-        }{% endif %}{% if ceilometer_gnocchi_resources_file_path is defined %},
++        }{% if ceilometer_gnocchi_resources_file_path is defined %},
+         {
+             "source": "{{ container_config_directory }}/gnocchi_resources.yaml",
+             "dest": "/etc/ceilometer/gnocchi_resources.yaml",
+diff --git a/ansible/roles/ceilometer/templates/ceilometer-notification.json.j2 b/ansible/roles/ceilometer/templates/ceilometer-notification.json.j2
+index 9dcffb311..a22251e97 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer-notification.json.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer-notification.json.j2
+@@ -24,13 +24,13 @@
+             "dest": "/etc/ceilometer/pipeline.yaml",
+             "owner": "ceilometer",
+             "perm": "0600"
+-        }{% if ceilometer_polling_file_path is defined %},
++        },
+         {
+             "source": "{{ container_config_directory }}/polling.yaml",
+             "dest": "/etc/ceilometer/polling.yaml",
+             "owner": "ceilometer",
+             "perm": "0600"
+-        }{% endif %}{% if ceilometer_gnocchi_resources_file_path is defined %},
++        }{% if ceilometer_gnocchi_resources_file_path is defined %},
+         {
+             "source": "{{ container_config_directory }}/gnocchi_resources.yaml",
+             "dest": "/etc/ceilometer/gnocchi_resources.yaml",
+diff --git a/ansible/roles/ceilometer/templates/polling.yaml.j2 b/ansible/roles/ceilometer/templates/polling.yaml.j2
+new file mode 100644
+index 000000000..2fe90640b
+--- /dev/null
++++ b/ansible/roles/ceilometer/templates/polling.yaml.j2
+@@ -0,0 +1,8 @@
++---
++sources:
++    - name: some_pollsters
++      interval: {{ ceilometer_polling_interval }}
++      meters:
++{% for meter in ceilometer_polling_meters %}
++          - {{ meter }}
++{% endfor %}
