@@ -78,7 +78,6 @@ apt-get install -y --no-install-recommends \
   sshpass
 update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3 1
 update-alternatives --install /usr/bin/python python /usr/local/bin/python 1
-uv pip install --no-cache --system -r /src/requirements.txt
 
 # add user
 groupadd -g "$GROUP_ID" dragon
@@ -87,62 +86,12 @@ useradd -l -g dragon -G docker -u "$USER_ID" -m -d /ansible dragon
 
 # prepare release repository
 git clone https://github.com/osism/release /release
-
-# kolla-operations is only read where kolla-operations.patch applies; it is
-# retired from 2025.1 on
-case "$OPENSTACK_VERSION" in
-  2023.2|2024.1|2024.2) kolla_operations=true ;;
-  *) kolla_operations=false ;;
-esac
-
-# prepare project repository
-git clone https://github.com/osism/ansible-playbooks /playbooks
-git clone https://github.com/osism/generics /generics
-if [ "$kolla_operations" = true ]; then git clone https://github.com/osism/kolla-operations /operations; fi
-
 if [ "$VERSION" != "latest" ]; then
   ( cd /release || exit; git fetch --all --force; git checkout "kolla-ansible-$VERSION" )
-  ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/latest/base.yml")" )
-  ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/latest/base.yml")" )
-  if [ "$kolla_operations" = true ]; then ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/latest/base.yml")" ); fi
 fi
 
-# pin the sources to the commits recorded in the labels
+# pin the source to the commit recorded in the labels
 if [ -n "$SHA_RELEASE" ]; then ( cd /release || exit; git checkout "$SHA_RELEASE" ); fi
-if [ -n "$SHA_ANSIBLE_PLAYBOOKS" ]; then ( cd /playbooks || exit; git checkout "$SHA_ANSIBLE_PLAYBOOKS" ); fi
-if [ -n "$SHA_GENERICS" ]; then ( cd /generics || exit; git checkout "$SHA_GENERICS" ); fi
-if [ "$kolla_operations" = true ] && [ -n "$SHA_KOLLA_OPERATIONS" ]; then ( cd /operations || exit; git checkout "$SHA_KOLLA_OPERATIONS" ); fi
-
-# add inventory files
-mkdir -p /ansible/inventory.generics /ansible/inventory
-cp /generics/inventory/50-ceph /ansible/inventory.generics/50-ceph
-cp /generics/inventory/51-ceph /ansible/inventory.generics/51-ceph
-cp /generics/inventory/50-kolla /ansible/inventory.generics/50-kolla
-cp /generics/inventory/51-kolla /ansible/inventory.generics/51-kolla
-
-# run preparations
-mkdir -p /ansible/galaxy /ansible/group_vars/all
-python3 /src/render-ansible-requirements.py
-python3 /src/render-python-requirements.py
-python3 /src/render-versions.py
-
-# install required python packages
-uv pip install --no-cache --system -r /requirements.txt
-
-# create required directories
-mkdir -p \
-  /ansible \
-  /ansible/action_plugins \
-  /ansible/cache \
-  /ansible/filter_plugins \
-  /ansible/library \
-  /ansible/logs \
-  /ansible/module_utils \
-  /ansible/roles \
-  /ansible/secrets \
-  /ansible/tasks \
-  /interface \
-  /share
 
 # prepare project repository
 if [ "$OPENSTACK_VERSION" = "master" ]; then
@@ -163,6 +112,65 @@ for patchfile in $(find /patches/$OPENSTACK_VERSION -name "*.patch" | LC_ALL=C s
   ( cd /repository && patch --forward --batch -p1 ) < $patchfile
 done
 
+# install required python packages
+# NOTE: All packages, kolla-ansible included, are installed by a single
+#       resolver run, so a requirement that conflicts with another fails the
+#       build instead of being replaced by a later install. Rendering
+#       /requirements.txt needs Jinja2 and PyYAML before they are installed,
+#       so the render script runs in a temporary environment.
+uv run --no-cache --no-project --with jinja2 --with packaging --with pyyaml python3 /src/render-python-requirements.py
+uv pip install --no-cache --system -r /src/requirements.txt -r /requirements.txt /repository
+
+# kolla-operations is only read where kolla-operations.patch applies; it is
+# retired from 2025.1 on
+case "$OPENSTACK_VERSION" in
+  2023.2|2024.1|2024.2) kolla_operations=true ;;
+  *) kolla_operations=false ;;
+esac
+
+# prepare project repository
+git clone https://github.com/osism/ansible-playbooks /playbooks
+git clone https://github.com/osism/generics /generics
+if [ "$kolla_operations" = true ]; then git clone https://github.com/osism/kolla-operations /operations; fi
+
+if [ "$VERSION" != "latest" ]; then
+  ( cd /playbooks || exit; git fetch --all --force; git checkout "$(yq -M -r .playbooks_version "/release/latest/base.yml")" )
+  ( cd /generics || exit; git fetch --all --force; git checkout "$(yq -M -r .generics_version "/release/latest/base.yml")" )
+  if [ "$kolla_operations" = true ]; then ( cd /operations || exit; git fetch --all --force; git checkout "$(yq -M -r .operations_version "/release/latest/base.yml")" ); fi
+fi
+
+# pin the sources to the commits recorded in the labels
+if [ -n "$SHA_ANSIBLE_PLAYBOOKS" ]; then ( cd /playbooks || exit; git checkout "$SHA_ANSIBLE_PLAYBOOKS" ); fi
+if [ -n "$SHA_GENERICS" ]; then ( cd /generics || exit; git checkout "$SHA_GENERICS" ); fi
+if [ "$kolla_operations" = true ] && [ -n "$SHA_KOLLA_OPERATIONS" ]; then ( cd /operations || exit; git checkout "$SHA_KOLLA_OPERATIONS" ); fi
+
+# add inventory files
+mkdir -p /ansible/inventory.generics /ansible/inventory
+cp /generics/inventory/50-ceph /ansible/inventory.generics/50-ceph
+cp /generics/inventory/51-ceph /ansible/inventory.generics/51-ceph
+cp /generics/inventory/50-kolla /ansible/inventory.generics/50-kolla
+cp /generics/inventory/51-kolla /ansible/inventory.generics/51-kolla
+
+# run preparations
+mkdir -p /ansible/galaxy /ansible/group_vars/all
+python3 /src/render-ansible-requirements.py
+python3 /src/render-versions.py
+
+# create required directories
+mkdir -p \
+  /ansible \
+  /ansible/action_plugins \
+  /ansible/cache \
+  /ansible/filter_plugins \
+  /ansible/library \
+  /ansible/logs \
+  /ansible/module_utils \
+  /ansible/roles \
+  /ansible/secrets \
+  /ansible/tasks \
+  /interface \
+  /share
+
 # install required ansible collections & roles
 ansible-galaxy role install -v -f -r /ansible/galaxy/requirements.yml -p /usr/share/ansible/roles
 ln -s /usr/share/ansible/roles /ansible/galaxy
@@ -179,11 +187,8 @@ rm /mitogen.tar.gz
 
 # project specific instructions
 ln -s /ansible/kolla-gather-facts.yml /ansible/gather-facts.yml
-uv pip install --no-cache --system -r /repository/requirements.txt
-uv pip install --no-cache --system /repository
-python3 /src/check-python-requirements.py
 
-# set ansible version in the motd, now that the installs are done
+# set ansible version in the motd
 ansible_version=$(python3 -c 'import ansible; print(ansible.release.__version__)')
 sed -i -e "s/ANSIBLE_VERSION/$ansible_version/" /etc/motd
 
