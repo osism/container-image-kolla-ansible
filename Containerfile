@@ -98,6 +98,8 @@ if [ "$OPENSTACK_VERSION" = "master" ]; then
   git clone https://github.com/openstack/kolla-ansible /repository
 elif [ "$OPENSTACK_VERSION" = "2024.2" ]; then
   git clone -b 2024.2-eol https://github.com/openstack/kolla-ansible /repository
+elif [ "$OPENSTACK_VERSION" = "2025.1" ]; then
+  git clone -b unmaintained/2025.1 https://github.com/openstack/kolla-ansible /repository
 else
   git clone -b stable/$OPENSTACK_VERSION https://github.com/openstack/kolla-ansible /repository
 fi
