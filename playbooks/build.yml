@@ -124,6 +124,9 @@
               2024.2)
                   kolla_ansible_ref=refs/tags/2024.2-eol
                   ;;
+              2025.1)
+                  kolla_ansible_ref=refs/heads/unmaintained/2025.1
+                  ;;
               *)
                   kolla_ansible_ref=refs/heads/stable/$openstack_version
                   ;;
