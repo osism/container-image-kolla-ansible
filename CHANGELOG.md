@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This file was started on May 30, 2025. Changes prior to this date are not included in the CHANGELOG.
 
+## [v0.20261111.0] - 2026-11-11
+
+### Changed
+
+- Support proxy environment for grafana (osism/container-image-kolla-ansible#958, contributed by Freerk-Ole Zakfeld (@fzakfeld))
+- patches: export ceilometer metrics to Prometheus (osism/container-image-kolla-ansible#981)
+- patches: carry octavia tenant network with OVN (osism/container-image-kolla-ansible#986)
+- patches: always render ceilometer polling.yaml (osism/container-image-kolla-ansible#987)
+- patches: cite upstream fix for ironic shard ID (osism/container-image-kolla-ansible#990)
+- Install the Python packages in a single uv run (osism/container-image-kolla-ansible#991)
+- patches: drop 2026.1 mariadb start_period (osism/container-image-kolla-ansible#992)
+- build: use unmaintained/2025.1 for kolla-ansible (osism/container-image-kolla-ansible#993)
+
 ## [v0.20261019.0] - 2026-10-19
 
 ### Added
