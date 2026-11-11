@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This file was started on May 30, 2025. Changes prior to this date are not included in the CHANGELOG.
 
+## [v0.20261111.0] - 2026-11-11
+
+### Added
+- Add support for a proxy environment for Grafana via grafana_container_proxy (osism/container-image-kolla-ansible#958, contributed by Freerk-Ole Zakfeld (@fzakfeld))
+- Add support for exporting ceilometer polled metrics to Prometheus via enable_ceilometer_prometheus_exporter (osism/container-image-kolla-ansible#981)
+
+### Changed
+- Install all Python packages, including kolla-ansible, in a single uv resolver run (osism/container-image-kolla-ansible#991)
+- Always render ceilometer polling.yaml from a template and widen the default polled meters to cover billing and enabled services (osism/container-image-kolla-ansible#987)
+- Update the upstream reference for the ironic shard ID patches to the change that actually merged (osism/container-image-kolla-ansible#990)
+
+### Fixed
+- Fix the Octavia precheck failing on tenant network deployments that use the OVN Neutron plugin agent (osism/container-image-kolla-ansible#986)
+- Fix the 2025.1 build by cloning kolla-ansible from unmaintained/2025.1 now that stable/2025.1 was removed upstream (osism/container-image-kolla-ansible#993)
+
+### Removed
+- Remove the 2026.1 mariadb healthcheck start_period patch, now redundant since it merged upstream (osism/container-image-kolla-ansible#992)
+
 ## [v0.20261019.0] - 2026-10-19
 
 ### Added
