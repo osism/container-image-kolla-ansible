@@ -1,0 +1,64 @@
+From dacd6583e06608a3a57cce307ac51f892790dd38 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Thu, 22 Oct 2026 08:36:00 +0200
+Subject: [PATCH] ceilometer: poll central pollsters in parallel
+
+The central polling agent runs the pollsters of a cycle one after
+another (ceilometer's [polling] threads_to_process_pollsters defaults to
+1), and a failed discovery is not cached. When one OpenStack API stalls,
+every pollster that uses it waits for its own request to time out, and
+all pollsters after them wait too. With the designate API unreachable
+from one central agent and a 60 second API timeout, the agent's other
+central meters were polled about 8 minutes late in every cycle.
+
+Render threads_to_process_pollsters =
+ceilometer_central_threads_to_process_pollsters (default 0, one thread
+per pollster) for the central agent only. The pollsters that use the
+stalled API then fail together and the others run on time. The cost is
+that a discovery shared by several pollsters runs once per pollster
+instead of once per cycle: with the default meter list, 4 instead of 1
+designate zone listings and 2 instead of 1 octavia load balancer
+listings per central agent and cycle. The compute agent keeps the
+ceilometer default; it was not tested with parallel pollsters, which
+would repeat its instance discovery per pollster. An empty value
+renders nothing and keeps the ceilometer default.
+
+Upstream-Status: Pending [not yet proposed]
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+---
+ ansible/roles/ceilometer/defaults/main.yml            | 7 +++++++
+ ansible/roles/ceilometer/templates/ceilometer.conf.j2 | 5 +++++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/ansible/roles/ceilometer/defaults/main.yml b/ansible/roles/ceilometer/defaults/main.yml
+index f6870c3ef..548cc31cf 100644
+--- a/ansible/roles/ceilometer/defaults/main.yml
++++ b/ansible/roles/ceilometer/defaults/main.yml
+@@ -157,6 +157,13 @@ ceilometer_ipmi_extra_volumes: "{{ ceilometer_extra_volumes }}"
+ 
+ ceilometer_libvirt_volume: "{{ 'nova_libvirt' if enable_nova_libvirt_container | bool else '/var/lib/libvirt' }}"
+ 
++# Threads the central polling agent uses for its pollsters. 1 (the
++# ceilometer default) runs them one after another, so an API that stalls
++# delays every pollster after it. 0 runs each pollster in its own thread;
++# a discovery shared by several pollsters then runs once per pollster
++# instead of once per cycle. An empty value keeps the ceilometer default.
++ceilometer_central_threads_to_process_pollsters: 0
++
+ ####################
+ # OpenStack
+ ####################
+diff --git a/ansible/roles/ceilometer/templates/ceilometer.conf.j2 b/ansible/roles/ceilometer/templates/ceilometer.conf.j2
+index 03f99e740..1b5142028 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer.conf.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer.conf.j2
+@@ -49,3 +49,8 @@ memcache_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_address
+ 
+ [oslo_concurrency]
+ lock_path = /var/lib/ceilometer/tmp
++{% if service_name == 'ceilometer-central' and ceilometer_central_threads_to_process_pollsters | string | length > 0 %}
++
++[polling]
++threads_to_process_pollsters = {{ ceilometer_central_threads_to_process_pollsters }}
++{% endif %}
