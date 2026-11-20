@@ -1,0 +1,103 @@
+From e6abc4a4dde5b45ffeff8a4e51689e72c8eaf26f Mon Sep 17 00:00:00 2001
+From: Jan Horstmann <horstmann@osism.tech>
+Date: Wed, 4 Feb 2026 13:07:59 +0100
+Subject: [PATCH 01/23] Add glance NVMe NQN and ID
+
+Change-Id: I496316eecb12486ac8f83da72201be80098f4920
+Signed-off-by: Jan Horstmann <horstmann@osism.tech>
+Upstream-Status: Pending [commit prepared with a Change-Id but never pushed to Gerrit]
+---
+ ansible/roles/glance/defaults/main.yml        |  2 +-
+ ansible/roles/glance/tasks/config.yml         | 26 +++++++++++++++++++
+ .../roles/glance/templates/glance-api.json.j2 | 12 +++++++++
+ ansible/roles/glance/templates/hostid.j2      |  1 +
+ ansible/roles/glance/templates/hostnqn.j2     |  1 +
+ 5 files changed, 41 insertions(+), 1 deletion(-)
+
+diff --git a/ansible/roles/glance/defaults/main.yml b/ansible/roles/glance/defaults/main.yml
+index e05708e..bf084ae 100644
+--- a/ansible/roles/glance/defaults/main.yml
++++ b/ansible/roles/glance/defaults/main.yml
+@@ -244,7 +244,7 @@ enable_cinder_backend_privileged: >-
+     cinder_backend_ceph | bool or
+     enable_cinder_backend_vast | bool
+   }}
+-glance_api_privileged: "{{ enable_cinder | bool and enable_cinder_backend_privileged | bool }}"
++glance_api_privileged: "{{ enable_cinder | bool and (enable_cinder_backend_privileged | bool or glance_backend_nvme | default(false) | bool) }}"
+ 
+ ###################
+ # Glance cache
+diff --git a/ansible/roles/glance/tasks/config.yml b/ansible/roles/glance/tasks/config.yml
+index c7e91de..206489f 100644
+--- a/ansible/roles/glance/tasks/config.yml
++++ b/ansible/roles/glance/tasks/config.yml
+@@ -135,3 +135,29 @@
+   when:
+     - glance_policy_file is defined
+     - service | service_enabled_and_mapped_to_host
++
++- name: Generating 'hostnqn' file for glance_api
++  vars:
++    service: "{{ glance_services['glance-api'] }}"
++    hostnqn: "nqn.2014-08.org.nvmexpress:uuid:{{ ansible_facts.hostname | to_uuid }}"
++  template:
++    src: "templates/hostnqn.j2"
++    dest: "{{ node_config_directory }}/glance-api/hostnqn"
++    mode: "0660"
++  become: true
++  when:
++    - service | service_enabled_and_mapped_to_host
++    - glance_backend_nvme | default(false) | bool
++
++- name: Generating 'hostid' file for glance_api
++  vars:
++    service: "{{ glance_services['glance-api'] }}"
++    hostid: "{{ ansible_facts.hostname | to_uuid }}"
++  template:
++    src: "templates/hostid.j2"
++    dest: "{{ node_config_directory }}/glance-api/hostid"
++    mode: "0660"
++  become: true
++  when:
++    - service | service_enabled_and_mapped_to_host
++    - glance_backend_nvme | default(false) | bool
+diff --git a/ansible/roles/glance/templates/glance-api.json.j2 b/ansible/roles/glance/templates/glance-api.json.j2
+index 97dbd41..b1ea4d7 100644
+--- a/ansible/roles/glance/templates/glance-api.json.j2
++++ b/ansible/roles/glance/templates/glance-api.json.j2
+@@ -60,6 +60,18 @@
+             "dest": "/var/lib/kolla/share/ca-certificates",
+             "owner": "root",
+             "perm": "0644"
++        }{% endif %}{% if glance_backend_nvme | default(false) | bool %},
++        {
++            "source": "{{ container_config_directory }}/hostnqn",
++            "dest": "/etc/nvme/hostnqn",
++            "owner": "root",
++            "perm": "0644"
++        },
++        {
++            "source": "{{ container_config_directory }}/hostid",
++            "dest": "/etc/nvme/hostid",
++            "owner": "root",
++            "perm": "0644"
+         }{% endif %}
+     ],
+     "directories": [
+diff --git a/ansible/roles/glance/templates/hostid.j2 b/ansible/roles/glance/templates/hostid.j2
+new file mode 100644
+index 0000000..141c302
+--- /dev/null
++++ b/ansible/roles/glance/templates/hostid.j2
+@@ -0,0 +1 @@
++{{ hostid }}
+diff --git a/ansible/roles/glance/templates/hostnqn.j2 b/ansible/roles/glance/templates/hostnqn.j2
+new file mode 100644
+index 0000000..6f10135
+--- /dev/null
++++ b/ansible/roles/glance/templates/hostnqn.j2
+@@ -0,0 +1 @@
++{{ hostnqn }}
+-- 
+2.47.3
+
