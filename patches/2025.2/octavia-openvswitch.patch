@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Christian Berendt <berendt@osism.tech>
+Date: Mon, 23 Mar 2026 20:46:48 +0100
+Subject: [PATCH] octavia: run openvswitch on health manager hosts
+
+Enable openvswitch_db and openvswitch_vswitchd services on
+octavia-health-manager nodes when Octavia is enabled.
+
+Signed-off-by: Christian Berendt <berendt@osism.tech>
+Upstream-Status: Pending
+---
+ ansible/roles/openvswitch/defaults/main.yml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/ansible/roles/openvswitch/defaults/main.yml b/ansible/roles/openvswitch/defaults/main.yml
+index 4857ab4c3..37a7292a2 100644
+--- a/ansible/roles/openvswitch/defaults/main.yml
++++ b/ansible/roles/openvswitch/defaults/main.yml
+@@ -12,6 +12,7 @@ openvswitch_services:
+       or inventory_hostname in groups['neutron-dhcp-agent']
+       or inventory_hostname in groups['neutron-l3-agent']
+       or inventory_hostname in groups['neutron-metadata-agent']
++      or (enable_octavia | bool and inventory_hostname in groups['octavia-health-manager'])
+       }}
+     volumes: "{{ openvswitch_db_default_volumes + openvswitch_db_extra_volumes }}"
+     dimensions: "{{ openvswitch_db_dimensions }}"
+@@ -28,6 +29,7 @@ openvswitch_services:
+       or inventory_hostname in groups['neutron-dhcp-agent']
+       or inventory_hostname in groups['neutron-l3-agent']
+       or inventory_hostname in groups['neutron-metadata-agent']
++      or (enable_octavia | bool and inventory_hostname in groups['octavia-health-manager'])
+       }}
+     privileged: True
+     volumes: "{{ openvswitch_vswitchd_default_volumes + openvswitch_vswitchd_extra_volumes }}"
