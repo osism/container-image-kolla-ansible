@@ -1,0 +1,82 @@
+From 919e5494a07858eaa86264911556783b860cd569 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Wed, 21 Oct 2026 16:20:37 +0200
+Subject: [PATCH 38/38] ceilometer: poll billing and service meters
+
+The default polling.yaml has none of the flavor meters billing needs
+(vcpus, memory, disk.root.size, ...), and of the central meters only
+the cinder ones, polled whether cinder is enabled or not.
+
+Add the remaining compute meters, 22 in all, and the central meters of
+cinder, glance, neutron, manila, designate and octavia, each only when
+its service is enabled: the central agent logs every polling cycle
+for a meter whose service is not registered in keystone.
+
+The radosgw meters are not included: without credentials they log an
+error with a traceback every cycle on every central agent.
+
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+Upstream-Status: Pending [not yet proposed]
+---
+ ansible/roles/ceilometer/defaults/main.yml | 35 +++++++++++++++++++++-
+ 1 file changed, 34 insertions(+), 1 deletion(-)
+
+diff --git a/ansible/roles/ceilometer/defaults/main.yml b/ansible/roles/ceilometer/defaults/main.yml
+index d17507b76..c6bce9239 100644
+--- a/ansible/roles/ceilometer/defaults/main.yml
++++ b/ansible/roles/ceilometer/defaults/main.yml
+@@ -182,20 +182,53 @@ ceilometer_polling_interval: 300
+ ceilometer_polling_meters_compute:
+   - power.state
+   - cpu
++  - vcpus
++  - memory
+   - memory.available
+   - memory.usage
++  - memory.resident
++  - memory.swap.in
++  - memory.swap.out
+   - network.incoming.bytes
+   - network.incoming.packets
+   - network.outgoing.bytes
+   - network.outgoing.packets
++  - disk.root.size
++  - disk.ephemeral.size
+   - disk.device.read.bytes
+   - disk.device.read.requests
+   - disk.device.write.bytes
+   - disk.device.write.requests
+-ceilometer_polling_meters_central:
++  - disk.device.capacity
++  - disk.device.allocation
++  - disk.device.usage
++# Central meters only for enabled services: the central agent logs every
++# polling cycle for a meter whose service is not registered in keystone.
++ceilometer_polling_meters_cinder:
+   - volume.size
+   - volume.snapshot.size
+   - volume.backup.size
++ceilometer_polling_meters_glance:
++  - image.size
++ceilometer_polling_meters_neutron:
++  - ip.floating
++ceilometer_polling_meters_manila:
++  - manila.share.size
++ceilometer_polling_meters_designate:
++  - dns.zone.status
++  - dns.zone.recordsets
++  - dns.zone.ttl
++  - dns.zone.serial
++ceilometer_polling_meters_octavia:
++  - loadbalancer.operating
++  - loadbalancer.provisioning
++ceilometer_polling_meters_central: >-
++  {{ (ceilometer_polling_meters_cinder if enable_cinder | bool else [])
++     + (ceilometer_polling_meters_glance if enable_glance | bool else [])
++     + (ceilometer_polling_meters_neutron if enable_neutron | bool else [])
++     + (ceilometer_polling_meters_manila if enable_manila | bool else [])
++     + (ceilometer_polling_meters_designate if enable_designate | bool else [])
++     + (ceilometer_polling_meters_octavia if enable_octavia | bool else []) }}
+ ceilometer_polling_meters_extra: []
+ ceilometer_polling_meters: "{{ ceilometer_polling_meters_compute + ceilometer_polling_meters_central + ceilometer_polling_meters_extra }}"
+ 
