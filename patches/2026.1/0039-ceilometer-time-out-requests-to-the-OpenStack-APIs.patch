@@ -1,0 +1,57 @@
+From 38a7f56c4233afce03f955240364f5633c777803 Mon Sep 17 00:00:00 2001
+From: Roger Luethi <luethi@osism.tech>
+Date: Wed, 21 Oct 2026 19:59:07 +0200
+Subject: [PATCH] ceilometer: time out requests to the OpenStack APIs
+
+The polling agents build their API sessions from [service_credentials]
+through keystoneauth, which honours a timeout option there. kolla-ansible
+does not set it, so the requests have none. A stalled API then blocks the
+pollster until TCP gives up, and the agent's next polling cycle does not
+start until every pollster of the current one has finished: with the
+designate API unreachable from one agent, each zone listing took about
+4.5 minutes to fail, the four DNS pollsters failed one after another,
+and all central meters on that agent went 18 minutes without a poll
+while its Prometheus exporter kept serving the old values.
+
+Render timeout = ceilometer_service_credentials_timeout (default 60
+seconds) in [service_credentials]. An empty value renders no timeout.
+The RGW pollsters do not use the keystoneauth session and are not
+covered.
+
+Upstream-Status: Pending [not yet proposed]
+Assisted-by: Claude:claude-opus-5-5
+Signed-off-by: Roger Luethi <luethi@osism.tech>
+---
+ ansible/roles/ceilometer/defaults/main.yml            | 4 ++++
+ ansible/roles/ceilometer/templates/ceilometer.conf.j2 | 3 +++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/ansible/roles/ceilometer/defaults/main.yml b/ansible/roles/ceilometer/defaults/main.yml
+index 86f04b271..f6870c3ef 100644
+--- a/ansible/roles/ceilometer/defaults/main.yml
++++ b/ansible/roles/ceilometer/defaults/main.yml
+@@ -163,6 +163,10 @@ ceilometer_libvirt_volume: "{{ 'nova_libvirt' if enable_nova_libvirt_container |
+ ceilometer_logging_debug: "{{ openstack_logging_debug }}"
+ ceilometer_keystone_user: "ceilometer"
+ openstack_ceilometer_auth: "{{ openstack_auth }}"
++# Timeout in seconds for the polling agents' requests to the OpenStack APIs.
++# Without it a stalled API blocks an agent's polling cycle until TCP gives up.
++# Set to an empty value to render no timeout.
++ceilometer_service_credentials_timeout: 60
+ 
+ ####################
+ # Kolla
+diff --git a/ansible/roles/ceilometer/templates/ceilometer.conf.j2 b/ansible/roles/ceilometer/templates/ceilometer.conf.j2
+index bdb101073..03f99e740 100644
+--- a/ansible/roles/ceilometer/templates/ceilometer.conf.j2
++++ b/ansible/roles/ceilometer/templates/ceilometer.conf.j2
+@@ -16,6 +16,9 @@ user_domain_id = {{ default_user_domain_id }}
+ auth_type = password
+ interface = internal
+ cafile = {{ openstack_cacert }}
++{% if ceilometer_service_credentials_timeout %}
++timeout = {{ ceilometer_service_credentials_timeout }}
++{% endif %}
+ 
+ [oslo_messaging_notifications]
+ transport_url = {{ notify_transport_url }}
