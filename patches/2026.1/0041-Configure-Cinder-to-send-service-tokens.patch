@@ -1,0 +1,58 @@
+From 081c4120f88696e92a14eb39312a7ff3be52659a Mon Sep 17 00:00:00 2001
+From: Pierre Riteau <pierre@stackhpc.com>
+Date: Tue, 30 Jun 2026 14:59:57 +0200
+Subject: [PATCH] Configure Cinder to send service tokens
+
+This fixes creation of Glance images from Cinder volumes. Cinder is
+already configured with the service role [1].
+
+[1] https://review.opendev.org/c/openstack/kolla-ansible/+/908405
+
+Closes-Bug: #2158707
+Change-Id: I36aaefcc16bbd0769efc0ddac44b52f692fc3ec2
+Signed-off-by: Pierre Riteau <pierre@stackhpc.com>
+Upstream-Status: Pending
+---
+ ansible/roles/cinder/templates/cinder.conf.j2        | 12 ++++++++++++
+ .../cinder-send-service-token-472f02c070f62b62.yaml  |  6 ++++++
+ 2 files changed, 18 insertions(+)
+ create mode 100644 releasenotes/notes/cinder-send-service-token-472f02c070f62b62.yaml
+
+diff --git a/ansible/roles/cinder/templates/cinder.conf.j2 b/ansible/roles/cinder/templates/cinder.conf.j2
+index d48bd9826..aae057912 100644
+--- a/ansible/roles/cinder/templates/cinder.conf.j2
++++ b/ansible/roles/cinder/templates/cinder.conf.j2
+@@ -134,6 +134,18 @@ memcache_security_strategy = {{ memcache_security_strategy }}
+ memcache_secret_key = {{ memcache_secret_key }}
+ memcached_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_address(host) | put_address_in_context('memcache') }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}
+ 
++[service_user]
++send_service_user_token = true
++auth_url = {{ keystone_internal_url }}
++auth_type = password
++project_domain_id = {{ default_project_domain_id }}
++user_domain_id = {{ default_user_domain_id }}
++project_name = service
++username = {{ cinder_keystone_user }}
++password = {{ cinder_keystone_password }}
++cafile = {{ openstack_cacert }}
++region_name = {{ openstack_region_name }}
++valid_interfaces = internal
+ 
+ [oslo_concurrency]
+ lock_path = /var/lib/cinder/tmp
+diff --git a/releasenotes/notes/cinder-send-service-token-472f02c070f62b62.yaml b/releasenotes/notes/cinder-send-service-token-472f02c070f62b62.yaml
+new file mode 100644
+index 000000000..d97050a59
+--- /dev/null
++++ b/releasenotes/notes/cinder-send-service-token-472f02c070f62b62.yaml
+@@ -0,0 +1,6 @@
++---
++fixes:
++  - |
++    Configures Cinder to send service tokens. This fixes the creation of Glance
++    images from Cinder volumes.
++    `LP#2158707 <https://launchpad.net/bugs/2158707>`__
+-- 
+2.54.0
+
