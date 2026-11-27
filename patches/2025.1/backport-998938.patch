@@ -1,0 +1,69 @@
+From 5a4886db5978e7aaca85cc1df2a219c1920de3d5 Mon Sep 17 00:00:00 2001
+From: Piotr Milewski <vurmil@gmail.com>
+Date: Tue, 28 Jul 2026 15:30:14 +0200
+Subject: [PATCH] Register keystoneauth options for [glance] config group
+
+Cinder requires service-to-service authentication with Glance to
+fetch direct image locations (e.g., for RBD CoW cloning). Because
+keystoneauth parameters were not explicitly registered for the
+[glance] section, they could not be properly configured and loaded.
+
+This lack of authentication led to HTTP 403 Forbidden errors
+during fetch_image_location, forcing a fallback to slow image
+downloads.
+
+This patch registers the required keystoneauth options in the
+[glance] group, enabling proper service-to-service communication.
+
+Closes-Bug: #2161971
+Change-Id: I2cae59b34b1fbd4fa3bf1c5b2da5277ef4712916
+Signed-off-by: Piotr Milewski <vurmil@gmail.com>
+(cherry picked from commit 1056bc652b148bddc5d4cb667c8d3ef26a322aa9)
+
+Upstream-Status: Backport [https://review.opendev.org/c/openstack/kolla-ansible/+/998938 merged 2026-07-30]
+Bug: https://bugs.launchpad.net/kolla-ansible/+bug/2161971
+Related: https://review.opendev.org/c/openstack/cinder/+/958716 (companion: makes cinder use these credentials; carried in osism/container-images-kolla)
+---
+ ansible/roles/cinder/templates/cinder.conf.j2        | 12 ++++++++++++
+ releasenotes/notes/bug-2161971-1f167e47f9740326.yaml |  9 +++++++++
+ 2 files changed, 21 insertions(+)
+ create mode 100644 releasenotes/notes/bug-2161971-1f167e47f9740326.yaml
+
+diff --git a/ansible/roles/cinder/templates/cinder.conf.j2 b/ansible/roles/cinder/templates/cinder.conf.j2
+index da0b8783c..2bea8312f 100644
+--- a/ansible/roles/cinder/templates/cinder.conf.j2
++++ b/ansible/roles/cinder/templates/cinder.conf.j2
+@@ -107,6 +107,18 @@ username = {{ nova_keystone_user }}
+ password = {{ nova_keystone_password }}
+ cafile = {{ openstack_cacert }}
+ 
++[glance]
++interface = internal
++auth_url = {{ keystone_internal_url }}
++auth_type = password
++project_domain_id = {{ default_project_domain_id }}
++user_domain_id = {{ default_user_domain_id }}
++region_name = {{ openstack_region_name }}
++project_name = service
++username = {{ cinder_keystone_user }}
++password = {{ cinder_keystone_password }}
++cafile = {{ openstack_cacert }}
++
+ [database]
+ connection = mysql+pymysql://{{ cinder_database_user }}:{{ cinder_database_password }}@{{ cinder_database_address }}/{{ cinder_database_name }}
+ connection_recycle_time = {{ database_connection_recycle_time }}
+diff --git a/releasenotes/notes/bug-2161971-1f167e47f9740326.yaml b/releasenotes/notes/bug-2161971-1f167e47f9740326.yaml
+new file mode 100644
+index 000000000..e57a8a0bf
+--- /dev/null
++++ b/releasenotes/notes/bug-2161971-1f167e47f9740326.yaml
+@@ -0,0 +1,9 @@
++---
++fixes:
++  - |
++    Fixes service-to-service authentication between Cinder and
++    Glance. This resolves ``HTTP 403 Forbidden`` errors during
++    ``fetch_image_location`` and restores fast volume cloning
++    (Copy-on-Write) for backends like RBD, preventing an
++    unnecessary fallback to slow image downloads.
++    `LP#2161971 <https://launchpad.net/bugs/2161971>`__
